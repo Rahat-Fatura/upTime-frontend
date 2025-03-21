@@ -3,7 +3,7 @@
 import axios from "axios";
 
 export const login = (email, password) => {
-    return axios.post(`http://127.0.0.1:3000/v1/auth/login`, {
+    return axios.post(`${process.env.REACT_APP_API_URL}v1/auth/login`, {
          email,
          password,
     });
