@@ -61,6 +61,9 @@ import {
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit, World } from 'tabler-icons-react'
 import { toast } from 'react-hot-toast'
+import MonitorForm from '../../components/MonitorForm'
+import { modalStyle, formContainerStyle, buttonContainerStyle } from '../../styles/monitorStyles'
+import { INITIAL_STATS } from '../../constants/monitorConstants'
 
 const drawerWidth = 240
 
@@ -70,37 +73,6 @@ const stats = [
   { title: 'Düşen Sunucu', value: '0', color: '#d32f2f' },
   { title: 'Çalışan sunucuların yüzdesi', value: '0%', color: '#ed6c02' },
 ]
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '80%',
-  maxWidth: 1000,
-  maxHeight: '90vh',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  borderRadius: 2,
-  display: 'flex',
-  flexDirection: 'column',
-}
-
-const formContainerStyle = {
-  p: 4,
-  overflowY: 'auto',
-  maxHeight: 'calc(90vh - 120px)',
-}
-
-const buttonContainerStyle = {
-  p: 2,
-  borderTop: '1px solid',
-  borderColor: 'divider',
-  bgcolor: 'background.paper',
-  display: 'flex',
-  justifyContent: 'flex-end',
-  gap: 1,
-}
 
 const methods = [
   { value: 'GET', label: 'GET' },
@@ -151,32 +123,32 @@ const stepNumberStyle = {
   fontWeight: 'bold',
 }
 
+const initialFormData = {
+  name: '',
+  method: 'GET',
+  port: '8000',
+  headers: {},
+  interval: 5,
+  intervalUnit: 'minutes',
+  report_time: 1,
+  reportTimeUnit: 'days',
+  status: false,
+  allowedStatusCodes: ['200', '201'],
+  is_active_by_owner: true,
+  is_process: false,
+}
+
 export default function Dashboard() {
   const [monitors, setMonitors] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedMonitor, setSelectedMonitor] = useState(null)
-  const [formData, setFormData] = useState({
-    name: '',
-    method: 'GET',
-    port: '8000',
-    headers: {},
-    interval: 5,
-    intervalUnit: 'minutes',
-    report_time: 1,
-    reportTimeUnit: 'days',
-    status: false,
-    allowedStatusCodes: ['200', '201'],
-    is_active_by_owner: true,
-    is_process: false,
-  })
-
+  const [formData, setFormData] = useState(initialFormData)
   const [hostError, setHostError] = useState('')
-
+  const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
 
   const validateHost = (host) => {
     // IP adresi veya domain adı için regex
-
     const domainRegex =
       /^(https?:\/\/)(((?<Ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?<Port>\d{2,4}))|((?<www>www)?\.?(?<Host>[a-zA-Z0-9]*)\.(?<Uzanti>[a-z]{3})\.?(?<Country>[a-z]{2})?))/gm
 
@@ -203,7 +175,6 @@ export default function Dashboard() {
     }))
   }
 
-  
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -245,33 +216,14 @@ export default function Dashboard() {
       if (response.data) {
         setMonitors((prevMonitors) => [...prevMonitors, response.data])
         setModalOpen(false)
-        setFormData({
-          name: '',
-          method: 'GET',
-          port: '8000',
-          headers: {},
-          interval: 5,
-          intervalUnit: 'minutes',
-          report_time: 1,
-          reportTimeUnit: 'days',
-          status: false,
-          allowedStatusCodes: ['200', '201'],
-          is_active_by_owner: true,
-          is_process: false,
-        })
-        alert('Sunucu başarıyla eklendi!');
+        setFormData(initialFormData)
+        toast.success('Sunucu başarıyla eklendi!')
       }
     } catch (error) {
       console.error('Sunucu eklenirken hata oluştu:', error)
-      if (error.response) {
-        alert(
-          `Hata: ${
-            error.response.data.message || 'Sunucu eklenirken bir hata oluştu.'
-          }`
-        )
-      } else {
-        alert('Sunucu eklenirken bir hata oluştu. Lütfen tekrar deneyin.')
-      }
+      toast.error(
+        error.response?.data?.message || 'Sunucu eklenirken bir hata oluştu.'
+      )
     }
   }
 
@@ -292,8 +244,6 @@ export default function Dashboard() {
     ]
   }
 
-  const [currentStats, setCurrentStats] = useState(stats)
-
   useEffect(() => {
     setCurrentStats(calculateStats())
   }, [monitors])
@@ -312,23 +262,12 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error('Monitör verileri alınırken hata oluştu:', error)
-        if (error.response) {
-          console.error('Hata detayı:', error.response.data)
-          console.error('Hata durumu:', error.response.status)
-        } else if (error.request) {
-          console.error('Sunucudan yanıt alınamadı')
-        } else {
-          console.error('İstek hatası:', error.message)
-        }
+        toast.error('Monitör verileri alınırken bir hata oluştu.')
       }
     }
     
-    const interval = setInterval(() => {
-      fetchMonitors().catch((error) => console.error('setInterval hatası:', error))
-    }, 1000)
-
-    fetchMonitors() // İlk veriyi çekmek için
-
+    const interval = setInterval(fetchMonitors, 1000)
+    fetchMonitors()
     return () => clearInterval(interval)
   }, [])
 
@@ -351,6 +290,7 @@ export default function Dashboard() {
                 : m
             )
           )
+          toast.success('Sunucu başlatıldı')
           break
 
         case 'pause':
@@ -368,6 +308,7 @@ export default function Dashboard() {
                 : m
             )
           )
+          toast.success('Sunucu durduruldu')
           break
 
         case 'delete':
@@ -386,6 +327,7 @@ export default function Dashboard() {
             setMonitors((prevMonitors) =>
               prevMonitors.filter((m) => m.id !== monitorId)
             )
+            toast.success('Sunucu silindi')
           }
           break
 
@@ -394,7 +336,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('İşlem sırasında bir hata oluştu:', error)
-      alert(
+      toast.error(
         'İşlem sırasında bir hata oluştu: ' +
           (error.response?.data?.message || error.message)
       )
@@ -408,66 +350,65 @@ export default function Dashboard() {
 
   const handleUpdateMonitor = async (e) => {
     e.preventDefault()
-      try {
-        const updateData = {
-          name: selectedMonitor.name,
-          method: selectedMonitor.method,
-          host: selectedMonitor.host,
-          body: selectedMonitor.body
-            ? typeof selectedMonitor.body === 'string'
-              ? JSON.parse(selectedMonitor.body)
-              : selectedMonitor.body
-            : {},
-          headers: selectedMonitor.headers
-            ? typeof selectedMonitor.headers === 'string'
-              ? JSON.parse(selectedMonitor.headers)
-              : selectedMonitor.headers
-            : {},
-          interval: selectedMonitor.interval,
-          intervalUnit: selectedMonitor.intervalUnit,
-          report_time: selectedMonitor.report_time,
-          reportTimeUnit: selectedMonitor.reportTimeUnit,
-          allowedStatusCodes:
-            typeof selectedMonitor.allowedStatusCodes === 'string'
-              ? selectedMonitor.allowedStatusCodes
-                  .split(',')
-                  .map((code) => code.trim())
-              : selectedMonitor.allowedStatusCodes,
-          is_process: selectedMonitor.is_process,
-        }
-      
-        const response = await axios.put(
-          `${process.env.REACT_APP_API_URL}v1/monitor/${selectedMonitor.id}`,
-          updateData,
-          {
-            headers: {
-              Authorization: `Bearer ${cookies.get('jwt-access')}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        )
-
-        if (response.data) {
-          setMonitors((prevMonitors) =>
-            prevMonitors.map((monitor) =>
-              monitor.id === selectedMonitor.id
-                ? { ...response.data, logs: monitor.logs }
-                : monitor
-            )
-          )
-          setDetailsModalOpen(false)
-          alert('Sunucu başarıyla güncellendi!')
-        }
-      } catch (error) {
-        console.error('Sunucu güncellenirken hata oluştu:', error)
-        alert(
-          `Hata: ${
-            error.response?.data?.message ||
-            'Sunucu güncellenirken bir hata oluştu.'
-          }`
-        )
+    try {
+      const updateData = {
+        name: selectedMonitor.name,
+        method: selectedMonitor.method,
+        host: selectedMonitor.host,
+        body: selectedMonitor.body
+          ? typeof selectedMonitor.body === 'string'
+            ? JSON.parse(selectedMonitor.body)
+            : selectedMonitor.body
+          : {},
+        headers: selectedMonitor.headers
+          ? typeof selectedMonitor.headers === 'string'
+            ? JSON.parse(selectedMonitor.headers)
+            : selectedMonitor.headers
+          : {},
+        interval: selectedMonitor.interval,
+        intervalUnit: selectedMonitor.intervalUnit,
+        report_time: selectedMonitor.report_time,
+        reportTimeUnit: selectedMonitor.reportTimeUnit,
+        allowedStatusCodes:
+          typeof selectedMonitor.allowedStatusCodes === 'string'
+            ? selectedMonitor.allowedStatusCodes
+                .split(',')
+                .map((code) => code.trim())
+            : selectedMonitor.allowedStatusCodes,
+        is_process: selectedMonitor.is_process,
       }
-    
+      
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}v1/monitor/${selectedMonitor.id}`,
+        updateData,
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.get('jwt-access')}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+
+      if (response.data) {
+        setMonitors((prevMonitors) =>
+          prevMonitors.map((monitor) =>
+            monitor.id === selectedMonitor.id
+              ? { ...response.data, logs: monitor.logs }
+              : monitor
+          )
+        )
+        setDetailsModalOpen(false)
+        toast.success('Sunucu başarıyla güncellendi!')
+      }
+    } catch (error) {
+      console.error('Sunucu güncellenirken hata oluştu:', error)
+      toast.error(
+        `Hata: ${
+          error.response?.data?.message ||
+          'Sunucu güncellenirken bir hata oluştu.'
+        }`
+      )
+    }
   }
 
   const handleDetailInputChange = (e) => {
@@ -738,238 +679,12 @@ export default function Dashboard() {
 
           <Box sx={formContainerStyle}>
             {selectedMonitor && (
-              <form onSubmit={handleUpdateMonitor}>
-                <Stack spacing={3}>
-                  <Box sx={formSectionStyle}>
-                    <Box sx={sectionTitleStyle}>
-                      <ComputerIcon />
-                      <Typography variant="h6">Temel Bilgiler</Typography>
-                    </Box>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          required
-                          fullWidth
-                          label="Sunucu Adı"
-                          name="name"
-                          value={selectedMonitor.name}
-                          onChange={handleDetailInputChange}
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            startAdornment: (
-                              <ComputerIcon sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <FormControl fullWidth size="small">
-                          <InputLabel>Method</InputLabel>
-                          <Select
-                            name="method"
-                            value={selectedMonitor.method}
-                            label="Method"
-                            onChange={handleDetailInputChange}
-                            variant="outlined"
-                          >
-                            {methods.map((method) => (
-                              <MenuItem key={method.value} value={method.value}>
-                                {method.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                          <HttpIcon
-                            sx={{
-                              position: 'absolute',
-                              right: 12,
-                              top: '50%',
-                              transform: 'translateY(-50%)',
-                              color: '#1976d2',
-                            }}
-                          />
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-                  </Box>
-
-                  <Box sx={formSectionStyle}>
-                    <Box sx={sectionTitleStyle}>
-                      <World />
-                      <Typography variant="h6">Bağlantı Bilgileri</Typography>
-                    </Box>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          required
-                          fullWidth
-                          label="Host"
-                          name="host"
-                          value={selectedMonitor.host}
-                          onChange={handleDetailInputChange}
-                          variant="outlined"
-                          size="small"
-                          error={!!hostError}
-                          helperText={
-                            hostError || 'Örnek: example.com veya 192.168.1.1'
-                          }
-                          InputProps={{
-                            startAdornment: (
-                              <World sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          required
-                          fullWidth
-                          label="İzin Verilen Status Kodları"
-                          name="allowedStatusCodes"
-                          value={
-                            Array.isArray(selectedMonitor.allowedStatusCodes)
-                              ? selectedMonitor.allowedStatusCodes.join(',')
-                              : selectedMonitor.allowedStatusCodes
-                          }
-                          onChange={handleDetailInputChange}
-                          variant="outlined"
-                          size="small"
-                          helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
-                          InputProps={{
-                            startAdornment: (
-                              <RequestQuoteTwoTone
-                                sx={{ mr: 1, color: '#1976d2' }}
-                              />
-                            ),
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-
-                  <Box sx={formSectionStyle}>
-                    <Box sx={sectionTitleStyle}>
-                      <CodeIcon />
-                      <Typography variant="h6">İstek Detayları</Typography>
-                    </Box>
-                    <TextField
-                      fullWidth
-                      label="Body (JSON formatında)"
-                      name="body"
-                      value={
-                        typeof selectedMonitor.body === 'object'
-                          ? JSON.stringify(selectedMonitor.body)
-                          : selectedMonitor.body
-                      }
-                      onChange={handleDetailInputChange}
-                      multiline
-                      rows={3}
-                      variant="outlined"
-                      size="small"
-                      helperText="Örnek: {'name': 'John', 'job': 'Developer'}"
-                      sx={{ pb: 2 }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Headers (JSON formatında)"
-                      name="headers"
-                      value={
-                        typeof selectedMonitor.headers === 'object'
-                          ? JSON.stringify(selectedMonitor.headers)
-                          : selectedMonitor.headers
-                      }
-                      onChange={handleDetailInputChange}
-                      multiline
-                      rows={2}
-                      variant="outlined"
-                      size="small"
-                      helperText="Örnek: {'Content-Type': 'application/json'}"
-                    />
-                  </Box>
-
-                  <Box sx={formSectionStyle}>
-                    <Box sx={sectionTitleStyle}>
-                      <TimerIcon />
-                      <Typography variant="h6">Zamanlama Ayarları</Typography>
-                    </Box>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <TextField
-                            required
-                            fullWidth
-                            type="number"
-                            label="Kontrol Aralığı"
-                            name="interval"
-                            value={selectedMonitor.interval}
-                            onChange={handleDetailInputChange}
-                            variant="outlined"
-                            size="small"
-                            InputProps={{
-                              startAdornment: (
-                                <TimerIcon sx={{ mr: 1, color: '#1976d2' }} />
-                              ),
-                            }}
-                            helperText="Sunucu kontrol edilecek zaman aralığı"
-                          />
-                          <FormControl sx={{ minWidth: 120 }} size="small">
-                            <InputLabel>Birim</InputLabel>
-                            <Select
-                              name="intervalUnit"
-                              value={selectedMonitor.intervalUnit || 'minutes'}
-                              label="Birim"
-                              onChange={handleDetailInputChange}
-                              variant="outlined"
-                            >
-                              <MenuItem value="seconds">Saniye</MenuItem>
-                              <MenuItem value="minutes">Dakika</MenuItem>
-                              <MenuItem value="hours">Saat</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </Grid>
-
-                      <Grid item xs={12} md={6}>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <TextField
-                            required
-                            fullWidth
-                            type="number"
-                            label="Raporlama Süresi"
-                            name="report_time"
-                            value={selectedMonitor.report_time}
-                            onChange={handleDetailInputChange}
-                            variant="outlined"
-                            size="small"
-                            InputProps={{
-                              startAdornment: (
-                                <CalendarIcon
-                                  sx={{ mr: 1, color: '#1976d2' }}
-                                />
-                              ),
-                            }}
-                          />
-                          <FormControl sx={{ minWidth: 120 }} size="small">
-                            <InputLabel>Birim</InputLabel>
-                            <Select
-                              name="reportTimeUnit"
-                              value={selectedMonitor.reportTimeUnit || 'days'}
-                              label="Birim"
-                              onChange={handleDetailInputChange}
-                              variant="outlined"
-                            >
-                              <MenuItem value="days">Gün</MenuItem>
-                              <MenuItem value="weeks">Hafta</MenuItem>
-                              <MenuItem value="months">Ay</MenuItem>
-                            </Select>
-                          </FormControl>
-                        </Box>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                </Stack>
-              </form>
+              <MonitorForm
+                formData={selectedMonitor}
+                handleInputChange={handleDetailInputChange}
+                hostError={hostError}
+                isEdit={true}
+              />
             )}
           </Box>
 
@@ -1021,247 +736,11 @@ export default function Dashboard() {
           </Box>
 
           <Box sx={formContainerStyle}>
-            <form onSubmit={handleSubmit}>
-              <Stack spacing={3}>
-                <Box sx={formSectionStyle}>
-                  <Box sx={sectionTitleStyle}>
-                    <ComputerIcon />
-                    <Typography variant="h6">Temel Bilgiler</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="Sunucu Adı"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        variant="outlined"
-                        size="small"
-                        InputProps={{
-                          startAdornment: (
-                            <ComputerIcon sx={{ mr: 1, color: '#1976d2' }} />
-                          ),
-                        }}
-                        helperText="Sunucunuzu tanımlamak için benzersiz bir isim"
-                      />
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                      <FormControl fullWidth size="small">
-                        <InputLabel>Method</InputLabel>
-                        <Select
-                          name="method"
-                          value={formData.method}
-                          label="Method"
-                          onChange={handleInputChange}
-                          variant="outlined"
-                        >
-                          {methods.map((method) => (
-                            <MenuItem key={method.value} value={method.value}>
-                              {method.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        <HttpIcon
-                          sx={{
-                            position: 'absolute',
-                            right: 12,
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: '#1976d2',
-                          }}
-                        />
-                      </FormControl>
-                      <FormHelperText>
-                        Sunucunuza yapılacak istek türü
-                      </FormHelperText>
-                    </Grid>
-                  </Grid>
-                </Box>
-
-                <Box sx={formSectionStyle}>
-                  <Box sx={sectionTitleStyle}>
-                    <World />
-                    <Typography variant="h6">Bağlantı Bilgileri</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="Host"
-                        name="host"
-                        value={formData.host || ''}
-                        onChange={handleInputChange}
-                        variant="outlined"
-                        size="small"
-                        error={!!hostError}
-                        helperText={
-                          hostError || 'Örnek: example.com veya 192.168.1.1'
-                        }
-                        InputProps={{
-                          startAdornment: (
-                            <ComputerIcon sx={{ mr: 1, color: '#1976d2' }} />
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        required
-                        fullWidth
-                        label="İzin Verilen Status Kodları"
-                        name="allowedStatusCodes"
-                        value={
-                          Array.isArray(formData.allowedStatusCodes)
-                            ? formData.allowedStatusCodes.join(',')
-                            : formData.allowedStatusCodes
-                        }
-                        onChange={handleInputChange}
-                        variant="outlined"
-                        size="small"
-                        helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
-                        InputProps={{
-                          startAdornment: (
-                            <RequestQuoteTwoTone
-                              sx={{ mr: 1, color: '#1976d2' }}
-                            />
-                          ),
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-
-                <Box sx={formSectionStyle}>
-                  <Box sx={sectionTitleStyle}>
-                    <CodeIcon />
-                    <Typography variant="h6">İstek Detayları</Typography>
-                  </Box>
-                  <TextField
-                    fullWidth
-                    label="Body (JSON formatında)"
-                    name="body"
-                    value={formData.body || ''}
-                    onChange={handleInputChange}
-                    multiline
-                    rows={3}
-                    variant="outlined"
-                    size="small"
-                    helperText="POST, PUT veya PATCH istekleri için gönderilecek veri"
-                    InputProps={{
-                      startAdornment: (
-                        <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                      ),
-                    }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Headers (JSON formatında)"
-                    name="headers"
-                    value={
-                      typeof formData.headers === 'object'
-                        ? JSON.stringify(formData.headers)
-                        : formData.headers
-                    }
-                    onChange={handleInputChange}
-                    multiline
-                    rows={2}
-                    variant="outlined"
-                    size="small"
-                    helperText="İsteğe bağlı HTTP başlıkları"
-                    InputProps={{
-                      startAdornment: (
-                        <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                      ),
-                    }}
-                  />
-                </Box>
-
-                <Box sx={formSectionStyle}>
-                  <Box sx={sectionTitleStyle}>
-                    <TimerIcon />
-                    <Typography variant="h6">Zamanlama Ayarları</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <TextField
-                          required
-                          fullWidth
-                          type="number"
-                          label="Kontrol Aralığı"
-                          name="interval"
-                          value={formData.interval}
-                          onChange={handleInputChange}
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            startAdornment: (
-                              <TimerIcon sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                          helperText="Sunucu kontrol edilecek zaman aralığı"
-                        />
-                        <FormControl sx={{ minWidth: 120 }} size="small">
-                          <InputLabel>Birim</InputLabel>
-                          <Select
-                            name="intervalUnit"
-                            value={formData.intervalUnit || 'minutes'}
-                            label="Birim"
-                            onChange={handleInputChange}
-                            variant="outlined"
-                          >
-                            <MenuItem value="seconds">Saniye</MenuItem>
-                            <MenuItem value="minutes">Dakika</MenuItem>
-                            <MenuItem value="hours">Saat</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Box>
-                    </Grid>
-
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <TextField
-                          required
-                          fullWidth
-                          type="number"
-                          label="Raporlama Süresi"
-                          name="report_time"
-                          value={formData.report_time}
-                          onChange={handleInputChange}
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            startAdornment: (
-                              <CalendarIcon sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                          helperText="Performans raporlarının oluşturulma sıklığı"
-                        />
-                        <FormControl sx={{ minWidth: 120 }} size="small">
-                          <InputLabel>Birim</InputLabel>
-                          <Select
-                            name="reportTimeUnit"
-                            value={formData.reportTimeUnit || 'days'}
-                            label="Birim"
-                            onChange={handleInputChange}
-                            variant="outlined"
-                          >
-                            <MenuItem value="days">Gün</MenuItem>
-                            <MenuItem value="weeks">Hafta</MenuItem>
-                            <MenuItem value="months">Ay</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Stack>
-            </form>
+            <MonitorForm
+              formData={formData}
+              handleInputChange={handleInputChange}
+              hostError={hostError}
+            />
           </Box>
 
           <Box sx={buttonContainerStyle}>
