@@ -62,7 +62,11 @@ import { DataGrid } from '@mui/x-data-grid'
 import { Edit, World } from 'tabler-icons-react'
 import { toast } from 'react-hot-toast'
 import MonitorForm from '../../components/MonitorForm'
-import { modalStyle, formContainerStyle, buttonContainerStyle } from '../../styles/monitorStyles'
+import {
+  modalStyle,
+  formContainerStyle,
+  buttonContainerStyle,
+} from '../../styles/monitorStyles'
 import { INITIAL_STATS } from '../../constants/monitorConstants'
 
 const drawerWidth = 240
@@ -161,9 +165,100 @@ export default function Dashboard() {
     }
   }
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
+  const validateInterval = (value) => {
+    let unit = formData.intervalUnit
+    value = Number(value)
+    switch (unit) {
+      case 'seconds':
+        if (value > 59) {
+          value = 59
+        } else if (value < 20) {
+          value = 20
+        } else {
+          value = value
+        }
+        break
+      case 'minutes':
+        if (value >= 60) {
+          value = 59
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      case 'hours':
+        if (value >= 24) {
+          value = 23
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      default:
+        break
+    }
+    return value;
+  }
 
+  const validateReportTime = (value) => {
+    value = Number(value)
+    let reportTimeUnit = formData.intervalUnit
+    switch (reportTimeUnit) {
+      case 'hours': {
+        if (value > 23) {
+          value = 23
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      }
+      case 'days': {
+        if (value > 30) {
+          value = 30
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      }
+      case 'weeks': {
+        if (value > 3) {
+          value = 3
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      }
+      case 'months': {
+        if (value > 12) {
+          value = 12
+        } else if (value < 1) {
+          value = 1
+        } else {
+          value = value
+        }
+        break
+      }
+    }
+    return value;
+  }
+
+  const handleInputChange = (e) => {
+    let { name, value } = e.target
+
+    if (name === 'interval') {
+      value = validateInterval(value)
+    }
+    if (name === 'report_time') {
+      value = validateReportTime(value)
+    }
     if (name === 'host') {
       const error = validateHost(value)
       setHostError(error)
@@ -251,12 +346,15 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchMonitors = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}v1/monitor/`, {
-          headers: {
-            Authorization: `Bearer ${cookies.get('jwt-access')}`,
-            'Content-Type': 'application/json',
-          },
-        })
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}v1/monitor/`,
+          {
+            headers: {
+              Authorization: `Bearer ${cookies.get('jwt-access')}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        )
         if (response.data) {
           setMonitors(response.data)
         }
@@ -265,8 +363,8 @@ export default function Dashboard() {
         toast.error('Monitör verileri alınırken bir hata oluştu.')
       }
     }
-    
-    const interval = setInterval(fetchMonitors, 1000)
+
+    const interval = setInterval(fetchMonitors, 20000)
     fetchMonitors()
     return () => clearInterval(interval)
   }, [])
@@ -377,7 +475,7 @@ export default function Dashboard() {
             : selectedMonitor.allowedStatusCodes,
         is_process: selectedMonitor.is_process,
       }
-      
+
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}v1/monitor/${selectedMonitor.id}`,
         updateData,
@@ -536,7 +634,7 @@ export default function Dashboard() {
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          {!params.row.is_active_by_owner  && (
+          {!params.row.is_active_by_owner && (
             <Tooltip title="Başlat">
               <IconButton
                 size="small"

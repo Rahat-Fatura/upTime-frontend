@@ -1,3 +1,5 @@
+/* eslint-disable no-self-assign */
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import {
   Box,
