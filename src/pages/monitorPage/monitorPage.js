@@ -139,7 +139,6 @@ const initialFormData = {
   status: false,
   allowedStatusCodes: ['200', '201'],
   is_active_by_owner: true,
-  is_process: false,
 }
 
 export default function Dashboard() {
@@ -473,7 +472,6 @@ export default function Dashboard() {
                 .split(',')
                 .map((code) => code.trim())
             : selectedMonitor.allowedStatusCodes,
-        is_process: selectedMonitor.is_process,
       }
 
       const response = await axios.put(
