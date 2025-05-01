@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Grid, Button, Typography, TextField } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { useNavigate } from "react-router-dom";
-import Box from "@mui/material/Box";
+import axios from "axios";
+import { cookies } from "../../utils/cookie";
+import Swal from "sweetalert2";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -10,9 +12,35 @@ const ForgotPassword = () => {
 
 
   const handleSubmit = (event) => {
-    //APİ İSTEĞİ AT GİRİŞ DOĞRUMU
-
-    navigate("/"); // Giriş başarılı olursa yönlendirme
+    axios.post(`${process.env.REACT_APP_API_URL}v1/auth/forgot-password`,{
+      email: email
+    },{
+      headers:{
+        'Authorization': `Bearer ${cookies.get("jwt-access")}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response=>{
+      console.log(response)
+      Swal.fire({
+        icon: 'warning',
+        title: 'E-posta adresinize şifre sıfırlama bağlantısı gönderildi',
+        text: 'Lütfen e-posta adresinizi kontrol edin.',
+        confirmButtonText: 'Tamam',
+      })
+      navigate("/login");
+    })
+    .catch(err=>{
+      Swal.fire({
+        icon: 'error',
+        title: 'E-posta gönderilemedi',
+        text: 'Lütfen e-postanız doğrumu kontrol edin !',
+        confirmButtonText: 'Tamam',
+      })
+      console.log(err)
+    });
+     
+     // Giriş başarılı olursa yönlendirme
   };
 
   return (
@@ -99,7 +127,7 @@ const ForgotPassword = () => {
             color="secondary"
             type="submit"
             className="custom-button"
-            // onClick={handleSubmit}
+            onClick={handleSubmit}
             // Inline styles for background color and width
           >
             Şifremi Sıfırla

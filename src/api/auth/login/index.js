@@ -3,7 +3,7 @@
 import axios from "axios";
 
 export const login = (email, password) => {
-    return axios.post(`${process.env.REACT_APP_API_URL}v1/auth/login`, {
+    return axios.post(`${process.env.REACT_APP_API_URL}auth/login`, {
          email,
          password,
     });

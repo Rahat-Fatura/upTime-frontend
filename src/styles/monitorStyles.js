@@ -33,7 +33,7 @@ export const formSectionStyle = {
   backgroundColor: '#f8f9fa',
   borderRadius: 2,
   p: 3,
-  mb: 3,
+  mb: 5,
   border: '1px solid',
   borderColor: 'divider',
 };

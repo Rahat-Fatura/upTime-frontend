@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState } from 'react'
+import Swal from 'sweetalert2'
 import {
   Grid,
   Button,
@@ -22,18 +23,30 @@ const Register = () => {
   const navigate = useNavigate()
   const [agree, setAgree] = useState(false)
 
-
-
-  const handleSubmit=async()=>{
-     axios.post(`${process.env.REACT_APP_API_URL}v1/auth/register`,
-      {
-        "name" : username,
-        "email" : email,
-        "password" : password
-      }
-     )
-     .then(response=>{navigate("/login")})
-     .catch(error=>console.log(error))
+  const handleSubmit = async () => {
+    axios
+      .post(`${process.env.REACT_APP_API_URL}auth/register`, {
+        name: username,
+        email: email,
+        password: password,
+      })
+      .then((response) => {
+        Swal.fire({
+          title: response.data.name,
+          icon: 'success',
+          text: 'Başarıyla kayıt oldunuz.',
+          confirmButtonText: 'Tamam',
+        })
+        navigate('/login')
+      })
+      .catch((error) => {
+        Swal.fire({
+          title: error.response.data.message,
+          icon: 'error',
+          text: 'Kayıt işlemi başarısız oldu.',
+          confirmButtonText: 'Tamam',
+        })
+      })
   }
   return (
     <Grid
@@ -190,7 +203,7 @@ const Register = () => {
             color="secondary"
             type="submit"
             className="custom-button"
-            onClick={()=>handleSubmit()}
+            onClick={() => handleSubmit()}
           >
             Kayıt Ol
           </Button>

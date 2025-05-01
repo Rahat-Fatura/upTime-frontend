@@ -18,6 +18,8 @@ import FlagIcon from "@mui/icons-material/Flag";
 import LanguageIcon from "@mui/icons-material/Language";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
+import { Handshake, ManageAccounts, ManageAccountsRounded, RollerShades, WorkOutlineRounded } from "@mui/icons-material";
+import { HandThreeFingers, Trees } from "tabler-icons-react";
 
 const UserProfileInfoPage = ({ userInfo}) => {
   return (
@@ -27,33 +29,33 @@ const UserProfileInfoPage = ({ userInfo}) => {
           <Grid container spacing={2}>
             <Grid item md={5}>
               <Typography variant="h6" sx={{ ml: "2vh" }}>
-                Bilgiler
+                User info
               </Typography>
               <List dense>
                 <ListItem>
                   <ListItemIcon>
                     <PersonIcon />
                   </ListItemIcon>
-                  <ListItemText primary="Ad Soyad" secondary={userInfo.name} />
+                  <ListItemText primary="Name" secondary={userInfo.name} />
                 </ListItem>
 
                 <ListItem>
                   <ListItemIcon>
-                    <WorkIcon />
+                    <RollerShades />
                   </ListItemIcon>
                   <ListItemText primary="Role" secondary={userInfo.role} />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <FlagIcon />
+                    <WorkIcon/>
                   </ListItemIcon>
-                  <ListItemText primary="Country" secondary={userInfo.country} />
+                  <ListItemText primary="Top Management" secondary={userInfo.country} />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
-                    <LanguageIcon />
+                    <Handshake/>
                   </ListItemIcon>
-                  <ListItemText primary="Language" secondary={userInfo.language} />
+                  <ListItemText primary="Sub Administration" secondary={userInfo.language} />
                 </ListItem>
               </List>
             </Grid>
@@ -68,15 +70,6 @@ const UserProfileInfoPage = ({ userInfo}) => {
                 İletişim
               </Typography>
               <List dense>
-                <ListItem>
-                  <ListItemIcon>
-                    <PhoneIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Telefon No"
-                    secondary={userInfo.number}
-                  />
-                </ListItem>
                 <ListItem>
                   <ListItemIcon>
                     <EmailIcon />

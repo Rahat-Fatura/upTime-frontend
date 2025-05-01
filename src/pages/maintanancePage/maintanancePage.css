@@ -1,0 +1,29 @@
+.flex {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 20px;
+    transition: margin-left 0.3s;
+}
+
+.sidebar-open {
+    margin-left: 250px;
+}
+
+.sidebar-closed {
+    margin-left: 0;
+}
+
+.monitor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.date-time-pickers {
+    margin-bottom: 15px;
+} 

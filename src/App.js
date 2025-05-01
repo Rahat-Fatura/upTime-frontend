@@ -10,7 +10,6 @@ import {
 import Login from "./pages/loginPage/loginPage.js";
 import ForgotPassword from "./pages/forgotPassword/forgotPassword.js";
 import Register from "./pages/registerPage/register.js";
-import HomePage from "./pages/homePage/homePage.js";
 import GridPage from "./pages/gridPage/gridPage.js";
 import ProfilePage from "./pages/profilePage/userProfile.js";
 import AdminPage from "./pages/adminPage/adminPage.js";
@@ -21,6 +20,12 @@ import { jwtDecode } from "jwt-decode";
 
 import { cookies } from "./utils/cookie";
 import Dashboard from "./pages/monitorPage/monitorPage.js";
+import MaintanancePage from "./pages/maintanancePage/maintanancePage.js";
+import TeamMembersPage from "./pages/teamMembersPage/teamMembersPage.js";
+import IntegrationsPage from "./pages/inegrationsPage/inegrationsPage.js";
+import ResetPassword from "./pages/resetPasswordPage/resetPassword.js";
+import MonitoringReportsPage from "./pages/monitoringReportsPage/monitoringReportsPage.js";
+import InstantControlPage from "./pages/instantControlPage/instantControlPage.js";
 const NotFound = () => {
   return (
     <div
@@ -45,7 +50,6 @@ function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  let userRole;
   useEffect(() => {
     const checkAuth = async () => {
       const jwtToken = cookies.get("jwt-access");
@@ -62,7 +66,7 @@ function AppRoutes() {
           navigate("/NotFound");
         }
       }else if (!jwtToken) {
-        if (!['/register', '/forgot-password', '/login', '/monitors'].includes(location.pathname)) {
+        if (!['/register', '/forgot-password', '/login', '/reset-password'].includes(location.pathname)) {
           navigate("/login");
         }
       }
@@ -78,15 +82,16 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/homepage" replace />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Register />} />
 
 
       <Route path="/user/profile" element={<ProfilePage />} />
-      <Route path="/homepage" element={<HomePage />} />
+    
       <Route path="/user/gridPage" element={<GridPage />} />
 
 
@@ -96,6 +101,11 @@ function AppRoutes() {
 
       <Route path="/admin/monitors" element={<Dashboard />} />
       <Route path="/user/monitors" element={<Dashboard />} />
+      <Route path="/user/monitoringReports" element={<MonitoringReportsPage/>} />
+      <Route path="/user/instantControl" element={<InstantControlPage/>} />
+      <Route path="/user/maintanance" element={<MaintanancePage/>} />
+      <Route path="/user/teamMembers" element={<TeamMembersPage/>} />
+      <Route path="/user/integrationsApi" element={<IntegrationsPage/>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -18,24 +18,21 @@ import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import UserInfo from "./userProfileInfoPage.js";
 import UserSetting from "./userProfileSettingsPage.js";
-
+import PasswordSetting from "./passwordChange.js";
+import { cookies } from "../../utils/cookie";
+import { Password } from "@mui/icons-material";
 const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
   const [userInfo, setUserInfo] = useState({
-    name: "Mustafa",
-    surname: "Teker",
-    email:"mstftkr99@gmail.com",
-    number:"5310000000",
-    country:"Türkiye",
-    language:"Türkçe",
-    organization:"EtrSoft",
-    address:"Nivo Ataköy",
-    state:"İstanbul",
-    zipCode:"34200",
-    role:"Yazılımcı"
+    name: cookies.get("user").name,
+    email:cookies.get("user").email,
+    created_at: String(cookies.get("user").created_at).split("T")[0],
+    status: cookies.get("user").status,
+    subordinates:cookies.get("user").subordinates,
+    role:cookies.get("user").role
   });
   const [userStatus, setUserStatus] = useState(true); //Kullanıcının aktif pasiflik durumunu belirtir.
   const [selectedButtonId, setSelectedButtonId] = useState(1);
@@ -94,7 +91,7 @@ const ProfilePage = () => {
             />
             <CardContent sx={{ position: "relative" }}>
               <Avatar
-                alt="Mustafa Teker"
+                alt={userInfo.name}
                 src="/path-to-profile-image.jpg"
                 sx={{
                   width: 120,
@@ -118,7 +115,7 @@ const ProfilePage = () => {
               >
                 <Grid item sx={{ marginRight: "1vh" }}>
                   <Typography variant="h5" component="div">
-                    Mustafa Teker
+                    {userInfo.name}
                   </Typography>
                 </Grid>
               </Grid>
@@ -135,7 +132,7 @@ const ProfilePage = () => {
                 <Grid item sx={{ display: "flex", alignItems: "center" }}>
                   <WorkIcon fontSize="small" sx={{ mr: 1 }} />
                   <Typography variant="body2" color="text.secondary">
-                    Web Arayüz Tasarımcısı
+                    Rahat Sistem
                   </Typography>
                 </Grid>
                 <Divider
@@ -146,7 +143,7 @@ const ProfilePage = () => {
                 <Grid item sx={{ display: "flex", alignItems: "center" }}>
                   <LocationOnIcon fontSize="small" sx={{ mr: 1 }} />
                   <Typography variant="body2" color="text.secondary">
-                    Gotham City
+                    Istanbul City
                   </Typography>
                 </Grid>
                 <Divider
@@ -157,7 +154,7 @@ const ProfilePage = () => {
                 <Grid item sx={{ display: "flex", alignItems: "center" }}>
                   <CalendarTodayIcon fontSize="small" sx={{ mr: 1 }} />
                   <Typography variant="body2" color="text.secondary">
-                    Temmuz 2024
+                    {userInfo.created_at}
                   </Typography>
                 </Grid>
                 <Divider
@@ -173,8 +170,8 @@ const ProfilePage = () => {
                     Durum :
                   </Typography>
                   <Chip
-                    label={userStatus ? "Aktif" : "Pasif"}
-                    color={userStatus ? "success" : "error"}
+                    label={userInfo.status ? "Aktif" : "Pasif"}
+                    color={userInfo.status ? "success" : "error"}
                   />
                 </Grid>
               </Grid>
@@ -222,12 +219,30 @@ const ProfilePage = () => {
               Ayarlar
             </Button>
           </Grid>
+          <Grid item md={1}>
+            <Button
+              fullWidth
+              variant={selectedButtonId === 3 ? "contained" : "text"}
+              type="submit"
+              className={
+                selectedButtonId === 3 ? "selected-button" : "unselected-button"
+              }
+              sx={{ display: "flex", gap: 1, pt: "1vh", pb: "1vh" }}
+              onClick={() => handleButtonClick(3)}
+            >
+              <Password fontSize="medium" />
+              Şifre Değiştir
+            </Button>
+          </Grid>
         </Grid>
         {selectedButtonId === 1 ? (
           <UserInfo userInfo={userInfo}/>
         ) : selectedButtonId === 2 ? (
           <UserSetting userInfo={userInfo} />
-        ) : (
+        ) : selectedButtonId === 3 ? (
+          <PasswordSetting />
+        ) :
+        (
           ""
         )}
       </Grid>

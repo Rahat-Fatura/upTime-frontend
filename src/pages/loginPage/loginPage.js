@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { cookies } from "../../utils/cookie";
 import { jwtDecode } from "jwt-decode";
@@ -26,10 +27,15 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(()=>{
+   setEmail(cookies.get("email"));
+   setPassword(cookies.get("password"));
+   setRememberMe(cookies.get("rememberMe"));
+  },[]);
+
   const handleLogin = (event) => {
     login(email, password)
     .then((resp) => {
-        console.log(typeof(resp))
         cookies.set("jwt-access", resp.data.tokens.access.token);
 
         cookies.set(
@@ -42,15 +48,25 @@ const Login = () => {
             "jwt-refresh-expires",
             resp.data.tokens.refresh.expires
         );
+        if(rememberMe){
+          cookies.set("email", email, { path: "/", maxAge: 60 * 60 * 24 * 30 });
+          cookies.set("password",password, { path: "/", maxAge: 60 * 60 * 24 * 30 });
+          cookies.set("rememberMe",rememberMe, { path: "/", maxAge: 60 * 60 * 24 * 30 });
+        }else{
+          cookies.remove("email");
+          cookies.remove("password");
+          cookies.remove("rememberMe");
+        }
         const decodedToken = jwtDecode(resp.data.tokens.access.token);
         
         const role = resp.data.user.role;
-        console.log(role)
         if (role === "user") {
-            navigate("/homepage");
+            cookies.set("user",resp.data.user)
+            navigate("/user/monitors");
         } else if (role === "admin") {
+            cookies.set("user",resp.data.user)
             navigate("/admin");
-        }
+        } 
     })
     .catch((err) => {
         Swal.fire({
@@ -113,21 +129,6 @@ const Login = () => {
           <Typography variant="h4">Rahat ... Hoşgeldiniz</Typography>
           <Typography variant="body1" color="textSecondary">
             Lütfen hesabınızda oturum açın ve "RAHAT"ınıza bakın :)
-          </Typography>
-        </Grid>
-        <Grid
-          item
-          md={12}
-          sx={{
-            backgroundColor: "#e8e7fd",
-            height: "100vh",
-            width: "100vh",
-            padding: "1.3vh",
-            borderRadius: "5px",
-          }}
-        >
-          <Typography variant="body2" color="#786af2" height={"100"}>
-            Email: admin@rahat.com / Pass: admin
           </Typography>
         </Grid>
 
@@ -205,7 +206,9 @@ const Login = () => {
             <Checkbox
               checked={rememberMe}
               className="default-checked"
-              onChange={(e) => setRememberMe(e.target.checked)}
+              onChange={(e) =>{
+                setRememberMe(e.target.checked)
+              }}
             />
             <Typography variant="body2">Beni Hatırla</Typography>
           </Grid>

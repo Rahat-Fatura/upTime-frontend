@@ -14,61 +14,30 @@ import {
 import { logout } from "../../api/auth/logout";
 
 import localStorage from "local-storage";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { Engineering, ExpandLess, ExpandMore, IntegrationInstructionsOutlined, Person, Security } from "@mui/icons-material";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import largeLogo from "../../assets/images/by-rahatsistem-logo.png";
 import smallLogo from "../../assets/images/rahatsistem-logo.png";
-
+import CellTowerIcon from '@mui/icons-material/CellTower';
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import {
-  Home,
-  Files,
-  MessageCircle,
-  ShoppingCart,
-  Mail,
-  Calendar,
-  List as ListIcon,
-  FileText as User,
-  Key,
+  ReportAnalytics,
   Server,
+  StatusChange,
+  TopologyBus,
 } from "tabler-icons-react";
 
 const menuItems = [
-  { text: "Anasayfa", icon: <Home size={22} />, path: "/homepage" },
-  { text: "Sunucular", icon: <Server size={22} />, path: "/user/monitors" },
-  { text: "GridPage", icon: <Files size={22} />, path: "/user/gridPage" },
-  { text: "Alt Programlar", header: true },
+  { text: "Monitoring", icon: <Server size={22} />, path: "/user/monitors" },
+  { text: "Reports", icon: <ReportAnalytics size={22} />, path: "/user/monitoringReports" },
+  { text: "Instant Control", icon: <CellTowerIcon size={22} />, path: "/user/instantControl" },
+  { text: "Maintanance", icon: <Engineering size={22} />, path: "/user/maintanance" },
+  { text: "Team Members", icon: <TopologyBus size={22} />, path: "/user/teamMembers" },
+  { text: "Integrations & API", icon: <IntegrationInstructionsOutlined size={22} />, path: "/user/integrationsApi" },
+
+  { text: "Profile", icon: <Person size={22} />, path: "/user/profile" },
   {
-    text: "Rahat Fatura",
-    icon: <ShoppingCart size={22} />,
-    subItems: [
-      {
-        text: "paneladmin",
-        icon: <ShoppingCart size={22} />,
-        path: "/panel/admin",
-      },
-      { text: "Add", icon: <ShoppingCart size={22} /> },
-      {
-        text: "Category",
-        icon: <ShoppingCart size={22} />,
-      },
-    ],
-  },
-  {
-    text: "Rahat Dinle",
-    icon: <Mail size={22} />,
-    subItems: [
-      { text: "Page1", icon: <Mail size={22} />, path: "/products/list" },
-      { text: "Page2", icon: <Mail size={22} />, path: "/products/add" },
-      { text: "Page3", icon: <Mail size={22} />, path: "/products/category" },
-    ],
-  },
-  { text: "Rahat İletişim", icon: <MessageCircle size={22} />, path: "/" },
-  { text: "Takvim", icon: <Calendar size={22} /> },
-  { text: "Belgeler", icon: <User size={22} /> },
-  { text: "Yetkilendirmeler", icon: <Key size={22} /> },
-  {
-    text: "Çıkış",
+    text: "Logout",
     icon: <LogoutOutlinedIcon size={22} />,
     action: logout,
     path: "/login",
@@ -120,7 +89,7 @@ const Sidebar = ({ status,toggleSidebar }) => {
             sx={{ pl: 2, pt: 2, pb: 1, m: 3 }}
           >
             {item.text}
-          </Typography>
+          </Typography> 
         )
       );
     }

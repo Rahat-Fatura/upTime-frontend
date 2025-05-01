@@ -1,10 +1,9 @@
-/* eslint-disable default-case */
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import alertify from 'alertifyjs'
+import api from '../../api/auth/axiosInstance'
 import { cookies } from '../../utils/cookie'
+import BuildIcon from '@mui/icons-material/Build';
 import {
-  AppBar,
-  Toolbar,
   Typography,
   IconButton,
   Box,
@@ -19,19 +18,9 @@ import {
   Tooltip,
   Divider,
   Modal,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
   Stack,
-  FormHelperText,
 } from '@mui/material'
 import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Monitor as MonitorIcon,
-  Settings as SettingsIcon,
   Add as AddIcon,
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
@@ -39,234 +28,136 @@ import {
   PlayArrow as PlayArrowIcon,
   Pause as PauseIcon,
   Delete as DeleteIcon,
-  TrendingUp as TrendingUpIcon,
-  EditAttributes,
-  EditAttributesOutlined,
-  Computer as ComputerIcon,
-  Http as HttpIcon,
-  AccessTime as AccessTimeIcon,
-  Assessment as AssessmentIcon,
-  Code as CodeIcon,
-  Security as SecurityIcon,
-  Timer as TimerIcon,
-  CalendarToday as CalendarIcon,
-  PortableWifiOffOutlined,
-  Usb,
-  UsbRounded,
-  RequestQuote,
-  RequestPage,
-  RestorePageOutlined,
-  RequestQuoteTwoTone,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
-import { Edit, World } from 'tabler-icons-react'
-import { toast } from 'react-hot-toast'
-import MonitorForm from '../../components/MonitorForm'
+import { Edit } from 'tabler-icons-react'
+import MonitorForm from './MonitorForm'
 import {
   modalStyle,
   formContainerStyle,
   buttonContainerStyle,
 } from '../../styles/monitorStyles'
-import { INITIAL_STATS } from '../../constants/monitorConstants'
-
-const drawerWidth = 240
-
-const stats = [
-  { title: 'Toplam Sunucu', value: '0', color: '#1976d2' },
-  { title: 'Aktif Sunucu', value: '0', color: '#2e7d32' },
-  { title: 'Düşen Sunucu', value: '0', color: '#d32f2f' },
-  { title: 'Çalışan sunucuların yüzdesi', value: '0%', color: '#ed6c02' },
-]
-
-const methods = [
-  { value: 'GET', label: 'GET' },
-  { value: 'POST', label: 'POST' },
-  { value: 'PUT', label: 'PUT' },
-  { value: 'DELETE', label: 'DELETE' },
-  { value: 'PATCH', label: 'PATCH' },
-]
-
-const formSectionStyle = {
-  backgroundColor: '#f8f9fa',
-  borderRadius: 2,
-  p: 3,
-  mb: 3,
-  border: '1px solid',
-  borderColor: 'divider',
-}
-
-const sectionTitleStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 2,
-  mb: 2,
-  color: '#1976d2',
-  fontWeight: 'bold',
-}
-
-const stepIndicatorStyle = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 1,
-  mb: 2,
-  color: '#1976d2',
-  fontWeight: 'bold',
-  fontSize: '0.875rem',
-}
-
-const stepNumberStyle = {
-  width: 24,
-  height: 24,
-  borderRadius: '50%',
-  backgroundColor: '#1976d2',
-  color: 'white',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '0.75rem',
-  fontWeight: 'bold',
-}
-
+import { INITIAL_STATS } from './constants/monitorConstants'
+import Sidebar from '../../components/sideBar/sideBar'
+import * as Yup from 'yup'
 const initialFormData = {
   name: '',
   method: 'GET',
-  port: '8000',
+  body: {},
   headers: {},
   interval: 5,
   intervalUnit: 'minutes',
-  report_time: 1,
+  reportTime: 1,
   reportTimeUnit: 'days',
   status: false,
-  allowedStatusCodes: ['200', '201'],
-  is_active_by_owner: true,
+  allowedStatusCodes: ['200'],
+  isActiveByOwner: true,
 }
 
 export default function Dashboard() {
+  const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
   const [modalOpen, setModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
-  const [hostError, setHostError] = useState('')
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
 
-  const validateHost = (host) => {
-    // IP adresi veya domain adı için regex
-    const domainRegex =
-      /^(https?:\/\/)(((?<Ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(?<Port>\d{2,4}))|((?<www>www)?\.?(?<Host>[a-zA-Z0-9]*)\.(?<Uzanti>[a-z]{3})\.?(?<Country>[a-z]{2})?))/gm
-
-    if (!host) {
-      return 'Host alanı zorunludur'
-    } else if (!domainRegex.test(host)) {
-      return 'Geçerli bir IP adresi veya domain adı giriniz'
-    } else {
-      return ''
-    }
-  }
-
-  const validateInterval = (value) => {
-    let unit = formData.intervalUnit
-    value = Number(value)
-    switch (unit) {
-      case 'seconds':
-        if (value > 59) {
-          value = 59
-        } else if (value < 20) {
-          value = 20
-        } else {
-          value = value
+  const validationShcema = Yup.object().shape({
+    name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
+    method: Yup.string()
+      .oneOf(
+        ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'PATCH', 'OPTION'],
+        'Geçersiz başlık !'
+      )
+      .required('İstek atabilmek için önemlidir !'),
+    host: Yup.string()
+      .matches(/^(https?:\/\/)/gm, 'Geçersiz host adresi')
+      .required('Host alanı zorunludur'),
+    body: Yup.string().test(
+      'is-json',
+      'Body geçerli bir JSON formatında değil!',
+      (value) => {
+        try {
+          JSON.parse(JSON.stringify(value))
+          return true
+        } catch (error) {
+          return false
         }
-        break
-      case 'minutes':
-        if (value >= 60) {
-          value = 59
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
-        }
-        break
-      case 'hours':
-        if (value >= 24) {
-          value = 23
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
-        }
-        break
-      default:
-        break
-    }
-    return value;
-  }
-
-  const validateReportTime = (value) => {
-    value = Number(value)
-    let reportTimeUnit = formData.intervalUnit
-    switch (reportTimeUnit) {
-      case 'hours': {
-        if (value > 23) {
-          value = 23
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
-        }
-        break
       }
-      case 'days': {
-        if (value > 30) {
-          value = 30
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
+    ),
+    headers: Yup.string().test(
+      'is-json',
+      'Head geçerli bir JSON formatı değil!',
+      (value) => {
+        try {
+          JSON.parse(JSON.stringify(value))
+          return true
+        } catch (error) {
+          return false
         }
-        break
       }
-      case 'weeks': {
-        if (value > 3) {
-          value = 3
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
+    ),
+    interval: Yup.number()
+      .required('İstek zaman birimi zorunludur!')
+      .when('intervalUnit', (intervalUnit, schema) => {
+        if (intervalUnit === 'seconds') {
+          return schema
+            .min(20, 'En az 20 saniye olmalı')
+            .max(59, 'En fazla 59 saniye olabilir')
         }
-        break
-      }
-      case 'months': {
-        if (value > 12) {
-          value = 12
-        } else if (value < 1) {
-          value = 1
-        } else {
-          value = value
+        if (intervalUnit === 'minutes') {
+          return schema
+            .min(1, 'En az 1 dakika olmalı')
+            .max(59, 'En fazla 59 dakika olabilir')
         }
-        break
-      }
-    }
-    return value;
-  }
+        if (intervalUnit === 'hours') {
+          return schema
+            .min(1, 'En az 1 saat olmalı')
+            .max(23, 'En fazla 23 saat olabilir')
+        }
+        return schema
+      }),
+    intervalUnit: Yup.string()
+      .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
+      .required('intervalUnit zorunludur!'),
+    reportTime: Yup.number()
+      .required('rapor zamanı girmeniz zorunludur!')
+      .when('reportTimeUnit', (reportTimeUnit, schema) => {
+        if (reportTimeUnit === 'hours') {
+          return schema
+            .min(1, 'En az 1 saat olmalı')
+            .max(23, 'En fazla 23 saat olabilir')
+        }
+        if (reportTimeUnit === 'days') {
+          return schema
+            .min(1, 'En az 1 gün olmalı')
+            .max(30, 'En fazla 30 gün olabilir')
+        }
+        if (reportTimeUnit === 'weeks') {
+          return schema
+            .min(1, 'En az 1 hafta olmalı')
+            .max(3, 'En fazla 3 hafta olabilir')
+        }
+        if (reportTimeUnit === 'months') {
+          return schema
+            .min(1, 'En az 1 ay olmalı')
+            .max(11, 'En fazla 11 ay olabilir')
+        }
+        return schema
+      }),
+    reportTimeUnit: Yup.string()
+      .oneOf(['days', 'weeks', 'hours', 'months'], 'Geçersiz zaman birimi!')
+      .required('raporlama zaman birimi zorunludur!'),
+    allowedStatusCodes: Yup.array()
+      .of(Yup.string().length(3, 'Status kodu 3 karakter olmalıdır'))
+      .min(1, 'En az bir status kodu girilmelidir')
+      .required('allowedStatusCodes zorunludur!'),
+  })
 
-  const handleInputChange = (e) => {
-    let { name, value } = e.target
-
-    if (name === 'interval') {
-      value = validateInterval(value)
-    }
-    if (name === 'report_time') {
-      value = validateReportTime(value)
-    }
-    if (name === 'host') {
-      const error = validateHost(value)
-      setHostError(error)
-    }
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen)
+    console.log(isOpen)
   }
 
   const handleSubmit = async (e) => {
@@ -288,36 +179,29 @@ export default function Dashboard() {
           : {},
         interval: formData.interval,
         intervalUnit: formData.intervalUnit,
-        report_time: formData.report_time,
+        reportTime: formData.reportTime,
         reportTimeUnit: formData.reportTimeUnit,
         allowedStatusCodes:
           typeof formData.allowedStatusCodes === 'string'
             ? formData.allowedStatusCodes.split(',').map((code) => code.trim())
             : formData.allowedStatusCodes,
       }
-
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}v1/monitor/`,
-        formattedData,
-        {
-          headers: {
-            Authorization: `Bearer ${cookies.get('jwt-access')}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-
+      const response = await api.post(`monitor/`, formattedData, {
+        headers: {
+          Authorization: `Bearer ${cookies.get('jwt-access')}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log('Response:', response.data)
       if (response.data) {
         setMonitors((prevMonitors) => [...prevMonitors, response.data])
         setModalOpen(false)
         setFormData(initialFormData)
-        toast.success('Sunucu başarıyla eklendi!')
+        alertify.success(`${response.data.host} başarılı şekilde eklendi !`)
       }
     } catch (error) {
+      alertify.error(error.response.data.message)
       console.error('Sunucu eklenirken hata oluştu:', error)
-      toast.error(
-        error.response?.data?.message || 'Sunucu eklenirken bir hata oluştu.'
-      )
     }
   }
 
@@ -345,21 +229,13 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchMonitors = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}v1/monitor/`,
-          {
-            headers: {
-              Authorization: `Bearer ${cookies.get('jwt-access')}`,
-              'Content-Type': 'application/json',
-            },
-          }
-        )
+        const response = await api.get(`monitor/`)
         if (response.data) {
           setMonitors(response.data)
         }
       } catch (error) {
         console.error('Monitör verileri alınırken hata oluştu:', error)
-        toast.error('Monitör verileri alınırken bir hata oluştu.')
+        alertify.error('Monitör verileri alınırken bir hata oluştu.')
       }
     }
 
@@ -373,67 +249,48 @@ export default function Dashboard() {
       const token = cookies.get('jwt-access')
       switch (action) {
         case 'start':
-          await axios.put(
-            `${process.env.REACT_APP_API_URL}v1/monitor/${monitorId}/play`,
-            {},
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          )
+          const res = await api.put(`monitor/${monitorId}/play`, {})
           setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
-                ? { ...m, is_active_by_owner: true, status: null }
+                ? { ...m, isActiveByOwner: true, status: "uncertain" }
                 : m
             )
           )
-          toast.success('Sunucu başlatıldı')
+          alertify.success(`${res.data.host} sunucu başlatıldı`)
           break
 
         case 'pause':
-          await axios.put(
-            `${process.env.REACT_APP_API_URL}v1/monitor/${monitorId}/pause`,
-            {},
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          )
+          const response = await api.put(`monitor/${monitorId}/pause`, {})
           setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
-                ? { ...m, is_active_by_owner: false, status: null }
+                ? { ...m, is_active_by_owner: false, status: "uncertain" }
                 : m
             )
           )
-          toast.success('Sunucu durduruldu')
+          alertify.warning(`${response.data.host} sunucu durduruldu`)
           break
 
         case 'delete':
           if (
             window.confirm('Bu sunucuyu silmek istediğinizden emin misiniz?')
           ) {
-            await axios.delete(
-              `${process.env.REACT_APP_API_URL}v1/monitor/${monitorId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${cookies.get('jwt-access')}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            )
+            const response = await api.delete(`monitor/${monitorId}`)
             setMonitors((prevMonitors) =>
               prevMonitors.filter((m) => m.id !== monitorId)
             )
-            toast.success('Sunucu silindi')
+            alertify.success(`${response.data.host} sunucu başarılı silindi`)
           }
           break
 
         default:
+          alertify.error('Geçersiz işlem')
           console.error('Geçersiz işlem')
       }
     } catch (error) {
       console.error('İşlem sırasında bir hata oluştu:', error)
-      toast.error(
+      alertify.error(
         'İşlem sırasında bir hata oluştu: ' +
           (error.response?.data?.message || error.message)
       )
@@ -464,7 +321,7 @@ export default function Dashboard() {
           : {},
         interval: selectedMonitor.interval,
         intervalUnit: selectedMonitor.intervalUnit,
-        report_time: selectedMonitor.report_time,
+        reportTime: selectedMonitor.reportTime,
         reportTimeUnit: selectedMonitor.reportTimeUnit,
         allowedStatusCodes:
           typeof selectedMonitor.allowedStatusCodes === 'string'
@@ -473,9 +330,8 @@ export default function Dashboard() {
                 .map((code) => code.trim())
             : selectedMonitor.allowedStatusCodes,
       }
-
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}v1/monitor/${selectedMonitor.id}`,
+      const response = await api.put(
+        `monitor/${selectedMonitor.id}`,
         updateData,
         {
           headers: {
@@ -494,11 +350,11 @@ export default function Dashboard() {
           )
         )
         setDetailsModalOpen(false)
-        toast.success('Sunucu başarıyla güncellendi!')
+        alertify.success(` sunucu başarıyla güncellendi!`)
       }
     } catch (error) {
       console.error('Sunucu güncellenirken hata oluştu:', error)
-      toast.error(
+      alertify.error(
         `Hata: ${
           error.response?.data?.message ||
           'Sunucu güncellenirken bir hata oluştu.'
@@ -510,17 +366,20 @@ export default function Dashboard() {
   const handleDetailInputChange = (e) => {
     const { name, value } = e.target
 
-    if (name === 'host') {
-      const error = validateHost(value)
-      setHostError(error)
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleUpdateInputChange = (e) => {
+    const { name, value } = e.target
 
     setSelectedMonitor((prev) => ({
       ...prev,
       [name]: value,
     }))
   }
-
   const columns = [
     {
       field: 'name',
@@ -542,26 +401,75 @@ export default function Dashboard() {
       headerName: 'Durumu',
       width: 200,
       renderCell: (params) => {
-        if (params.value === null) {
+        if (params.value === "uncertain") {
           return (
             <Chip
               icon={<HelpOutline />}
-              label="Belirsiz"
+              label="Uncertain"
               color="warning"
-              size="small"
-              sx={{ backgroundColor: '#9e9e9e', color: 'white' }}
+              size="medium"
+              sx={{
+                fontWeight: 'bold',
+                '& .MuiChip-label': {
+                  fontSize: '1rem', // örnek: 16px
+                  fontWeight: 'bold',
+                }
+              }}
             />
           )
         }
-
-        return (
-          <Chip
-            icon={params.value ? <CheckCircleIcon /> : <WarningIcon />}
-            label={params.value ? 'Ayakta' : 'Düştü'}
-            color={params.value ? 'success' : 'error'}
-            size="small"
-          />
-        )
+        if (params.value === "maintanance") {
+          return (
+            <Chip
+              icon={<BuildIcon />}
+              label="Maintenance"
+              color="info"
+              size="medium"
+              sx={{
+                fontWeight: 'bold',
+                '& .MuiChip-label': {
+                  fontSize: '1rem', // örnek: 16px
+                  fontWeight: 'bold',
+                  fontColor: 'black',
+                }
+              }}
+            />
+          )
+        }
+        if (params.value === "down") {
+          return (
+            <Chip
+              icon={ <WarningIcon />}
+              label={'Down'}
+              color={'error'}
+              size="medium"
+              sx={{
+                fontWeight: 'bold',
+                '& .MuiChip-label': {
+                  fontSize: '1rem', // örnek: 16px
+                  fontWeight: 'bold',
+                }
+              }}
+            />
+          )
+        }
+        if (params.value === "up") {
+          return (
+            <Chip
+              icon={<CheckCircleIcon />}
+              label={'Up'}
+              color={'success'}
+              size="medium"
+              sx={{
+                fontWeight: 'bold',
+                '& .MuiChip-label': {
+                  fontSize: '1rem', // örnek: 16px
+                  fontWeight: 'bold',
+                }
+              }}
+            />
+          )
+        }
       },
     },
     {
@@ -620,7 +528,7 @@ export default function Dashboard() {
       },
     },
     {
-      field: 'created_at',
+      field: 'createdAt',
       headerName: 'Oluşturulma Tarihi',
       width: 200,
       // eslint-disable-next-line no-unused-expressions
@@ -632,10 +540,10 @@ export default function Dashboard() {
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          {!params.row.is_active_by_owner && (
+          {!params.row.isActiveByOwner && (
             <Tooltip title="Başlat">
               <IconButton
-                size="small"
+                size="small" 
                 color="success"
                 onClick={() => handleMonitorAction('start', params.row.id)}
               >
@@ -643,7 +551,7 @@ export default function Dashboard() {
               </IconButton>
             </Tooltip>
           )}
-          {params.row.is_active_by_owner && (
+          {params.row.isActiveByOwner && (
             <Tooltip title="Durdur">
               <IconButton
                 size="small"
@@ -685,25 +593,26 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: 1201 }}>
-        <Toolbar>
-          <img
-            src={'../../../rahatsistem-logo.png'}
-            alt="Logo"
-            width={50}
-            height={50}
-            style={{
-              marginRight: '16px',
-              backgroundColor: 'white',
-              borderRadius: '5px',
-            }}
-          />
-          <Typography variant="h5" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Rahat Sistem Sunucu Kontrol Sayfası
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+      <Grid item md={isOpen ? 2.3 : 0.7}>
+        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+      </Grid>
+      <Grid
+        item
+        md={isOpen ? 9.7 : 11.3}
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          flexDirection: 'column',
+          pr: '4vh',
+          gap: 1,
+        }}
+      >
+      </Grid>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 2 }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+            Monitoring Page.
+            <hr />
+        </Typography>
         <Container maxWidth="xl">
           <Grid container spacing={3}>
             {currentStats.map((stat) => (
@@ -758,7 +667,10 @@ export default function Dashboard() {
 
       <Modal
         open={detailsModalOpen}
-        onClose={() => setDetailsModalOpen(false)}
+        onClose={() => {
+          setDetailsModalOpen(false)
+          setSelectedMonitor(selectedMonitor)
+        }}
         aria-labelledby="details-modal-title"
       >
         <Box sx={modalStyle}>
@@ -777,8 +689,7 @@ export default function Dashboard() {
             {selectedMonitor && (
               <MonitorForm
                 formData={selectedMonitor}
-                handleInputChange={handleDetailInputChange}
-                hostError={hostError}
+                handleInputChange={handleUpdateInputChange}
                 isEdit={true}
               />
             )}
@@ -786,7 +697,10 @@ export default function Dashboard() {
 
           <Box sx={buttonContainerStyle}>
             <Button
-              onClick={() => setDetailsModalOpen(false)}
+              onClick={() => {
+                setDetailsModalOpen(false)
+                setSelectedMonitor(selectedMonitor)
+              }}
               variant="outlined"
               color="inherit"
             >
@@ -806,7 +720,10 @@ export default function Dashboard() {
 
       <Modal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setFormData(initialFormData)
+          setModalOpen(false)
+        }}
         aria-labelledby="add-modal-title"
       >
         <Box sx={modalStyle}>
@@ -834,14 +751,16 @@ export default function Dashboard() {
           <Box sx={formContainerStyle}>
             <MonitorForm
               formData={formData}
-              handleInputChange={handleInputChange}
-              hostError={hostError}
+              handleInputChange={handleDetailInputChange}
             />
           </Box>
 
           <Box sx={buttonContainerStyle}>
             <Button
-              onClick={() => setModalOpen(false)}
+              onClick={() => {
+                setModalOpen(false)
+                setFormData(initialFormData)
+              }}
               variant="outlined"
               color="inherit"
               size="large"

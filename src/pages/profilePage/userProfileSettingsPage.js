@@ -30,27 +30,9 @@ const UserProfileSettingsPage = ({ userInfo}) => {
           <TextField
             fullWidth
             className="input-field"
-                label="Soyad"
-            variant="outlined"
-            defaultValue={userInfo.surname}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            className="input-field"
             label="Email"
             variant="outlined"
             defaultValue={userInfo.email}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            className="input-field"
-            label="Görevi"
-            variant="outlined"
-            defaultValue={userInfo.organization}
           />
         </Grid>
       </Grid>
@@ -59,49 +41,7 @@ const UserProfileSettingsPage = ({ userInfo}) => {
         flexItem
         sx={{ display: { xs: "none", md: "block" } }}
       />
-      <Grid
-        item
-        xs={12}
-        md={5.5}
-        sx={{ display: "flex", gap: 2, flexDirection: "column" }}
-      >
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            className="input-field"
-            label="Telefon Numarası"
-            variant="outlined"
-            defaultValue={userInfo.number}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            label="Adres"
-            className="input-field"
-            variant="outlined"
-            defaultValue={userInfo.address}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            label="Konum"
-            variant="outlined"
-            className="input-field"
-            defaultValue={userInfo.state}
-          />
-        </Grid>
-        <Grid item xs={12} md={12}>
-          <TextField
-            fullWidth
-            label="Posta Kodu"
-            variant="outlined"
-            className="input-field"
-            defaultValue={userInfo.zipCode}
-          />
-        </Grid>
-      </Grid>
+      
 
       <Grid
         item
