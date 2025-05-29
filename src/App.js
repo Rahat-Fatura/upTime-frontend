@@ -26,6 +26,11 @@ import IntegrationsPage from "./pages/inegrationsPage/inegrationsPage.js";
 import ResetPassword from "./pages/resetPasswordPage/resetPassword.js";
 import MonitoringReportsPage from "./pages/monitoringReportsPage/monitoringReportsPage.js";
 import InstantControlPage from "./pages/instantControlPage/instantControlPage.js";
+import NewMonitorPage from "./pages/monitorPage/newMonitorPage.js"
+import PingMonitorFormPage from "./pages/monitorPage/pingMonitorFormPage.js"
+import KeyWordMonitorFormPage from "./pages/monitorPage/keyWordMonitorFormPage.js";
+import PortMonitorFormPage from "./pages/monitorPage/portMonitorFormPage.js";
+import CronJobMonitorFormPage from "./pages/monitorPage/cronJobMonitorForm.js";
 const NotFound = () => {
   return (
     <div
@@ -101,6 +106,22 @@ function AppRoutes() {
 
       <Route path="/admin/monitors" element={<Dashboard />} />
       <Route path="/user/monitors" element={<Dashboard />} />
+
+      <Route path="/user/monitors/new/http" element={<NewMonitorPage/>}/>
+      <Route path="/user/monitors/:id/http" element={<NewMonitorPage update = {true} />}/>
+
+      <Route path="/user/monitors/new/ping" element={<PingMonitorFormPage/>}/>
+      <Route path="/user/monitors/:id/ping" element={<PingMonitorFormPage update={true}/>}/>
+
+      <Route path="/user/monitors/new/port" element={<PortMonitorFormPage/>}/>
+      <Route path="/user/monitors/:id/port" element={<PortMonitorFormPage update={true}/>}/>
+
+      <Route path="/user/monitors/new/keyword" element={<KeyWordMonitorFormPage/>}/>
+      <Route path="/user/monitors/:id/keyword" element={<KeyWordMonitorFormPage update={true}/>}/>
+
+      <Route path="/user/monitors/new/cronjob" element={<CronJobMonitorFormPage/>}/>
+      <Route path="/user/monitors/:id/cronjob" element={<CronJobMonitorFormPage update={true}/>}/>
+
       <Route path="/user/monitoringReports" element={<MonitoringReportsPage/>} />
       <Route path="/user/instantControl" element={<InstantControlPage/>} />
       <Route path="/user/maintanance" element={<MaintanancePage/>} />

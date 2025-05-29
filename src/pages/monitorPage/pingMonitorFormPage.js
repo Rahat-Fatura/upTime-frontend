@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect} from 'react'
 import Sidebar from '../../components/sideBar/sideBar'
 import api from '../../api/auth/axiosInstance'
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2'
 import {
   Box,
   Container,
@@ -15,12 +15,22 @@ import {
   TextField,
   MenuItem,
   FormControl,
+  FormControlLabel,
+  FormGroup,
+  RadioGroup,
+  Radio,
+  Checkbox,
   InputLabel,
   Select,
   Divider,
   Tab,
   Tabs,
   IconButton,
+  Avatar,
+  Tooltip,
+  NativeSelect,
+  Card,
+  CardContent,
   Chip,
   FormHelperText,
   Slider,
@@ -41,7 +51,7 @@ import {
   Close as CloseIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from '@mui/icons-material'
-import ComputerIcon from '@mui/icons-material/Computer';
+import ComputerIcon from '@mui/icons-material/Computer'
 import { width } from '@mui/system'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -50,18 +60,13 @@ import {
   REPORT_TIME_UNITS,
 } from './constants/monitorConstants'
 
-const newMonitorPage = (update=false) => {
+const pingMonitorFormPage = (update = false) => {
   const [params, setParams] = useState(useParams())
-  const [monitorType, setMonitorType] = useState('http')
+  const [monitorType, setMonitorType] = useState('ping')
   const [friendlyName, setFriendlyName] = useState('')
   const [intervalUnit, setIntervalUnit] = useState('minutes')
-  const [method, setMethod] = useState('GET')
-  const [body, setBody] = useState()
-  const [headers, setHeaders] = useState()
-  const [allowedStatusCodes, setAllowedStatusCodes] = useState([])
   const [host, setHost] = useState('')
   const [interval, setInterval] = useState(5)
-  const [timeout, setTimeout] = useState(30)
   const [alertContacts, setAlertContacts] = useState([])
   const [activeTab, setActiveTab] = useState(0)
   const [isOpen, setIsOpen] = useState(true)
@@ -78,43 +83,34 @@ const newMonitorPage = (update=false) => {
     getIntervalLimits(intervalUnit)
   }, [intervalUnit])
 
+
   useEffect(() => {
-    const fetchMonitorData= async()=>{
-      try {
-        const response = await api.get(`monitors/http/${params.id}`);
-        console.log(response.data)
-        setFriendlyName(response.data.monitor.name);
-        setHost(response.data.host);
-        setMethod(response.data.method);
-        setBody(response.data.body
-          ? JSON.stringify(response.data.body)
-          : '');
-        setHeaders(response.data.headers
-          ? JSON.stringify(response.data.headers)
-          : '');
-        setAllowedStatusCodes(response.data.allowedStatusCodes
-          ? response.data.allowedStatusCodes.join(',')
-          : '');
-        setInterval(response.data.monitor.interval);
-        setIntervalUnit(response.data.monitor.intervalUnit);
-        setTimeout(response.data.timeOut);
-        setEmailList(response.data.monitor.alertContacts || []);
+      const fetchMonitorData= async()=>{
+        try {
+          const response = await api.get(`monitors/ping/${params.id}`);
+          console.log(response.data)
+          setFriendlyName(response.data.monitor.name);
+          setHost(response.data.host);
+          setInterval(response.data.monitor.interval);
+          setIntervalUnit(response.data.monitor.intervalUnit);
+          setEmailList(response.data.monitor.alertContacts || []);
+        }
+        catch (error) {
+         Swal.fire({
+            title: "Hata",
+            text: "Monitor bilgileri alınırken bir hata oluştu.",
+            icon: "error",
+            confirmButtonText: "Tamam",
+          });
+          turnMonitorPage();
+          console.error('Monitor bilgileri alınırken hata oluştu:', error)
+        }
       }
-      catch (error) {
-       Swal.fire({
-          title: "Hata",
-          text: "Monitor bilgileri alınırken bir hata oluştu.",
-          icon: "error",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
-        console.error('Monitor bilgileri alınırken hata oluştu:', error)
+      if (update.update) {
+        fetchMonitorData();
       }
-    }
-    if (update.update) {
-      fetchMonitorData();
-    }
-  },[])
+    },[])
+
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
@@ -123,7 +119,7 @@ const newMonitorPage = (update=false) => {
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(interval>0&&interval<60?interval:0)
+        setInterval(interval>0&&interval<60?interval:1)
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
@@ -137,97 +133,67 @@ const newMonitorPage = (update=false) => {
     }
   }
 
-  const createMonitor = async(e) => {
+  const createMonitor = async (e) => {
     try {
       const formattedData = {
         name: friendlyName,
-        httpMonitor:{
+        pingMonitor: {
           host: host,
-          method: method,
-          body: body
-          ? typeof body === 'string'
-            ? JSON.parse(body)
-            : body
-          : {},
-        headers: headers
-          ? typeof headers === 'string'
-            ? JSON.parse(headers)
-            : headers
-          : {},
-          allowedStatusCodes:  allowedStatusCodes.length > 0 
-            ? []//allowedStatusCodes.split(',').map((code) => code.trim())
-            : [],
-          timeOut: timeout
         },
         interval: interval,
         intervalUnit: intervalUnit,
       }
       console.log(formattedData)
-      const response = await api.post(`monitors/http/`, formattedData)
+      const response = await api.post(`monitors/ping/`, formattedData)
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
-                    confirmButtonText: "Tamam",
-                });
-        turnMonitorPage();
+          title: response.data.message,
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
-                  title: error.response.data.message,
-                  icon: "error",
-                  confirmButtonText: "Tamam",
-              });
+        title: error.response.data.message,
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
       console.error('Sunucu eklenirken hata oluştu:', error)
     }
   }
 
   const updateMonitor = async(e) => {
-    try {
-      const formattedData = {
-        name: friendlyName,
-        httpMonitor:{
-          host: host,
-          method: method,
-          body: body
-          ? typeof body === 'string'
-            ? JSON.parse(body)
-            : body
-          : {},
-        headers: headers
-          ? typeof headers === 'string'
-            ? JSON.parse(headers)
-            : headers
-          : {},
-          allowedStatusCodes: allowedStatusCodes.length>0
-          ? allowedStatusCodes.split(',').map((code) => code.trim())
-          :[],
-          timeOut: timeout,
-        },
-        interval: interval,
-        intervalUnit: intervalUnit
-      }
-      console.log(formattedData)
-      const response = await api.put(`monitors/http/${params.id}`, formattedData)
-      console.log('Response:', response.data)
-      if (response.data) {
+      try {
+        const formattedData = {
+          name: friendlyName,
+          pingMonitor:{
+            host: host,
+          },
+          interval: interval,
+          intervalUnit: intervalUnit
+        }
+        console.log(formattedData)
+        const response = await api.put(`monitors/ping/${params.id}`, formattedData)
+        console.log('Response:', response.data)
+        if (response.data) {
+          Swal.fire({
+                      title: response.data.message,
+                      icon: "success",
+                      confirmButtonText: "OK",
+                  });
+          turnMonitorPage();
+        }
+      } catch (error) {
         Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
-                    confirmButtonText: "Tamam",
+                    title: error.response.data.message,
+                    icon: "error",
+                    confirmButtonText: "OK",
                 });
-        turnMonitorPage();
+        console.error('Monitor update error :', error)
       }
-    } catch (error) {
-      Swal.fire({
-                  title: error.response.data.message,
-                  icon: "error",
-                  confirmButtonText: "Tamam",
-              });
-      console.error('Monitor update error :', error)
     }
-  }
 
   const handleMonitorTypeChange = (event) => {
     setMonitorType(event.target.value)
@@ -319,7 +285,42 @@ const newMonitorPage = (update=false) => {
                     },
                   }}
                 >
-                  <MenuItem value="http">
+                  <MenuItem value="ping">
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        width: '100%',
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          bgcolor: '#4caf50',
+                          p: 1.5,
+                          borderRadius: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          minWidth: 48,
+                        }}
+                      >
+                        <ComputerIcon sx={{ color: 'white', fontSize: 28 }} />
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle1" fontWeight="500">
+                          Ping
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Monitor network connectivity
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </MenuItem>
+
+                  <Divider />
+
+                  <MenuItem disabled={update.update?true:false} value="http">
                     <Box
                       sx={{
                         display: 'flex',
@@ -357,39 +358,7 @@ const newMonitorPage = (update=false) => {
                       />
                     </Box>
                   </MenuItem>
-                  <Divider />
-                  <MenuItem disabled={update.update?true:false} value="ping">
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        width: '100%',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          bgcolor: '#4caf50',
-                          p: 1.5,
-                          borderRadius: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minWidth: 48,
-                        }}
-                      >
-                        <ComputerIcon sx={{ color: 'white', fontSize: 28 }} />
-                      </Box>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="subtitle1" fontWeight="500">
-                          Ping
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Monitor network connectivity
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </MenuItem>
+
                   <Divider />
                   <MenuItem disabled={update.update?true:false} value="port">
                     <Box
@@ -506,17 +475,16 @@ const newMonitorPage = (update=false) => {
                     />
                     <Typography variant="body2" color="text.secondary">
                       {monitorType === 'http'
-                        ? 'Monitor websites and web services'
+                        ? navigate('/user/monitors/new/http')
                         : monitorType === 'ping'
-                        ? navigate('/user/monitors/new/ping')
+                        ? 'IP PING CONTROLL'
                         : monitorType === 'port'
                         ? navigate('/user/monitors/new/port')
                         : monitorType === 'keyword'
                         ? navigate('/user/monitors/new/keyword')
                         : monitorType === 'cronjob'
                         ? navigate('/user/monitors/new/cronjob')
-                        : 'Select a monitor type to get started.'
-                      }
+                        : 'Select a monitor type to get started.'}
                     </Typography>
                   </Box>
                 </FormHelperText>
@@ -541,229 +509,61 @@ const newMonitorPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label={
-                    'URL (or IP)'
-                  }
+                  label={'IP (or Host)'}
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
-                  placeholder={
-                    'https://example.com'
-                  }
-                  helperText={
-                     'The URL to monitor including http:// or https://'
-                  }
+                  placeholder={'8.8.8.8'}
+                  helperText={'The IP address or hostname to ping'}
                 />
               </Grid>
             </Grid>
-
-            {monitorType === 'http' && (
-              <Box sx={{ mt: 3 }}>
-                <Tabs
-                  value={activeTab}
-                  onChange={handleTabChange}
-                  variant="scrollable"
-                  scrollButtons="auto"
-                >
-                  <Tab label="Basic Settings" />
-                  <Tab label="Request Details" />
-                  {/*<Tab label="Authentication" />*/}
-                </Tabs>
-
-                <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
-                  {activeTab === 0 && (
-                    <Grid container spacing={3}>
-                      <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Monitoring Interval</InputLabel>
-                        </Grid>
-                        <FormControl fullWidth>
-                          <Slider
-                            name="interval"
-                            value={interval}
-                            onChange={(e) => setInterval(e.target.value)}
-                            min={min}
-                            max={max}
-                            step={1} // Her tıklamada 1 artar/azalır
-                            valueLabelDisplay="auto" // Değeri üzerinde gösterir
-                            marks={[
-                              { value: min, label: `${min}` }, // Min değeri etiketliyor
-                              { value: max, label: `${max}` }, // Max değeri etiketliyor
-                            ]}
-                            sx={{ color: '#1976d2' }} // Mavi renk
-                          />
-                        </FormControl>
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Time Unit</InputLabel>
-                        </Grid>
-                        <FormControl fullWidth>
-                          <Select
-                            name="intervalUnit"
-                            value={intervalUnit || 'minutes'}
-                            label="Birim"
-                            onChange={(e) => {
-                              setIntervalUnit(e.target.value)
-                            }}
-                            variant="outlined"
-                          >
-                            {INTERVAL_UNITS.map((unit) => (
-                              <MenuItem key={unit.value} value={unit.value}>
-                                {unit.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-                  )}
-                  {activeTab === 1 && (
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="HTTP Method"
-                          select
-                          defaultValue = {update.update? method : 'GET'}
-                          onChange={(e) => setMethod(e.target.value)}
-                        >
-                          <MenuItem value="GET">GET</MenuItem>
-                          <MenuItem value="POST">POST</MenuItem>
-                          <MenuItem value="PUT">PUT</MenuItem>
-                          <MenuItem value="DELETE">DELETE</MenuItem>
-                          <MenuItem value="PATCH">PATCH</MenuItem>
-                          <MenuItem value="HEAD">HEAD</MenuItem>
-                        </TextField>
-                      </Grid>
-                      <Divider sx={{ my: 3 }} />
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Custom HTTP Headers (JSON TYPE)"
-                          multiline
-                          rows={3}
-                          sx={{ mb: 2 }}
-                          name="headers"
-                          value={
-                            typeof headers === 'object'
-                              ? JSON.stringify(headers)
-                              : headers
-                          }
-                          onChange={(e) => setHeaders(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            startAdornment: (
-                              <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                        />
-                      </Grid>
-                      <Divider sx={{ my: 3 }} />
-                      <Grid item xs={12}>
-                        <TextField
-                          fullWidth
-                          label="Custom HTTP Body (JSON TYPE)"
-                          multiline
-                          rows={3}
-                          sx={{ mb: 2 }}
-                          name="body"
-                          value={
-                            typeof body === 'object'
-                              ? JSON.stringify(body)
-                              : body
-                          }
-                          onChange={(e) => setBody(e.target.value)}
-                          variant="outlined"
-                          size="small"
-                          helperText="POST, PUT veya PATCH istekleri için gönderilecek veri"
-                          InputProps={{
-                            startAdornment: (
-                              <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                            ),
-                          }}
-                        />
-                      </Grid>
-                      <Divider sx={{ my: 3 }} />
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          required
-                          fullWidth
-                          label="İzin Verilen Status Kodları"
-                          name="allowedStatusCodes"
-                          value={
-                            Array.isArray(allowedStatusCodes)
-                              ? allowedStatusCodes.join(',')
-                              : allowedStatusCodes
-                          }
-                          onChange={(e) =>
-                            setAllowedStatusCodes(e.target.value)
-                          }
-                          variant="outlined"
-                          size="small"
-                          helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
-                        />
-                      </Grid>
-                    </Grid>
-                  )}
-                  {/*activeTab === 2 && (
-                    <Grid container spacing={3}>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth>
-                          <InputLabel>Authentication Type</InputLabel>
-                          <Select defaultValue="" label="Authentication Type">
-                            <MenuItem value="">None</MenuItem>
-                            <MenuItem value="basic">HTTP Basic</MenuItem>
-                            <MenuItem value="digest">HTTP Digest</MenuItem>
-                          </Select>
-                        </FormControl>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Username"
-                          disabled={activeTab !== 2}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="Password"
-                          type="password"
-                          disabled={activeTab !== 2}
-                        />
-                      </Grid>
-                    </Grid>
-                  )*/}
-                </Box>
-              </Box>
-            )}
-
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <Grid item>
-                  <InputLabel>Request Timeout</InputLabel>
+                  <InputLabel>Monitoring Interval</InputLabel>
                 </Grid>
+                <FormControl fullWidth>
+                  <Slider
+                    name="interval"
+                    value={interval}
+                    onChange={(e) => setInterval(e.target.value)}
+                    min={min}
+                    max={max}
+                    step={1} // Her tıklamada 1 artar/azalır
+                    valueLabelDisplay="auto" // Değeri üzerinde gösterir
+                    marks={[
+                      { value: min, label: `${min}` }, // Min değeri etiketliyor
+                      { value: max, label: `${max}` }, // Max değeri etiketliyor
+                    ]}
+                    sx={{ color: '#1976d2' }} // Mavi renk
+                  />
+                </FormControl>
+              </Grid>
 
+              <Grid item xs={12} sm={6}>
+                <Grid item>
+                  <InputLabel>Time Unit</InputLabel>
+                </Grid>
                 <FormControl fullWidth>
                   <Select
-                    value={timeout}
-                    onChange={(e) => setTimeout(e.target.value)}
-                    label="Timeout"
+                    name="intervalUnit"
+                    value={intervalUnit || 'minutes'}
+                    label="Birim"
+                    onChange={(e) => {
+                      setIntervalUnit(e.target.value)
+                    }}
+                    variant="outlined"
                   >
-                    <MenuItem value={10}>10 seconds</MenuItem>
-                    <MenuItem value={20}>20 seconds</MenuItem>
-                    <MenuItem value={30}>30 seconds</MenuItem>
-                    <MenuItem value={40}>40 seconds</MenuItem>
-                    <MenuItem value={50}>50 seconds</MenuItem>
-                    <MenuItem value={60}>60 seconds</MenuItem>
+                    {INTERVAL_UNITS.map((unit) => (
+                      <MenuItem key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </Grid>
             </Grid>
-            {/* Alert Contacts */}
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
@@ -829,7 +629,7 @@ const newMonitorPage = (update=false) => {
                   {emailList.length === 0 && (
                     <MenuItem disabled>
                       <Typography color="text.secondary">
-                        No email added yet
+                        Henüz email eklenmedi
                       </Typography>
                     </MenuItem>
                   )}
@@ -851,7 +651,8 @@ const newMonitorPage = (update=false) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={()=>{update.update? updateMonitor() :createMonitor()}}>
+                  onClick={()=>{update.update? updateMonitor() :createMonitor()}}
+                >
                   {update.update?'Update Monitor':'Create Monitor'}
                 </Button>
               </Box>
@@ -863,4 +664,4 @@ const newMonitorPage = (update=false) => {
   )
 }
 
-export default newMonitorPage
+export default pingMonitorFormPage

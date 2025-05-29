@@ -69,7 +69,7 @@ export default function MonitoringReportsPage() {
     const fetchLogs = async () => {
       try {
         setLoading(true)
-        const response = await api.get('monitor/logs')
+        const response = await api.get('monitors/logs')
         setLogs(response.data)
       } catch (error) {
         console.error('Log verisi alınamadı:', error)

@@ -76,7 +76,8 @@ export default function InstantControlPage() {
     const fetchStatusPages = async () => {
       try {
         setLoading(true)
-        const response = await api.get('monitor/instant-Control')
+        const response = await api.get('monitors/instant-Control')
+        console.log(response.data)
         setStatusPages(response.data)
       } catch (error) {
         console.error('Status pages verisi alınamadı:', error)
@@ -90,7 +91,7 @@ export default function InstantControlPage() {
   const handleRequest = async (page) => {
     try {
       setLoadingRequests((prev) => ({ ...prev, [page.id]: true }))
-      const response = await api.get(`monitor/instant-Control/${page.id}`)
+      const response = await api.get(`monitors/instant-Control/${page.id}`)
       console.log('İstek sonucu:', response.data)
       const result = {
         status: response.data.status,
@@ -176,7 +177,7 @@ export default function InstantControlPage() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <StatusIndicator status={page.status} />
+                     {/* <StatusIndicator status={page.status} />*/}
                       <Typography
                         variant="h6"
                         component="div"
@@ -185,7 +186,7 @@ export default function InstantControlPage() {
                         {page.name}
                       </Typography>
                     </Box>
-                    <MethodChip label={page.method} method={page.method} />
+                    {/*<MethodChip label={page.method} method={page.method} />*/}
                   </Box>
 
                   <Typography
@@ -195,7 +196,7 @@ export default function InstantControlPage() {
                   >
                     {page.host}
                   </Typography>
-
+                 {/*
                   <Box sx={{ mb: 2 }}>
                     <Typography
                       variant="subtitle2"
@@ -227,7 +228,7 @@ export default function InstantControlPage() {
                         />
                       ))}
                     </Box>
-                  </Box>
+                  </Box> */}
 
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button

@@ -3,6 +3,7 @@ import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
 import { cookies } from '../../utils/cookie'
 import BuildIcon from '@mui/icons-material/Build';
+
 import {
   Typography,
   IconButton,
@@ -17,7 +18,6 @@ import {
   LinearProgress,
   Tooltip,
   Divider,
-  Modal,
   Stack,
 } from '@mui/material'
 import {
@@ -31,15 +31,12 @@ import {
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit } from 'tabler-icons-react'
-import MonitorForm from './MonitorForm'
-import {
-  modalStyle,
-  formContainerStyle,
-  buttonContainerStyle,
-} from '../../styles/monitorStyles'
 import { INITIAL_STATS } from './constants/monitorConstants'
 import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
+import { useNavigate } from 'react-router-dom';
+
+
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -57,12 +54,10 @@ const initialFormData = {
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
-  const [modalOpen, setModalOpen] = useState(false)
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
-
+  const navigate = useNavigate();
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
     method: Yup.string()
@@ -161,7 +156,9 @@ export default function Dashboard() {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    navigate('/user/monitors/new/http');
+
+   /* e.preventDefault()
     try {
       const formattedData = {
         name: formData.name,
@@ -186,7 +183,7 @@ export default function Dashboard() {
             ? formData.allowedStatusCodes.split(',').map((code) => code.trim())
             : formData.allowedStatusCodes,
       }
-      const response = await api.post(`monitor/`, formattedData, {
+      const response = await api.post(`monitors/`, formattedData, {
         headers: {
           Authorization: `Bearer ${cookies.get('jwt-access')}`,
           'Content-Type': 'application/json',
@@ -202,20 +199,20 @@ export default function Dashboard() {
     } catch (error) {
       alertify.error(error.response.data.message)
       console.error('Sunucu eklenirken hata oluştu:', error)
-    }
+    }*/
   }
 
   const calculateStats = () => {
     const total = monitors.length
-    const active = monitors.filter((m) => m.status === true).length
-    const down = monitors.filter((m) => m.status === false).length
+    const active = monitors.filter((m) => m.status === 'up').length
+    const down = monitors.filter((m) => m.status === 'down').length
     const avgActive = (active / total) * 100
     return [
-      { title: 'Toplam Sunucu', value: total.toString(), color: '#1976d2' },
-      { title: 'Aktif Sunucu', value: active.toString(), color: '#2e7d32' },
-      { title: 'Düşen Sunucu', value: down.toString(), color: '#d32f2f' },
+      { title: 'Total Monitor', value: total.toString(), color: '#1976d2' },
+      { title: 'Up Monitor', value: active.toString(), color: '#2e7d32' },
+      { title: 'Down Monitor', value: down.toString(), color: '#d32f2f' },
       {
-        title: 'Çalışan sunucuların yüzdesi',
+        title: 'Overall Active',
         value: avgActive ? avgActive.toString().substring(0, 5) + '%' : '0%',
         color: '#ed6c02',
       },
@@ -229,9 +226,10 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchMonitors = async () => {
       try {
-        const response = await api.get(`monitor/`)
+        const response = await api.get(`monitors/`)
         if (response.data) {
           setMonitors(response.data)
+          console.log(response.data)
         }
       } catch (error) {
         console.error('Monitör verileri alınırken hata oluştu:', error)
@@ -246,10 +244,9 @@ export default function Dashboard() {
 
   const handleMonitorAction = async (action, monitorId) => {
     try {
-      const token = cookies.get('jwt-access')
       switch (action) {
         case 'start':
-          const res = await api.put(`monitor/${monitorId}/play`, {})
+          const res = await api.put(`monitors/${monitorId}/play`, {})
           setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
@@ -257,30 +254,38 @@ export default function Dashboard() {
                 : m
             )
           )
-          alertify.success(`${res.data.host} sunucu başlatıldı`)
+          alertify.success(`${res.data.name} sunucu başlatıldı`)
           break
 
         case 'pause':
-          const response = await api.put(`monitor/${monitorId}/pause`, {})
-          setMonitors((prevMonitors) =>
+          try {
+            const response = await api.put(`monitors/${monitorId}/pause`, {})
+            setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
                 ? { ...m, is_active_by_owner: false, status: "uncertain" }
                 : m
             )
           )
-          alertify.warning(`${response.data.host} sunucu durduruldu`)
-          break
-
+          alertify.warning(`${response.data.name} sunucu durduruldu`)
+          }
+          catch (error) {
+            console.error('Sunucu durdurulurken hata oluştu:', error)
+            alertify.error(
+              'Sunucu durdurulurken bir hata oluştu: ' +
+                (error.response?.data?.message || error.message)
+            )
+          }
+          break;
         case 'delete':
           if (
             window.confirm('Bu sunucuyu silmek istediğinizden emin misiniz?')
           ) {
-            const response = await api.delete(`monitor/${monitorId}`)
+            const response = await api.delete(`monitors/${monitorId}`)
             setMonitors((prevMonitors) =>
               prevMonitors.filter((m) => m.id !== monitorId)
             )
-            alertify.success(`${response.data.host} sunucu başarılı silindi`)
+            alertify.success(`${response.data.name} sunucu başarılı silindi`)
           }
           break
 
@@ -298,93 +303,33 @@ export default function Dashboard() {
   }
 
   const handleShowDetails = (monitor) => {
-    setSelectedMonitor(monitor)
-    setDetailsModalOpen(true)
-  }
-
-  const handleUpdateMonitor = async (e) => {
-    e.preventDefault()
-    try {
-      const updateData = {
-        name: selectedMonitor.name,
-        method: selectedMonitor.method,
-        host: selectedMonitor.host,
-        body: selectedMonitor.body
-          ? typeof selectedMonitor.body === 'string'
-            ? JSON.parse(selectedMonitor.body)
-            : selectedMonitor.body
-          : {},
-        headers: selectedMonitor.headers
-          ? typeof selectedMonitor.headers === 'string'
-            ? JSON.parse(selectedMonitor.headers)
-            : selectedMonitor.headers
-          : {},
-        interval: selectedMonitor.interval,
-        intervalUnit: selectedMonitor.intervalUnit,
-        reportTime: selectedMonitor.reportTime,
-        reportTimeUnit: selectedMonitor.reportTimeUnit,
-        allowedStatusCodes:
-          typeof selectedMonitor.allowedStatusCodes === 'string'
-            ? selectedMonitor.allowedStatusCodes
-                .split(',')
-                .map((code) => code.trim())
-            : selectedMonitor.allowedStatusCodes,
-      }
-      const response = await api.put(
-        `monitor/${selectedMonitor.id}`,
-        updateData,
-        {
-          headers: {
-            Authorization: `Bearer ${cookies.get('jwt-access')}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-
-      if (response.data) {
-        setMonitors((prevMonitors) =>
-          prevMonitors.map((monitor) =>
-            monitor.id === selectedMonitor.id
-              ? { ...response.data, logs: monitor.logs }
-              : monitor
-          )
-        )
-        setDetailsModalOpen(false)
-        alertify.success(` sunucu başarıyla güncellendi!`)
-      }
-    } catch (error) {
-      console.error('Sunucu güncellenirken hata oluştu:', error)
-      alertify.error(
-        `Hata: ${
-          error.response?.data?.message ||
-          'Sunucu güncellenirken bir hata oluştu.'
-        }`
-      )
+    switch (monitor.monitorType) {
+      case 'HttpMonitor':
+        navigate(`/user/monitors/${monitor.id}/http`)
+        break
+      case 'PingMonitor':
+        navigate(`/user/monitors/${monitor.id}/ping`)
+        break
+      case 'CronJobMonitor':
+        navigate(`/user/monitors/${monitor.id}/cronjob`)
+        break
+      case 'PortMonitor':
+        navigate(`/user/monitors/${monitor.id}/port`)
+        break
+      case 'KeywordMonitor':
+        navigate(`/user/monitors/${monitor.id}/keyword`)
+        break
+      default:
+        console.error('Unknow monitor type ! :', monitor.monitorType)
     }
   }
 
-  const handleDetailInputChange = (e) => {
-    const { name, value } = e.target
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  const handleUpdateInputChange = (e) => {
-    const { name, value } = e.target
-
-    setSelectedMonitor((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
   const columns = [
     {
       field: 'name',
-      headerName: 'Sunucu adı',
-      width: 200,
+      headerName: 'Monitor name',
+      width: 300,
+      size: 'medium',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography>{params.value}</Typography>
@@ -394,11 +339,101 @@ export default function Dashboard() {
     {
       field: 'host',
       headerName: 'Host',
-      width: 200,
+      width: 400,
+      size: 'medium',
+      renderCell: (params) => {
+        switch (params.row.monitorType) {
+          case "HttpMonitor":
+             return (
+            <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>{params.row.httpMonitor.host}</Typography>
+                
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
+                  <Typography  backgroundColor={
+                params.row.httpMonitor.method==="GET"
+                ? "green" : params.row.httpMonitor.method==="POST"
+                ? "orange" : params.row.httpMonitor.method==="PUT"
+                ? "orange" : params.row.httpMonitor.method==="DELETE"
+                ? "red" : params.row.httpMonitor.method==="HEAD"
+                ? "blue" : params.row.httpMonitor.method==="PATCH"
+                ? "purple" : params.row.httpMonitor.method==="OPTION"
+                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.httpMonitor.method}
+                </Typography>
+                </Box>
+              </Box>
+              );
+          case 'PingMonitor':
+            return (
+              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>{params.row.pingMonitor.host}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
+                </Box>
+              </Box>
+             );
+          case 'CronJobMonitor':
+            return (
+              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>CRON JOB URL {"==>"/*params.row.cronJobMonitor.host*/}</Typography>
+                  <Button variant="contained" size='small' onClick={()=>{navigator.clipboard.writeText(params.row.cronJobMonitor.host)}}>COPY</Button>
+
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={'80%'}>{params.row.monitorType} </Typography>
+                </Box>
+              </Box>
+             );
+          case 'PortMonitor':
+            return (
+              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>{params.row.portMonitor.host}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
+                  <Typography borderRadius={1}  backgroundColor={"orange"} fontSize={"80%"}>{params.row.portMonitor.port}</Typography>
+                </Box>
+              </Box>
+              
+             );
+          case 'KeywordMonitor':
+            return (
+            <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>{params.row.keyWordMonitor.host}</Typography>
+                
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
+                  <Typography  backgroundColor={
+                params.row.keyWordMonitor.method==="GET"
+                ? "green" : params.row.keyWordMonitor.method==="POST"
+                ? "orange" : params.row.keyWordMonitor.method==="PUT"
+                ? "orange" : params.row.keyWordMonitor.method==="DELETE"
+                ? "red" : params.row.keyWordMonitor.method==="HEAD"
+                ? "blue" : params.row.keyWordMonitor.method==="PATCH"
+                ? "purple" : params.row.keyWordMonitor.method==="OPTION"
+                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.keyWordMonitor.method}
+                </Typography>
+                </Box>
+              </Box>
+              );
+            
+          default:
+            console.error('Unknown monitor type:', params.row.monitorType)
+        }
+        
+      },
     },
     {
       field: 'status',
-      headerName: 'Durumu',
+      headerName: 'Status',
       width: 200,
       renderCell: (params) => {
         if (params.value === "uncertain") {
@@ -474,14 +509,14 @@ export default function Dashboard() {
     },
     {
       field: 'logs',
-      headerName: 'Başarı Durumu',
+      headerName: 'Success Rate',
       width: 200,
       renderCell: (params) => {
         if (!params.value || params.value.length === 0) {
           return (
             <Box sx={{ width: '100%', textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary">
-                Veri yok
+                No info
               </Typography>
             </Box>
           )
@@ -528,15 +563,8 @@ export default function Dashboard() {
       },
     },
     {
-      field: 'createdAt',
-      headerName: 'Oluşturulma Tarihi',
-      width: 200,
-      // eslint-disable-next-line no-unused-expressions
-      valueFormatter: (params) => params.split('T')[0],
-    },
-    {
       field: 'actions',
-      headerName: 'İşlemler',
+      headerName: 'Actions',
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
@@ -552,7 +580,7 @@ export default function Dashboard() {
             </Tooltip>
           )}
           {params.row.isActiveByOwner && (
-            <Tooltip title="Durdur">
+            <Tooltip title="Pause">
               <IconButton
                 size="small"
                 color="warning"
@@ -562,7 +590,7 @@ export default function Dashboard() {
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip title="Sil">
+          <Tooltip title="Delete">
             <IconButton
               size="small"
               color="error"
@@ -576,7 +604,7 @@ export default function Dashboard() {
     },
     {
       field: 'edit',
-      headerName: 'Düzenleme',
+      headerName: 'Edit',
       width: 120,
       renderCell: (params) => (
         <Button
@@ -612,7 +640,7 @@ export default function Dashboard() {
       <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
             Monitoring Page.
             <hr />
-        </Typography>
+      </Typography>
         <Container maxWidth="xl">
           <Grid container spacing={3}>
             {currentStats.map((stat) => (
@@ -643,14 +671,14 @@ export default function Dashboard() {
                 mb: 2,
               }}
             >
-              <Typography variant="h6">Sunucu Listesi</Typography>
+              <Typography variant="h6">Monitors</Typography>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 color="primary"
-                onClick={() => setModalOpen(true)}
+                onClick={() => handleSubmit()}
               >
-                Yeni Sunucu Ekle
+                New Monitor
               </Button>
             </Box>
             <Divider sx={{ mb: 2 }} />
@@ -664,122 +692,6 @@ export default function Dashboard() {
           </Paper>
         </Container>
       </Box>
-
-      <Modal
-        open={detailsModalOpen}
-        onClose={() => {
-          setDetailsModalOpen(false)
-          setSelectedMonitor(selectedMonitor)
-        }}
-        aria-labelledby="details-modal-title"
-      >
-        <Box sx={modalStyle}>
-          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Typography
-              id="details-modal-title"
-              variant="h6"
-              component="h2"
-              sx={{ fontWeight: 'bold' }}
-            >
-              Sunucu Düzenle
-            </Typography>
-          </Box>
-
-          <Box sx={formContainerStyle}>
-            {selectedMonitor && (
-              <MonitorForm
-                formData={selectedMonitor}
-                handleInputChange={handleUpdateInputChange}
-                isEdit={true}
-              />
-            )}
-          </Box>
-
-          <Box sx={buttonContainerStyle}>
-            <Button
-              onClick={() => {
-                setDetailsModalOpen(false)
-                setSelectedMonitor(selectedMonitor)
-              }}
-              variant="outlined"
-              color="inherit"
-            >
-              İptal
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              onClick={handleUpdateMonitor}
-            >
-              Güncelle
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      <Modal
-        open={modalOpen}
-        onClose={() => {
-          setFormData(initialFormData)
-          setModalOpen(false)
-        }}
-        aria-labelledby="add-modal-title"
-      >
-        <Box sx={modalStyle}>
-          <Box
-            sx={{
-              p: 3,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: '#f8f9fa',
-            }}
-          >
-            <Typography
-              id="add-modal-title"
-              variant="h5"
-              component="h2"
-              sx={{ fontWeight: 'bold', color: '#1976d2' }}
-            >
-              Yeni Sunucu Ekle
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Sunucunuzu izlemeye başlamak için aşağıdaki formu doldurun
-            </Typography>
-          </Box>
-
-          <Box sx={formContainerStyle}>
-            <MonitorForm
-              formData={formData}
-              handleInputChange={handleDetailInputChange}
-            />
-          </Box>
-
-          <Box sx={buttonContainerStyle}>
-            <Button
-              onClick={() => {
-                setModalOpen(false)
-                setFormData(initialFormData)
-              }}
-              variant="outlined"
-              color="inherit"
-              size="large"
-            >
-              İptal
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              onClick={handleSubmit}
-              size="large"
-              startIcon={<AddIcon />}
-            >
-              Sunucuyu Ekle
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
     </Box>
   )
 }

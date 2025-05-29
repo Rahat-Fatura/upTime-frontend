@@ -76,7 +76,7 @@ export default function MaintanancePage() {
   const fetchMonitors = async () => {
     try {
       setLoading(true)
-      const response = await api.get('monitor/maintanance')
+      const response = await api.get('monitors/maintanance')
       console.log(response.data)
       setMonitors(response.data)
       // Her monitor için başlangıç state'lerini oluştur
@@ -111,9 +111,13 @@ export default function MaintanancePage() {
   }
 
   const handleSubmit = async (monitorId) => {
-    const { startDateTime, endDateTime } = monitorDates[monitorId]
-    const startDate = startDateTime.toDate()
-    const endDate = endDateTime.toDate()
+    const { startDateTime, endDateTime } = monitorDates[monitorId];
+    const startDate = startDateTime.toDate();
+    startDate.setSeconds(0);
+    startDate.setMilliseconds(0);
+    const endDate = endDateTime.toDate();
+    endDate.setSeconds(0);
+    endDate.setMilliseconds(0);
     const now = new Date()
 
     if (!startDateTime || !endDateTime) {
@@ -144,7 +148,7 @@ export default function MaintanancePage() {
     }
 
     try {
-      const response = await api.post(`monitor/${monitorId}/maintanance`, {
+      const response = await api.post(`monitors/${monitorId}/maintanance`, {
         startTime: startDate,
         endTime: endDate,
       })
@@ -213,28 +217,9 @@ export default function MaintanancePage() {
     }
   }
 
-  const handleCancelMaintenanceTask = async (monitorId) => {
-    try {
-      const response = await api.put(`monitor/${ monitorId }/maintanance/task/cancel`)
-      setSnackbar({
-        open: true,
-        message: 'Bakım modu başarıyla iptal edildi',
-        severity: 'success',
-      })
-      console.log(response)
-      fetchMonitors();
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Bakım modu iptal edilirken bir hata oluştu',
-        severity: 'error',
-      })
-    }
-  }
-
   const handleCancelMaintenance = async (monitorId) => {
     try {
-      const response = await api.put(`monitor/${ monitorId }/maintanance/cancel`)
+      const response = await api.put(`monitors/${ monitorId }/maintanance/cancel`)
       setSnackbar({
         open: true,
         message: 'Bakım modu başarıyla iptal edildi',
@@ -504,21 +489,24 @@ export default function MaintanancePage() {
                     <Button
                       variant="contained"
                       onClick={() => {
-                        if (monitor.status === 'maintanance' && !monitor.maintanance.status) {
-                          handleCancelMaintenanceTask(monitor.id)
-                        } else if (monitor.status === 'maintanance' && monitor.maintanance.status) {
-                          handleCancelMaintenance(monitor.id)
+                         if (monitor.maintanance != null) {
+                          if(monitor.maintanance.status == true){
+                            handleCancelMaintenance(monitor.id)
+                          }
+                          else{
+                            handleSubmit(monitor.id)
+                          }
                         } else {
                           handleSubmit(monitor.id)
                         }
                       }}
                       fullWidth
                       color={
-                        monitor.status === 'maintanance' && !monitor.maintanance
-                          ? 'info'
-                          : monitor.status === 'maintanance' && monitor.maintanance
+                        (monitor.maintanance != null)
+                        ? (monitor.maintanance.status == true)
                           ? 'error'
-                          : getStatusColor(monitor.status)
+                          : 'primary'
+                        :  'primary'
                       }
                       sx={{
                         py: 1.5,
@@ -533,11 +521,11 @@ export default function MaintanancePage() {
                         transition: 'all 0.2s ease'
                       }}
                     >
-                      {monitor.status === 'maintanance' && !monitor.maintanance.status
-                        ? 'Bakım Oluşturma Emrini Durdur'
-                        : monitor.status === 'maintanance' && monitor.maintanance.status
-                        ? 'Bakım Durumunu Durdur'
-                        : 'Bakım Planını Kaydet'}
+                      {(monitor.maintanance != null)
+                        ? (monitor.maintanance.status == true)
+                           ? 'Bakım Durumunu Durdur'
+                           : 'Bakım Durumunu Başlat'
+                        : 'Bakım Durumunu Başlat'}
                     </Button>
                   </CardContent>
                 </Card>

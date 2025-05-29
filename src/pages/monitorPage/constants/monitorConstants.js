@@ -13,12 +13,13 @@ export const HTTP_METHODS = [
   { value: 'PUT', label: 'PUT' },
   { value: 'DELETE', label: 'DELETE' },
   { value: 'PATCH', label: 'PATCH' },
+  { value: 'HEAD', label: 'HEAD' },
 ];
 
 export const INTERVAL_UNITS = [
-  { value: 'seconds', label: 'Saniye' },
-  { value: 'minutes', label: 'Dakika' },
-  { value: 'hours', label: 'Saat' },
+  { value: 'seconds', label: 'Second' },
+  { value: 'minutes', label: 'Minute' },
+  { value: 'hours', label: 'Hour' },
 ];
 
 export const REPORT_TIME_UNITS = [

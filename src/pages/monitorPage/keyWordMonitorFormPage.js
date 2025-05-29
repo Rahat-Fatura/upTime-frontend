@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import Sidebar from '../../components/sideBar/sideBar'
 import api from '../../api/auth/axiosInstance'
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2'
 import {
   Box,
   Container,
@@ -15,12 +15,22 @@ import {
   TextField,
   MenuItem,
   FormControl,
+  FormControlLabel,
+  FormGroup,
+  RadioGroup,
+  Radio,
+  Checkbox,
   InputLabel,
   Select,
   Divider,
   Tab,
   Tabs,
   IconButton,
+  Avatar,
+  Tooltip,
+  NativeSelect,
+  Card,
+  CardContent,
   Chip,
   FormHelperText,
   Slider,
@@ -41,7 +51,7 @@ import {
   Close as CloseIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon,
 } from '@mui/icons-material'
-import ComputerIcon from '@mui/icons-material/Computer';
+import ComputerIcon from '@mui/icons-material/Computer'
 import { width } from '@mui/system'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -50,14 +60,15 @@ import {
   REPORT_TIME_UNITS,
 } from './constants/monitorConstants'
 
-const newMonitorPage = (update=false) => {
+const keyWordMonitorPage = (update=false) => {
   const [params, setParams] = useState(useParams())
-  const [monitorType, setMonitorType] = useState('http')
+  const [monitorType, setMonitorType] = useState('keyword')
   const [friendlyName, setFriendlyName] = useState('')
   const [intervalUnit, setIntervalUnit] = useState('minutes')
   const [method, setMethod] = useState('GET')
   const [body, setBody] = useState()
   const [headers, setHeaders] = useState()
+  const [keyword, setKeyword] = useState('')
   const [allowedStatusCodes, setAllowedStatusCodes] = useState([])
   const [host, setHost] = useState('')
   const [interval, setInterval] = useState(5)
@@ -79,43 +90,45 @@ const newMonitorPage = (update=false) => {
   }, [intervalUnit])
 
   useEffect(() => {
-    const fetchMonitorData= async()=>{
-      try {
-        const response = await api.get(`monitors/http/${params.id}`);
-        console.log(response.data)
-        setFriendlyName(response.data.monitor.name);
-        setHost(response.data.host);
-        setMethod(response.data.method);
-        setBody(response.data.body
-          ? JSON.stringify(response.data.body)
-          : '');
-        setHeaders(response.data.headers
-          ? JSON.stringify(response.data.headers)
-          : '');
-        setAllowedStatusCodes(response.data.allowedStatusCodes
-          ? response.data.allowedStatusCodes.join(',')
-          : '');
-        setInterval(response.data.monitor.interval);
-        setIntervalUnit(response.data.monitor.intervalUnit);
-        setTimeout(response.data.timeOut);
-        setEmailList(response.data.monitor.alertContacts || []);
+      const fetchMonitorData= async()=>{
+        try {
+          const response = await api.get(`monitors/keyword/${params.id}`);
+          console.log(response.data)
+          setFriendlyName(response.data.monitor.name);
+          setHost(response.data.host);
+          setMethod(response.data.method);
+          setBody(response.data.body
+            ? JSON.stringify(response.data.body)
+            : '');
+          setHeaders(response.data.headers
+            ? JSON.stringify(response.data.headers)
+            : '');
+          setAllowedStatusCodes(response.data.allowedStatusCodes
+            ? response.data.allowedStatusCodes.join(',')
+            : '');
+          setKeyword(response.data.keyWord)
+          setInterval(response.data.monitor.interval);
+          setIntervalUnit(response.data.monitor.intervalUnit);
+          setTimeout(response.data.timeOut);
+          setEmailList(response.data.monitor.alertContacts || []);
+        }
+        catch (error) {
+         Swal.fire({
+            title: "Hata",
+            text: "Monitor bilgileri alınırken bir hata oluştu.",
+            icon: "error",
+            confirmButtonText: "Tamam",
+          });
+          turnMonitorPage();
+          console.error('Monitor bilgileri alınırken hata oluştu:', error)
+        }
       }
-      catch (error) {
-       Swal.fire({
-          title: "Hata",
-          text: "Monitor bilgileri alınırken bir hata oluştu.",
-          icon: "error",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
-        console.error('Monitor bilgileri alınırken hata oluştu:', error)
+      if (update.update) {
+        fetchMonitorData();
       }
-    }
-    if (update.update) {
-      fetchMonitorData();
-    }
-  },[])
-  const getIntervalLimits = (unit) => {
+    },[])
+
+   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
         setInterval(interval>=20&&interval<60?interval:20)
@@ -137,97 +150,100 @@ const newMonitorPage = (update=false) => {
     }
   }
 
-  const createMonitor = async(e) => {
+  const createMonitor = async (e) => {
     try {
       const formattedData = {
         name: friendlyName,
-        httpMonitor:{
+        keyWordMonitor: {
           host: host,
           method: method,
           body: body
-          ? typeof body === 'string'
-            ? JSON.parse(body)
-            : body
-          : {},
-        headers: headers
-          ? typeof headers === 'string'
-            ? JSON.parse(headers)
-            : headers
-          : {},
-          allowedStatusCodes:  allowedStatusCodes.length > 0 
-            ? []//allowedStatusCodes.split(',').map((code) => code.trim())
-            : [],
-          timeOut: timeout
+            ? typeof body === 'string'
+              ? JSON.parse(body)
+              : body
+            : {},
+          headers: headers
+            ? typeof headers === 'string'
+              ? JSON.parse(headers)
+              : headers
+            : {},
+          allowedStatusCodes:
+            typeof allowedStatusCodes === 'string'
+              ? allowedStatusCodes.split(',').map((code) => code.trim())
+              : allowedStatusCodes,
+          keyWord: keyword,
+          timeOut: timeout,
         },
         interval: interval,
         intervalUnit: intervalUnit,
       }
       console.log(formattedData)
-      const response = await api.post(`monitors/http/`, formattedData)
+      const response = await api.post(`monitors/keyword/`, formattedData)
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
-                    confirmButtonText: "Tamam",
-                });
-        turnMonitorPage();
+          title: response.data.message,
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
-                  title: error.response.data.message,
-                  icon: "error",
-                  confirmButtonText: "Tamam",
-              });
+        title: error.response.data.message,
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
       console.error('Sunucu eklenirken hata oluştu:', error)
     }
   }
 
   const updateMonitor = async(e) => {
-    try {
-      const formattedData = {
-        name: friendlyName,
-        httpMonitor:{
-          host: host,
-          method: method,
-          body: body
-          ? typeof body === 'string'
-            ? JSON.parse(body)
-            : body
-          : {},
-        headers: headers
-          ? typeof headers === 'string'
-            ? JSON.parse(headers)
-            : headers
-          : {},
-          allowedStatusCodes: allowedStatusCodes.length>0
-          ? allowedStatusCodes.split(',').map((code) => code.trim())
-          :[],
-          timeOut: timeout,
-        },
-        interval: interval,
-        intervalUnit: intervalUnit
-      }
-      console.log(formattedData)
-      const response = await api.put(`monitors/http/${params.id}`, formattedData)
-      console.log('Response:', response.data)
-      if (response.data) {
+      try {
+        const formattedData = {
+          name: friendlyName,
+          keyWordMonitor:{
+            host: host,
+            method: method,
+            body: body
+            ? typeof body === 'string'
+              ? JSON.parse(body)
+              : body
+            : {},
+          headers: headers
+            ? typeof headers === 'string'
+              ? JSON.parse(headers)
+              : headers
+            : {},
+            allowedStatusCodes: allowedStatusCodes.length>0
+            ? allowedStatusCodes.split(',').map((code) => code.trim())
+            :[],
+            keyWord: keyword,
+            timeOut: timeout,
+          },
+          interval: interval,
+          intervalUnit: intervalUnit
+        }
+        console.log(formattedData)
+        const response = await api.put(`monitors/keyword/${params.id}`, formattedData)
+        console.log('Response:', response.data)
+        if (response.data) {
+          Swal.fire({
+                      title: response.data.message,
+                      icon: "success",
+                      confirmButtonText: "Tamam",
+                  });
+          turnMonitorPage();
+        }
+      } catch (error) {
         Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
+                    title: error.response.data.message,
+                    icon: "error",
                     confirmButtonText: "Tamam",
                 });
-        turnMonitorPage();
+        console.error('Monitor update error :', error)
       }
-    } catch (error) {
-      Swal.fire({
-                  title: error.response.data.message,
-                  icon: "error",
-                  confirmButtonText: "Tamam",
-              });
-      console.error('Monitor update error :', error)
     }
-  }
 
   const handleMonitorTypeChange = (event) => {
     setMonitorType(event.target.value)
@@ -319,7 +335,7 @@ const newMonitorPage = (update=false) => {
                     },
                   }}
                 >
-                  <MenuItem value="http">
+                  <MenuItem disabled={update.update?true:false} value="http">
                     <Box
                       sx={{
                         display: 'flex',
@@ -426,7 +442,7 @@ const newMonitorPage = (update=false) => {
                     </Box>
                   </MenuItem>
                   <Divider />
-                  <MenuItem disabled={update.update?true:false} value="keyword">
+                  <MenuItem value="keyword">
                     <Box
                       sx={{
                         display: 'flex',
@@ -506,17 +522,16 @@ const newMonitorPage = (update=false) => {
                     />
                     <Typography variant="body2" color="text.secondary">
                       {monitorType === 'http'
-                        ? 'Monitor websites and web services'
+                        ? navigate('/user/monitors/new/http')
                         : monitorType === 'ping'
                         ? navigate('/user/monitors/new/ping')
                         : monitorType === 'port'
                         ? navigate('/user/monitors/new/port')
                         : monitorType === 'keyword'
-                        ? navigate('/user/monitors/new/keyword')
+                        ? 'Keyword monitor allows you to check for specific words or phrases in the content of a webpage.'
                         : monitorType === 'cronjob'
                         ? navigate('/user/monitors/new/cronjob')
-                        : 'Select a monitor type to get started.'
-                      }
+                        : 'Select a monitor type to get started.'}
                     </Typography>
                   </Box>
                 </FormHelperText>
@@ -541,22 +556,18 @@ const newMonitorPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label={
-                    'URL (or IP)'
-                  }
+                  label={'URL (or IP)'}
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
-                  placeholder={
-                    'https://example.com'
-                  }
+                  placeholder={'https://example.com'}
                   helperText={
-                     'The URL to monitor including http:// or https://'
+                    'The URL to monitor including http:// or https://'
                   }
                 />
               </Grid>
             </Grid>
 
-            {monitorType === 'http' && (
+            {monitorType === 'keyword' && (
               <Box sx={{ mt: 3 }}>
                 <Tabs
                   value={activeTab}
@@ -702,7 +713,21 @@ const newMonitorPage = (update=false) => {
                           }
                           variant="outlined"
                           size="small"
-                          helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
+                          helperText="Write them separated by commas (ex: 200,201,409)"
+                        />
+                      </Grid>
+                      <Divider sx={{ my: 3 }} />
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          required
+                          fullWidth
+                          label="Enter the keyword you want to check"
+                          name="Keyword"
+                          value={keyword}
+                          onChange={(e) => setKeyword(e.target.value)}
+                          variant="outlined"
+                          size="small"
+                          helperText="Enter in Html or Json format (ex: <h1>Keyword</h1> or {'key': 'value'})"
                         />
                       </Grid>
                     </Grid>
@@ -829,7 +854,7 @@ const newMonitorPage = (update=false) => {
                   {emailList.length === 0 && (
                     <MenuItem disabled>
                       <Typography color="text.secondary">
-                        No email added yet
+                        Henüz email eklenmedi
                       </Typography>
                     </MenuItem>
                   )}
@@ -851,7 +876,8 @@ const newMonitorPage = (update=false) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={()=>{update.update? updateMonitor() :createMonitor()}}>
+                  onClick={()=>{update.update? updateMonitor() :createMonitor()}}
+                >
                   {update.update?'Update Monitor':'Create Monitor'}
                 </Button>
               </Box>
@@ -863,4 +889,4 @@ const newMonitorPage = (update=false) => {
   )
 }
 
-export default newMonitorPage
+export default keyWordMonitorPage
