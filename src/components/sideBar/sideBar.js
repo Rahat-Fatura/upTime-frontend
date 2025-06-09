@@ -32,8 +32,8 @@ const menuItems = [
   { text: "Reports", icon: <ReportAnalytics size={22} />, path: "/user/monitoringReports" },
   { text: "Instant Control", icon: <CellTowerIcon size={22} />, path: "/user/instantControl" },
   { text: "Maintanance", icon: <Engineering size={22} />, path: "/user/maintanance" },
-  { text: "Team Members", icon: <TopologyBus size={22} />, path: "/user/teamMembers" },
-  { text: "Integrations & API", icon: <IntegrationInstructionsOutlined size={22} />, path: "/user/integrationsApi" },
+ /* { text: "Team Members", icon: <TopologyBus size={22} />, path: "/user/teamMembers" },
+  { text: "Integrations & API", icon: <IntegrationInstructionsOutlined size={22} />, path: "/user/integrationsApi" },*/
 
   { text: "Profile", icon: <Person size={22} />, path: "/user/profile" },
   {
@@ -66,8 +66,8 @@ const Sidebar = ({ status,toggleSidebar }) => {
     setOpenSubMenu((prevState) => ({ ...prevState, [text]: !prevState[text] }));
   };
 
-  const drawerWidth = status ? 240 : 60;
-  const effectiveWidth = status || isHovered ? 240 : 60;
+  const drawerWidth = status ? 320 : 80;
+  const effectiveWidth = status || isHovered ? 320 : 80;
   const handleItemClick = (item) => {
     if (item.action) {
       item.action();
@@ -186,6 +186,7 @@ const Sidebar = ({ status,toggleSidebar }) => {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
+        position: 'fixed',
         "& .MuiDrawer-paper": {
           width: effectiveWidth,
           boxSizing: "border-box",
@@ -193,13 +194,16 @@ const Sidebar = ({ status,toggleSidebar }) => {
           transition: "width 0.2s",
           overflowX: "hidden",
           overflowY: isHovered === true || status === true ? "" : "hidden",
+          position: 'fixed',
+          height: '100vh',
+          borderRight: '1px solid rgba(0, 0, 0, 0.12)',
         },
         "& .MuiDrawer-paper::-webkit-scrollbar": {
-          width: "0.7vh", // Scrollbar genişliği
+          width: "0.7vh",
         },
         "& .MuiDrawer-paper::-webkit-scrollbar-thumb": {
-          backgroundColor: "#888", // Scrollbar çizgisi rengi
-          borderRadius: 10, // Scrollbar çizgisi köşe yuvarlama
+          backgroundColor: "#888",
+          borderRadius: 10,
         },
       }}
       onMouseEnter={handleMouseEnter}

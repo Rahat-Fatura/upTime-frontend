@@ -244,21 +244,6 @@ const updateMonitor = async(e) => {
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Box>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" color="primary">
-          <Toolbar>
-            <IconButton
-              edge="start"
-              color="inherit"
-              sx={{ mr: 2 }}
-              onClick={() => turnMonitorPage()}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              Monitor Page
-            </Typography>
-          </Toolbar>
-        </AppBar>
 
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>

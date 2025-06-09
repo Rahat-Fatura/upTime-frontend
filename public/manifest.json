@@ -1,19 +1,19 @@
 {
-  "short_name": "Rahat Sistem",
-  "name": "Rahat Sistem Template",
+  "short_name": "Rahat Up",
+  "name": "Rahat Up - Web Sitenizi 7/24 İzleyin",
   "icons": [
     {
-      "src": "rahatsistem-logo.png",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "rahatsistem-logo.png",
+      "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "rahatsistem-logo.png",
+      "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }

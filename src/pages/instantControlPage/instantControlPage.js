@@ -15,6 +15,9 @@ import {
   Collapse,
   Paper,
   Stack,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
@@ -23,6 +26,8 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import SpeedIcon from '@mui/icons-material/Speed'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import InfoIcon from '@mui/icons-material/Info'
+import SearchIcon from '@mui/icons-material/Search'
+import MenuIcon from '@mui/icons-material/Menu'
 
 const StatusCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
@@ -64,6 +69,8 @@ export default function InstantControlPage() {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(true)
   const [statusPages, setStatusPages] = useState([])
+  const [filteredPages, setFilteredPages] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [requestResults, setRequestResults] = useState({})
   const [loadingRequests, setLoadingRequests] = useState({})
@@ -73,12 +80,37 @@ export default function InstantControlPage() {
   }
 
   useEffect(() => {
+    if (!statusPages || statusPages.length === 0) {
+      setFilteredPages([])
+      return
+    }
+
+    const searchLower = searchQuery.toLowerCase().trim()
+    
+    if (searchLower === '') {
+      setFilteredPages(statusPages)
+      return
+    }
+
+    const filtered = statusPages.filter(page => {
+      const nameMatch = page.name?.toLowerCase().includes(searchLower)
+      const hostMatch = page.host?.toLowerCase().includes(searchLower)
+      return nameMatch || hostMatch
+    })
+
+    setFilteredPages(filtered)
+  }, [searchQuery, statusPages])
+
+  useEffect(() => {
     const fetchStatusPages = async () => {
       try {
         setLoading(true)
         const response = await api.get('monitors/instant-Control')
         console.log(response.data)
-        setStatusPages(response.data)
+        // Monitörleri ID'ye göre sırala
+        const sortedPages = response.data.sort((a, b) => a.id - b.id)
+        setStatusPages(sortedPages)
+        setFilteredPages(sortedPages)
       } catch (error) {
         console.error('Status pages verisi alınamadı:', error)
       } finally {
@@ -137,35 +169,98 @@ export default function InstantControlPage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box sx={{ width: '240px' }}>
+      <Box
+        sx={{
+          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 240 : 0 },
+          flexShrink: 0,
+          transition: 'width 0.3s',
+          position: { xs: 'fixed', sm: 'relative' },
+          zIndex: 1000,
+          height: { xs: '100vh', sm: 'auto' },
+          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
+        }}
+      >
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Box>
       <Box
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3 },
           backgroundColor: '#f8f9fa',
           minHeight: '100vh',
           maxWidth: '1800px',
           margin: '0 auto',
+          ml: { xs: 0, sm: isOpen ? '240px' : 0 },
+          transition: 'margin-left 0.3s',
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
         }}
       >
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          sx={{
-            fontWeight: 'bold',
-            color: theme.palette.primary.main,
-            mb: 3,
-          }}
-        >
-          Instant Control Page.
-        </Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          mb: 3,
+          gap: 2
+        }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 'bold',
+              color: theme.palette.primary.main,
+              fontSize: { xs: '1.5rem', sm: '2rem' }
+            }}
+          >
+            Instant Control Page
+          </Typography>
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{ 
+              display: { xs: 'flex', sm: 'none' },
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
         <Divider sx={{ mb: 4 }} />
-        <Grid container spacing={3}>
-          {statusPages.map((page) => (
-            <Grid item xs={12} md={6} xl={4} key={page.id} >
+
+        <Box sx={{ mb: 4 }}>
+          <TextField
+            fullWidth
+            placeholder="Monitor adı ile arama yapın..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: 2,
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
+          />
+        </Box>
+
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
+          {filteredPages.map((page) => (
+            <Grid item xs={12} sm={6} md={4} key={page.id}>
               <StatusCard>
                 <CardContent>
                   <Box
@@ -177,58 +272,30 @@ export default function InstantControlPage() {
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                     {/* <StatusIndicator status={page.status} />*/}
                       <Typography
                         variant="h6"
                         component="div"
-                        sx={{ fontWeight: 'bold' }}
+                        sx={{ 
+                          fontWeight: 'bold',
+                          fontSize: { xs: '1rem', sm: '1.25rem' }
+                        }}
                       >
                         {page.name}
                       </Typography>
                     </Box>
-                    {/*<MethodChip label={page.method} method={page.method} />*/}
                   </Box>
 
                   <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ mb: 2 }}
+                    sx={{ 
+                      mb: 2,
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      wordBreak: 'break-all'
+                    }}
                   >
                     {page.host}
                   </Typography>
-                 {/*
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      variant="subtitle2"
-                      color="text.secondary"
-                      gutterBottom
-                    >
-                      İzin Verilen Durum Kodları:
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {page.allowedStatusCodes.map((code) => (
-                        <Chip
-                          key={code}
-                          label={code}
-                          size="small"
-                          sx={{
-                            backgroundColor:
-                              code.charAt(0) === '2'
-                               ? '#4caf50'
-                               : code.charAt(0) === '4'
-                               ? '#f44336'
-                               : code.charAt(0) === '1'
-                               ? '#ff9800'
-                               : code.charAt(0) === '3'
-                               ? '#2196f3'
-                               : '#f44336',
-                            color: 'white',
-                            borderRadius: 4,
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box> */}
 
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button
@@ -243,8 +310,9 @@ export default function InstantControlPage() {
                       sx={{
                         borderRadius: 2,
                         textTransform: 'none',
-                        px: 3,
-                        py: 1,
+                        px: { xs: 2, sm: 3 },
+                        py: { xs: 0.5, sm: 1 },
+                        fontSize: { xs: '0.875rem', sm: '1rem' }
                       }}
                     >
                       {loadingRequests[page.id]
@@ -258,14 +326,14 @@ export default function InstantControlPage() {
                       elevation={0}
                       sx={{
                         mt: 2,
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         backgroundColor: requestResults[page.id]?.isError
                           ? 'rgba(244, 67, 54, 0.1)'
                           : 'rgba(76, 175, 80, 0.1)',
                         borderRadius: 2,
                       }}
                     >
-                      <Stack spacing={2}>
+                      <Stack spacing={{ xs: 1.5, sm: 2 }}>
                         <Box
                           sx={{
                             display: 'flex',
@@ -285,6 +353,7 @@ export default function InstantControlPage() {
                               color: requestResults[page.id]?.isError
                                 ? 'error.main'
                                 : 'success.main',
+                              fontSize: { xs: '0.875rem', sm: '1rem' }
                             }}
                           >
                             {requestResults[page.id]?.isError
@@ -296,19 +365,29 @@ export default function InstantControlPage() {
                         <Box
                           sx={{
                             display: 'flex',
+                            flexDirection: { xs: 'column', sm: 'row' },
                             justifyContent: 'space-between',
-                            alignItems: 'center',
+                            alignItems: { xs: 'flex-start', sm: 'center' },
+                            gap: { xs: 1, sm: 0 }
                           }}
                         >
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <AccessTimeIcon fontSize="small" color="action" />
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography 
+                              variant="body2" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
                               Yanıt Süresi: {requestResults[page.id]?.responseTime}ms
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <InfoIcon fontSize="small" color="action" />
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography 
+                              variant="body2" 
+                              color="text.secondary"
+                              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
                               Son kontrol: {requestResults[page.id]?.timestamp}
                             </Typography>
                           </Box>
@@ -321,6 +400,7 @@ export default function InstantControlPage() {
                               color: requestResults[page.id]?.isError
                                 ? 'error.main'
                                 : 'success.main',
+                              fontSize: { xs: '0.75rem', sm: '0.875rem' }
                             }}
                           >
                             Durum: {requestResults[page.id]?.message}

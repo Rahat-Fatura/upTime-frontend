@@ -19,6 +19,8 @@ import {
   Tooltip,
   Divider,
   Stack,
+  TextField,
+  InputAdornment,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -28,6 +30,8 @@ import {
   PlayArrow as PlayArrowIcon,
   Pause as PauseIcon,
   Delete as DeleteIcon,
+  Search as SearchIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit } from 'tabler-icons-react'
@@ -54,6 +58,8 @@ const initialFormData = {
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
+  const [filteredMonitors, setFilteredMonitors] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
@@ -157,49 +163,6 @@ export default function Dashboard() {
 
   const handleSubmit = async (e) => {
     navigate('/user/monitors/new/http');
-
-   /* e.preventDefault()
-    try {
-      const formattedData = {
-        name: formData.name,
-        method: formData.method,
-        host: formData.host,
-        body: formData.body
-          ? typeof formData.body === 'string'
-            ? JSON.parse(formData.body)
-            : formData.body
-          : {},
-        headers: formData.headers
-          ? typeof formData.headers === 'string'
-            ? JSON.parse(formData.headers)
-            : formData.headers
-          : {},
-        interval: formData.interval,
-        intervalUnit: formData.intervalUnit,
-        reportTime: formData.reportTime,
-        reportTimeUnit: formData.reportTimeUnit,
-        allowedStatusCodes:
-          typeof formData.allowedStatusCodes === 'string'
-            ? formData.allowedStatusCodes.split(',').map((code) => code.trim())
-            : formData.allowedStatusCodes,
-      }
-      const response = await api.post(`monitors/`, formattedData, {
-        headers: {
-          Authorization: `Bearer ${cookies.get('jwt-access')}`,
-          'Content-Type': 'application/json',
-        },
-      })
-      console.log('Response:', response.data)
-      if (response.data) {
-        setMonitors((prevMonitors) => [...prevMonitors, response.data])
-        setModalOpen(false)
-        setFormData(initialFormData)
-        alertify.success(`${response.data.host} başarılı şekilde eklendi !`)
-      }
-    } catch (error) {
-      alertify.error(error.response.data.message)
-      console.error('Sunucu eklenirken hata oluştu:', error)
-    }*/
   }
 
   const calculateStats = () => {
@@ -242,6 +205,29 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    if (!monitors || monitors.length === 0) {
+      setFilteredMonitors([])
+      return
+    }
+
+    const searchLower = searchQuery.toLowerCase().trim()
+    
+    if (searchLower === '') {
+      setFilteredMonitors(monitors)
+      return
+    }
+
+    const filtered = monitors.filter(monitor => {
+      const nameMatch = monitor.name?.toLowerCase().includes(searchLower)
+      const hostMatch = monitor.host?.toLowerCase().includes(searchLower)
+      const typeMatch = monitor.monitorType?.toLowerCase().includes(searchLower)
+      return nameMatch || hostMatch || typeMatch
+    })
+
+    setFilteredMonitors(filtered)
+  }, [searchQuery, monitors])
+
   const handleMonitorAction = async (action, monitorId) => {
     try {
       switch (action) {
@@ -263,7 +249,7 @@ export default function Dashboard() {
             setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
-                ? { ...m, is_active_by_owner: false, status: "uncertain" }
+                ? { ...m, isActiveByOwner: false, status: "uncertain" }
                 : m
             )
           )
@@ -381,7 +367,7 @@ export default function Dashboard() {
               <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography>CRON JOB URL {"==>"/*params.row.cronJobMonitor.host*/}</Typography>
-                  <Button variant="contained" size='small' onClick={()=>{navigator.clipboard.writeText(params.row.cronJobMonitor.host)}}>COPY</Button>
+                  <Button color='primary' variant="contained" size='small' onClick={()=>{navigator.clipboard.writeText(params.row.cronJobMonitor.host)}}>COPY</Button>
 
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -508,11 +494,12 @@ export default function Dashboard() {
       },
     },
     {
-      field: 'logs',
+      field: 'succesRate',
       headerName: 'Success Rate',
       width: 200,
       renderCell: (params) => {
-        if (!params.value || params.value.length === 0) {
+        console.log(params.row.successRate)
+        if (!params.row.successRate) {
           return (
             <Box sx={{ width: '100%', textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary">
@@ -522,11 +509,8 @@ export default function Dashboard() {
           )
         }
 
-        const totalRequests = params.value.length
-        const successfulRequests = params.value.filter(
-          (log) => !log.isError
-        ).length
-        const successRate = (successfulRequests / totalRequests) * 100
+        const successRate = Number(params.row.successRate.substring(0,params.row.successRate.length-1));
+        console.log(successRate)
         const color =
           successRate >= 90
             ? 'success'
@@ -554,9 +538,7 @@ export default function Dashboard() {
               color="text.secondary"
               sx={{ display: 'block', textAlign: 'center' }}
             >
-              {`${successfulRequests}/${totalRequests} (${Math.round(
-                successRate
-              )}%)`}
+              {params.row.successRate}
             </Typography>
           </Box>
         )
@@ -620,40 +602,95 @@ export default function Dashboard() {
   ]
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
-      <Grid
-        item
-        md={isOpen ? 9.7 : 11.3}
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          flexDirection: 'column',
-          pr: '4vh',
-          gap: 1,
+          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 280 : 0 },
+          flexShrink: 0,
+          transition: 'width 0.3s',
+          position: { xs: 'fixed', sm: 'relative' },
+          zIndex: 1000,
+          height: { xs: '100vh', sm: 'auto' },
+          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
         }}
       >
-      </Grid>
-      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-            Monitoring Page.
-            <hr />
-      </Typography>
+        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+      </Box>
+      <Box
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, sm: 3 },
+          backgroundColor: '#f8f9fa',
+          minHeight: '100vh',
+          maxWidth: '1800px',
+          margin: '0 auto',
+          ml: { xs: 0, sm: isOpen ? '280px' : '60px' },
+          transition: 'margin-left 0.3s',
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '280px' : '60px'})` },
+          position: 'relative',
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          mb: 3,
+          gap: 2
+        }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 'bold',
+              color: '#1976d2',
+              fontSize: { xs: '1.5rem', sm: '2rem' }
+            }}
+          >
+            Monitoring Page
+          </Typography>
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{ 
+              display: { xs: 'flex', sm: 'none' },
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
+        <Divider sx={{ mb: 4 }} />
+
         <Container maxWidth="xl">
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {currentStats.map((stat) => (
               <Grid item xs={12} sm={6} md={3} key={stat.title}>
-                <Card sx={{ height: '100%' }}>
+                <Card sx={{ 
+                  height: '100%',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  }
+                }}>
                   <CardContent>
-                    <Typography color="text.secondary" gutterBottom>
+                    <Typography 
+                      color="text.secondary" 
+                      gutterBottom
+                      sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                    >
                       {stat.title}
                     </Typography>
                     <Typography
                       variant="h4"
                       component="div"
-                      sx={{ color: stat.color }}
+                      sx={{ 
+                        color: stat.color,
+                        fontSize: { xs: '1.5rem', sm: '2rem' }
+                      }}
                     >
                       {stat.value}
                     </Typography>
@@ -662,32 +699,88 @@ export default function Dashboard() {
               </Grid>
             ))}
           </Grid>
-          <Paper sx={{ p: 3, mt: 3 }}>
+
+          <Paper sx={{ p: { xs: 2, sm: 3 }, mt: 3 }}>
             <Box
               sx={{
                 display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
                 justifyContent: 'space-between',
-                alignItems: 'center',
+                alignItems: { xs: 'flex-start', sm: 'center' },
                 mb: 2,
+                gap: 2
               }}
             >
-              <Typography variant="h6">Monitors</Typography>
+              <Typography 
+                variant="h6"
+                sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
+              >
+                Monitors
+              </Typography>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 color="primary"
                 onClick={() => handleSubmit()}
+                sx={{
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
               >
                 New Monitor
               </Button>
             </Box>
             <Divider sx={{ mb: 2 }} />
+
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                fullWidth
+                placeholder="Monitor adı ile arama yapın..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  backgroundColor: 'white',
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                  },
+                }}
+              />
+            </Box>
+
             <DataGrid
-              rows={monitors}
+              rows={filteredMonitors}
               columns={columns}
               pageSizeOptions={[5, 10, 25]}
               autoHeight
               disableRowSelectionOnClick
+              initialState={{
+                sorting: {
+                  sortModel: [{ field: 'name', sort: 'asc' }],
+                },
+                pagination: {
+                  paginationModel: { pageSize: 10 },
+                },
+              }}
+              sx={{
+                '& .MuiDataGrid-cell': {
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                },
+                '& .MuiDataGrid-columnHeader': {
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }
+              }}
             />
           </Paper>
         </Container>

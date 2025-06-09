@@ -1,7 +1,43 @@
 import React from "react";
 import { Button, TextField, Grid, Divider } from "@mui/material";
-
+import Swal from 'sweetalert2';
+import api from '../../api/auth/axiosInstance'
 const UserProfileSettingsPage = ({ userInfo}) => {
+
+  const handleSubmit = async () => {
+      if (userInfo.name.length > 0 && userInfo.email.length > 0) {
+        try {
+          const response = await api.put(
+            `${process.env.REACT_APP_API_URL}auth/register-change`,
+            {
+              name: userInfo.name,
+              email:  userInfo.email,
+            }
+          )
+          Swal.fire({
+            icon: 'success',
+            title: 'Başarılı',
+            text: response.data.message,
+            confirmButtonText: 'Tamam',
+          })
+        } catch (error) {
+          console.error('Error changing password:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'Hata',
+            text: error.response.data.message,
+            confirmButtonText: 'Tamam',
+          })
+        }
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Uyarı',
+          text: 'Kullanıcı adı ve mail alanları boş bırakılamaz.',
+          confirmButtonText: 'Tamam',
+        })
+      }
+    }
 
   return (
     <Grid
@@ -24,6 +60,9 @@ const UserProfileSettingsPage = ({ userInfo}) => {
             label="Ad"
             variant="outlined"
             defaultValue={userInfo.name}
+            onChange={(e)=>{
+              userInfo["name"]= e.target.value;
+            }}
           />
         </Grid>
         <Grid item xs={12} md={12}>
@@ -33,6 +72,9 @@ const UserProfileSettingsPage = ({ userInfo}) => {
             label="Email"
             variant="outlined"
             defaultValue={userInfo.email}
+            onChange={(e)=>{
+              userInfo["email"]= e.target.value;
+            }}
           />
         </Grid>
       </Grid>
@@ -54,7 +96,7 @@ const UserProfileSettingsPage = ({ userInfo}) => {
         }}
       >
         <Grid md={3}>
-          <Button variant="contained" color="primary" className="custom-button">
+          <Button onClick={()=>handleSubmit()} variant="contained" color="primary" className="custom-button">
             Değişiklikleri Kaydet
           </Button>
         </Grid>

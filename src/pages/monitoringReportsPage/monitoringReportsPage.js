@@ -12,6 +12,9 @@ import {
   useTheme,
   CircularProgress,
   LinearProgress,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Table from '@mui/material/Table'
@@ -22,16 +25,42 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import SearchIcon from '@mui/icons-material/Search'
+import MenuIcon from '@mui/icons-material/Menu'
 
 export default function MonitoringReportsPage() {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(true)
   const [logs, setLogs] = useState([])
+  const [filteredLogs, setFilteredLogs] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
   }
+
+  useEffect(() => {
+    if (!logs || logs.length === 0) {
+      setFilteredLogs([])
+      return
+    }
+
+    const searchLower = searchQuery.toLowerCase().trim()
+    
+    if (searchLower === '') {
+      setFilteredLogs(logs)
+      return
+    }
+
+    const filtered = logs.filter(log => {
+      const nameMatch = log.name?.toLowerCase().includes(searchLower)
+      const hostMatch = log.host?.toLowerCase().includes(searchLower)
+      return nameMatch || hostMatch
+    })
+
+    setFilteredLogs(filtered)
+  }, [searchQuery, logs])
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -71,6 +100,7 @@ export default function MonitoringReportsPage() {
         setLoading(true)
         const response = await api.get('monitors/logs')
         setLogs(response.data)
+        setFilteredLogs(response.data)
       } catch (error) {
         console.error('Log verisi alınamadı:', error)
       } finally {
@@ -96,28 +126,120 @@ export default function MonitoringReportsPage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box sx={{ width: '240px' }}>
+      <Box
+        sx={{
+          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 240 : 0 },
+          flexShrink: 0,
+          transition: 'width 0.3s',
+          position: { xs: 'fixed', sm: 'relative' },
+          zIndex: 1000,
+          height: { xs: '100vh', sm: 'auto' },
+          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
+        }}
+      >
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Box>
-      <Box sx={{ 
-        flexGrow: 1, 
-        p: 3, 
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh'
-      }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-          Monitor Reports.
-        </Typography>
+      <Box
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, sm: 3 },
+          backgroundColor: '#f8f9fa',
+          minHeight: '100vh',
+          maxWidth: '1800px',
+          margin: '0 auto',
+          ml: { xs: 0, sm: isOpen ? '240px' : 0 },
+          transition: 'margin-left 0.3s',
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
+        }}
+      >
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
+          mb: 3,
+          gap: 2
+        }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 'bold',
+              color: theme.palette.primary.main,
+              fontSize: { xs: '1.5rem', sm: '2rem' }
+            }}
+          >
+            Monitor Reports
+          </Typography>
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{ 
+              display: { xs: 'flex', sm: 'none' },
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Box>
         <Divider sx={{ mb: 4 }} />
-        <Grid container spacing={3}>
-          {logs.map((log) => (
-            <Grid item xs={12} md={6} lg={4} key={log.id}>
+
+        <Box sx={{ mb: 4 }}>
+          <TextField
+            fullWidth
+            placeholder="Monitor adı ile arama yapın..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="action" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: 2,
+              '& .MuiOutlinedInput-root': {
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
+          />
+        </Box>
+
+        <Grid container spacing={{ xs: 2, sm: 3 }}>
+          {filteredLogs.map((log) => (
+            <Grid item xs={12} sm={6} md={4} key={log.id}>
               <StatCard>
                 <CardContent>
-                  <Typography variant="h5" component="div" gutterBottom sx={{ fontWeight: 'bold' }}>
+                  <Typography 
+                    variant="h5" 
+                    component="div" 
+                    gutterBottom 
+                    sx={{ 
+                      fontWeight: 'bold',
+                      fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                    }}
+                  >
                     {log.name}
                   </Typography>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  <Typography 
+                    variant="subtitle1" 
+                    color="text.secondary" 
+                    gutterBottom
+                    sx={{ 
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      wordBreak: 'break-all'
+                    }}
+                  >
                     {log.host}
                   </Typography>
                   

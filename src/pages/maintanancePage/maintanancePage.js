@@ -1,10 +1,7 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable eqeqeq */
-/* eslint-disable no-undef */
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useEffect } from 'react'
 import api from '../../api/auth/axiosInstance'
 import Sidebar from '../../components/sideBar/sideBar'
+import Swal from "sweetalert2";
 import {
   Card,
   CardContent,
@@ -20,6 +17,8 @@ import {
   Paper,
   Divider,
   Tooltip,
+  InputAdornment,
+  IconButton,
 } from '@mui/material'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -29,9 +28,11 @@ import ErrorIcon from '@mui/icons-material/Error'
 import HelpIcon from '@mui/icons-material/Help'
 import BuildIcon from '@mui/icons-material/Build'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
+import SearchIcon from '@mui/icons-material/Search'
 import { styled } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
+import MenuIcon from '@mui/icons-material/Menu'
 
 const StatusBadge = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(0.5, 1),
@@ -55,6 +56,8 @@ const TimeInfoBox = styled(Box)(({ theme }) => ({
 export default function MaintanancePage() {
   const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
+  const [filteredMonitors, setFilteredMonitors] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [monitorDates, setMonitorDates] = useState({})
   const [snackbar, setSnackbar] = useState({
@@ -68,26 +71,63 @@ export default function MaintanancePage() {
   }
 
   useEffect(() => {
-    const interval = setInterval(fetchMonitors, 30000)
+    const interval = setInterval(fetchMonitors, 60000)
     fetchMonitors()
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    console.log('Search Query:', searchQuery)
+    console.log('Monitors:', monitors)
+
+    if (!monitors || monitors.length === 0) {
+      setFilteredMonitors([])
+      return
+    }
+
+    const searchLower = searchQuery.toLowerCase().trim()
+    
+    if (searchLower === '') {
+      setFilteredMonitors(monitors)
+      return
+    }
+
+    const filtered = monitors.filter(monitor => {
+      const nameMatch = monitor.name?.toLowerCase().includes(searchLower)
+      const hostMatch = monitor.host?.toLowerCase().includes(searchLower)
+      return nameMatch || hostMatch
+    })
+
+    console.log('Filtered Results:', filtered)
+    setFilteredMonitors(filtered)
+  }, [searchQuery, monitors])
 
   const fetchMonitors = async () => {
     try {
       setLoading(true)
       const response = await api.get('monitors/maintanance')
-      console.log(response.data)
-      setMonitors(response.data)
-      // Her monitor için başlangıç state'lerini oluştur
-      const initialDates = {}
-      response.data.forEach(monitor => {
-        initialDates[monitor.id] = {
-          startDateTime: monitor.maintanance ? dayjs(monitor.maintanance.startTime) : dayjs(),
-          endDateTime: monitor.maintanance ? dayjs(monitor.maintanance.endTime) : dayjs()
-        }
-      })
-      setMonitorDates(initialDates)
+      console.log('API Response:', response.data)
+      
+      if (response.data && Array.isArray(response.data)) {
+        const sortedMonitors = response.data.sort((a, b) => a.id - b.id)
+        console.log('Sorted Monitors:', sortedMonitors)
+        setMonitors(sortedMonitors)
+        setFilteredMonitors(sortedMonitors) // İlk yüklemede tüm monitörleri göster
+        
+        const initialDates = {}
+        sortedMonitors.forEach(monitor => {
+          if (monitor && monitor.id) {
+            initialDates[monitor.id] = {
+              startDateTime: monitor.maintanance ? dayjs(monitor.maintanance.startTime) : dayjs(),
+              endDateTime: monitor.maintanance ? dayjs(monitor.maintanance.endTime) : dayjs()
+            }
+          }
+        })
+        setMonitorDates(initialDates)
+      } else {
+        setMonitors([])
+        setFilteredMonitors([])
+      }
     } catch (error) {
       console.error('Error fetching monitors:', error)
       setSnackbar({
@@ -95,6 +135,8 @@ export default function MaintanancePage() {
         message: 'Monitorlar yüklenirken bir hata oluştu',
         severity: 'error',
       })
+      setMonitors([])
+      setFilteredMonitors([])
     } finally {
       setLoading(false)
     }
@@ -121,28 +163,28 @@ export default function MaintanancePage() {
     const now = new Date()
 
     if (!startDateTime || !endDateTime) {
-      setSnackbar({
-        open: true,
-        message: 'Lütfen tüm tarih ve saat bilgilerini giriniz',
-        severity: 'warning',
+      Swal.fire({
+        title: 'Warning',
+        text: 'Lütfen tüm tarih ve saat bilgilerini giriniz',
+        icon: 'warning',
       })
       return
     }
    
     if (startDate < now || endDate < now) {
-      setSnackbar({
-        open: true,
-        message: 'Başlangıç veya bitiş tarihleri geçmişte olamaz',
-        severity: 'warning',
+      Swal.fire({
+        title: 'Warning',
+        text: 'Başlangıç veya bitiş tarihleri geçmişte olamaz',
+        icon: 'warning',
       })
       return
     }
 
     if (startDate >= endDate) {
-      setSnackbar({
-        open: true,
-        message: 'Başlangıç tarihi geçmiş tarihten ön tarihte olamaz',
-        severity: 'warning',
+      Swal.fire({
+        title: 'Warning',
+        text: 'Başlangıç tarihi geçmiş tarihten ön tarihte olamaz',
+        icon: 'warning',
       })
       return
     }
@@ -152,18 +194,19 @@ export default function MaintanancePage() {
         startTime: startDate,
         endTime: endDate,
       })
-      setSnackbar({
-        open: true,
-        message: 'Bakım planı başarıyla kaydedildi',
-        severity: 'success',
+      Swal.fire({
+        title: 'Success',
+        text: 'Bakım planı başarıyla kaydedildi',
+        icon: 'success',
       })
+
       fetchMonitors();
     }
     catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Bakım planı kaydedilirken bir hata oluştu',
-        severity: 'error',
+      Swal.fire({
+        title: 'Error',
+        text: 'Bakım planı kaydedilirken bir hata oluştu',
+        icon: 'error',
       })
     }
   }
@@ -220,18 +263,18 @@ export default function MaintanancePage() {
   const handleCancelMaintenance = async (monitorId) => {
     try {
       const response = await api.put(`monitors/${ monitorId }/maintanance/cancel`)
-      setSnackbar({
-        open: true,
-        message: 'Bakım modu başarıyla iptal edildi',
-        severity: 'success',
+      Swal.fire({
+        title: 'Succes',
+        text: 'Bakım modu başarıyla iptal edildi.',
+        icon: 'succes',
       })
       console.log(response)
       fetchMonitors();
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Bakım modu iptal edilirken bir hata oluştu',
-        severity: 'error',
+      Swal.fire({
+        title: 'Error',
+        text: 'Bakım modu ipat edilirken bir hata oluştu',
+        icon: 'error',
       })
     }
   }
@@ -240,11 +283,13 @@ export default function MaintanancePage() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         sx={{
-          width: isOpen ? 240 : 0,
+          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 240 : 0 },
           flexShrink: 0,
-          transition: 'width 0.3s',
-          position: 'fixed',
+          transition: 'width 0.8s',
+          position: { xs: 'fixed', sm: 'relative' },
           zIndex: 1000,
+          height: { xs: '100vh', sm: 'auto' },
+          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
         }}
       >
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
@@ -252,32 +297,86 @@ export default function MaintanancePage() {
       <Box
         sx={{
           flexGrow: 1,
-          ml: isOpen ? '240px' : 0,
+          ml: { xs: 0, sm: isOpen ? '240px' : 0 },
           transition: 'margin-left 0.3s',
-          p: 3,
+          p: { xs: 2, sm: 3 },
           backgroundColor: '#f5f5f5',
           minHeight: '100vh',
           position: 'relative',
           zIndex: 1,
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            align="left" 
-            sx={{ 
-              mb: 4,
-              fontWeight: 'bold',
-              color: 'primary.main',
-              textShadow: '1px 1px 2px rgba(0,0,0,0.1)'
-            }}
-          >
-            Maintanance Page.
-            <hr/>
-          </Typography>
-          <Grid container spacing={3}>
-            {monitors.map((monitor) => (
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            mb: 4,
+            gap: 2
+          }}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
+              sx={{ 
+                fontWeight: 'bold',
+                color: 'primary.main',
+                textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                fontSize: { xs: '1.5rem', sm: '2rem' }
+              }}
+            >
+              Maintanance Page
+            </Typography>
+            <IconButton
+              onClick={toggleSidebar}
+              sx={{ 
+                display: { xs: 'flex', sm: 'none' },
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+          <Divider sx={{ mb: 4 }} />
+
+          <Box sx={{ mb: 1 }}>
+            <TextField
+              fullWidth
+              placeholder="Monitor adı ile arama yapın..."
+              value={searchQuery}
+              onChange={(e) => {
+                console.log('Search Input Changed:', e.target.value)
+                setSearchQuery(e.target.value)
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                backgroundColor: 'white',
+                borderRadius: 2,
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
+            {filteredMonitors.map((monitor) => (
               <Grid item xs={12} sm={6} md={4} key={monitor.id}>
                 <Card 
                   sx={{ 
@@ -308,8 +407,8 @@ export default function MaintanancePage() {
                         <Avatar 
                           sx={{ 
                             bgcolor: `${getStatusColor(monitor.status)}.main`,
-                            width: 40,
-                            height: 40,
+                            width: { xs: 32, sm: 40 },
+                            height: { xs: 32, sm: 40 },
                             boxShadow: 2
                           }}
                         >
@@ -318,7 +417,13 @@ export default function MaintanancePage() {
                       </Tooltip>
                     }
                     title={
-                      <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontWeight: 'bold',
+                          fontSize: { xs: '1rem', sm: '1.25rem' }
+                        }}
+                      >
                         {monitor.name}
                       </Typography>
                     }
@@ -326,7 +431,14 @@ export default function MaintanancePage() {
                   <Divider />
                   <CardContent>
                     <TimeInfoBox>
-                      <Typography variant="h5" color="text.secondary">
+                      <Typography 
+                        variant="h5" 
+                        color="text.secondary"
+                        sx={{
+                          fontSize: { xs: '0.875rem', sm: '1rem' },
+                          wordBreak: 'break-all'
+                        }}
+                      >
                         {monitor.host}
                       </Typography>
                     </TimeInfoBox>
@@ -334,7 +446,7 @@ export default function MaintanancePage() {
                     <Box 
                       sx={{ 
                         mb: 3,
-                        p: 2,
+                        p: { xs: 1, sm: 2 },
                         borderRadius: 2,
                         backgroundColor: 'background.paper',
                         boxShadow: 1,
@@ -349,14 +461,15 @@ export default function MaintanancePage() {
                           mb: 2,
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 1
+                          gap: 1,
+                          fontSize: { xs: '0.75rem', sm: '0.875rem' }
                         }}
                       >
                         <AccessTimeIcon fontSize="small" />
                         Bakım Zaman Aralığı
                       </Typography>
                       <Box sx={{ mb: 2 }}>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={{ xs: 1, sm: 2 }}>
                           <Grid item xs={12} md={6}>
                             <DatePicker
                               label="Başlangıç Tarihi"
@@ -368,6 +481,11 @@ export default function MaintanancePage() {
                                   fullWidth
                                   variant="outlined"
                                   size="small"
+                                  sx={{
+                                    '& .MuiInputBase-input': {
+                                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                                    }
+                                  }}
                                 />
                               )}
                               minDate={dayjs()}
@@ -391,12 +509,16 @@ export default function MaintanancePage() {
                                         sx={{ 
                                           color: 'primary.main',
                                           mr: 1,
-                                          my: 0.5
+                                          my: 0.5,
+                                          fontSize: { xs: '1rem', sm: '1.25rem' }
                                         }}
                                       />
                                     ),
                                   }}
                                   sx={{
+                                    '& .MuiInputBase-input': {
+                                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                                    },
                                     '& .MuiOutlinedInput-root': {
                                       '&:hover fieldset': {
                                         borderColor: 'primary.main',
@@ -421,7 +543,7 @@ export default function MaintanancePage() {
                         </Grid>
                       </Box>
                       <Box>
-                        <Grid container spacing={2}>
+                        <Grid container spacing={{ xs: 1, sm: 2 }}>
                           <Grid item xs={12} md={6}>
                             <DatePicker
                               label="Bitiş Tarihi"
@@ -433,6 +555,11 @@ export default function MaintanancePage() {
                                   fullWidth
                                   variant="outlined"
                                   size="small"
+                                  sx={{
+                                    '& .MuiInputBase-input': {
+                                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                                    }
+                                  }}
                                 />
                               )}
                               minDate={monitorDates[monitor.id]?.startDateTime || dayjs()}
@@ -456,12 +583,16 @@ export default function MaintanancePage() {
                                         sx={{ 
                                           color: 'primary.main',
                                           mr: 1,
-                                          my: 0.5
+                                          my: 0.5,
+                                          fontSize: { xs: '1rem', sm: '1.25rem' }
                                         }}
                                       />
                                     ),
                                   }}
                                   sx={{
+                                    '& .MuiInputBase-input': {
+                                      fontSize: { xs: '0.875rem', sm: '1rem' }
+                                    },
                                     '& .MuiOutlinedInput-root': {
                                       '&:hover fieldset': {
                                         borderColor: 'primary.main',
@@ -509,11 +640,12 @@ export default function MaintanancePage() {
                         :  'primary'
                       }
                       sx={{
-                        py: 1.5,
+                        py: { xs: 1, sm: 1.5 },
                         fontWeight: 'bold',
                         textTransform: 'none',
                         boxShadow: 2,
                         borderRadius: 2,
+                        fontSize: { xs: '0.875rem', sm: '1rem' },
                         '&:hover': {
                           boxShadow: 4,
                           transform: 'translateY(-2px)',
@@ -536,6 +668,7 @@ export default function MaintanancePage() {
             open={snackbar.open}
             autoHideDuration={6000}
             onClose={handleCloseSnackbar}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           >
             <Alert
               onClose={handleCloseSnackbar}

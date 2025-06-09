@@ -1,0 +1,612 @@
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  TextField,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Speed,
+  Notifications,
+  BarChart,
+  Language,
+  Security,
+  Support,
+  ArrowForward,
+} from "@mui/icons-material";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
+const features = [
+  {
+    icon: <Speed sx={{ fontSize: 40 }} />,
+    title: "Gerçek Zamanlı İzleme",
+    description: "Web sitenizin performansını saniye saniye takip edin.",
+  },
+  {
+    icon: <Notifications sx={{ fontSize: 40 }} />,
+    title: "Anlık Bildirimler",
+    description: "Herhangi bir sorun olduğunda anında haberdar olun.",
+  },
+  {
+    icon: <BarChart sx={{ fontSize: 40 }} />,
+    title: "Detaylı Raporlar",
+    description: "Performans metriklerini detaylı raporlarla analiz edin.",
+  },
+  {
+    icon: <Language sx={{ fontSize: 40 }} />,
+    title: "Çoklu Lokasyon",
+    description: "Farklı bölgelerden kontrol noktaları ile izleme.",
+  },
+];
+
+const pricingPlans = [
+  {
+    title: "Başlangıç",
+    price: "Ücretsiz",
+    features: [
+      "1 Web Sitesi",
+      "5 dakikalık kontrol aralığı",
+      "Temel metrikler",
+      "Email bildirimleri",
+    ],
+    buttonText: "Başla",
+    highlighted: false,
+  },
+  {
+    title: "Pro",
+    price: "₺99/ay",
+    features: [
+      "10 Web Sitesi",
+      "1 dakikalık kontrol aralığı",
+      "Gelişmiş metrikler",
+      "SMS ve Email bildirimleri",
+      "API erişimi",
+    ],
+    buttonText: "Seç",
+    highlighted: true,
+  },
+  {
+    title: "Kurumsal",
+    price: "Özel Fiyat",
+    features: [
+      "Sınırsız Web Sitesi",
+      "30 saniyelik kontrol aralığı",
+      "Özel metrikler",
+      "7/24 Destek",
+      "Özel entegrasyonlar",
+    ],
+    buttonText: "İletişime Geç",
+    highlighted: false,
+  },
+];
+
+const LandingPage = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+
+  const loginPage = () => {
+     navigate('/login')
+  }
+
+  const registerPage = () => {
+     navigate('/register')
+  }
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setMobileMenuOpen(false);
+    }
+  };
+
+  return (
+    <Box sx={{ overflow: "hidden" }}>
+      {/* Navbar */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          bgcolor: scrolled ? "rgba(255, 255, 255, 0.9)" : "transparent",
+          backdropFilter: scrolled ? "blur(10px)" : "none",
+          transition: "all 0.3s ease",
+          boxShadow: scrolled ? "0 2px 10px rgba(0,0,0,0.1)" : "none",
+        }}
+      >
+        
+        <Container maxWidth="lg">
+          
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              py: 2,
+            }}
+          >
+            <Box sx={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}>
+              <img src="/rahatUp-logo.png" alt="Logo" width={40} height={40} style={{
+              'borderRadius':'10px',
+              'paddingRight': '25px'
+            }}/>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: "bold",
+                color: scrolled ? "primary.main" : "white",
+              }}
+            >
+              Rahat Up
+            </Typography>
+            </Box>
+            
+
+            {isMobile ? (
+              <IconButton
+                onClick={() => setMobileMenuOpen(true)}
+                sx={{ color: scrolled ? "primary.main" : "white" }}
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : (
+              <Box sx={{ display: "flex", gap: 3 }}>
+                {["features", "pricing", "contact"].map((item) => (
+                  <Button
+                    key={item}
+                    onClick={() => scrollToSection(item)}
+                    sx={{
+                      color: scrolled ? "primary.main" : "white",
+                      textTransform: "none",
+                      "&:hover": {
+                        bgcolor: "rgba(255,255,255,0.1)",
+                      },
+                    }}
+                  >
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </Button>
+                ))}
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: "secondary.main",
+                    color: "white",
+                    "&:hover": {
+                      bgcolor: "secondary.dark",
+                    },
+                  }}
+                  onClick={()=>loginPage()}
+                >
+                  Hemen Başla
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Hero Section */}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          background: "linear-gradient(45deg, #1a237e 30%, #0d47a1 90%)",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Typography
+                  variant="h2"
+                  sx={{
+                    fontWeight: "bold",
+                    mb: 2,
+                    fontSize: { xs: "2.5rem", md: "3.5rem" },
+                  }}
+                >
+                  Web Sitenizi 7/24 İzleyin,<br />
+                  Rahat Edin
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 4, opacity: 0.9, fontWeight: "normal" }}
+                >
+                  Rahat Up ile web sitenizin performansını sürekli takip edin,
+                  sorunları anında tespit edin ve kullanıcı deneyimini en üst
+                  seviyede tutun.
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  sx={{
+                    bgcolor: "secondary.main",
+                    color: "white",
+                    px: 4,
+                    py: 1.5,
+                    "&:hover": {
+                      bgcolor: "secondary.dark",
+                    },
+                  }}
+                  onClick={()=>registerPage()}
+                >
+                  Ücretsiz Deneyin
+                </Button>
+              </motion.div>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8 }}
+              >
+                <Box
+                  component="img"
+                  src="/images/dashboard-preview.png"
+                  alt="Dashboard Preview"
+                  sx={{
+                    width: "100%",
+                    maxWidth: 600,
+                    height: "auto",
+                    filter: "drop-shadow(0 0 20px rgba(0,0,0,0.3))",
+                  }}
+                />
+              </motion.div>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Features Section */}
+      <Box id="features" sx={{ py: 10, bgcolor: "grey.50" }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            align="center"
+            sx={{ mb: 6, fontWeight: "bold" }}
+          >
+            Neden Rahat Up?
+          </Typography>
+          <Grid container spacing={4}>
+            {features.map((feature, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      textAlign: "center",
+                      p: 3,
+                      transition: "transform 0.3s",
+                      "&:hover": {
+                        transform: "translateY(-10px)",
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        color: "primary.main",
+                        mb: 2,
+                      }}
+                    >
+                      {feature.icon}
+                    </Box>
+                    <Typography variant="h6" gutterBottom>
+                      {feature.title}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Pricing Section */}
+      <Box id="pricing" sx={{ py: 10 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            align="center"
+            sx={{ mb: 6, fontWeight: "bold" }}
+          >
+            Fiyatlandırma
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            {pricingPlans.map((plan, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      position: "relative",
+                      ...(plan.highlighted && {
+                        border: "2px solid",
+                        borderColor: "primary.main",
+                        transform: "scale(1.05)",
+                      }),
+                    }}
+                  >
+                    {plan.highlighted && (
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          bgcolor: "primary.main",
+                          color: "white",
+                          px: 2,
+                          py: 0.5,
+                          borderBottomLeftRadius: 8,
+                        }}
+                      >
+                        <Typography variant="caption">Popüler</Typography>
+                      </Box>
+                    )}
+                    <CardContent sx={{ flexGrow: 1, p: 4 }}>
+                      <Typography variant="h5" gutterBottom>
+                        {plan.title}
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        sx={{ mb: 3, fontWeight: "bold" }}
+                      >
+                        {plan.price}
+                      </Typography>
+                      <List>
+                        {plan.features.map((feature, idx) => (
+                          <ListItem key={idx} sx={{ px: 0 }}>
+                            <ArrowForward
+                              sx={{ color: "primary.main", mr: 1 }}
+                            />
+                            <ListItemText primary={feature} />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </CardContent>
+                    <Box sx={{ p: 3, pt: 0 }}>
+                      <Button
+                        variant={plan.highlighted ? "contained" : "outlined"}
+                        fullWidth
+                        size="large"
+                      >
+                        {plan.buttonText}
+                      </Button>
+                    </Box>
+                  </Card>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Contact Section */}
+      <Box id="contact" sx={{ py: 10, bgcolor: "grey.50" }}>
+        <Container maxWidth="md">
+          <Typography
+            variant="h3"
+            align="center"
+            sx={{ mb: 6, fontWeight: "bold" }}
+          >
+            Bizimle İletişime Geçin
+          </Typography>
+          <Card sx={{ p: 4 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Adınız"
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Email Adresiniz"
+                  variant="outlined"
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Mesajınız"
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    p: 3,
+                  }}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    İletişim Bilgileri
+                  </Typography>
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Email: info@rahatup.com
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      Tel: +90 (555) 123 45 67
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", gap: 2 }}>
+                    <IconButton color="primary">
+                      <Security />
+                    </IconButton>
+                    <IconButton color="primary">
+                      <Support />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+            <Box sx={{ mt: 3, textAlign: "center" }}>
+              <Button
+                variant="contained"
+                size="large"
+                sx={{ px: 4, py: 1.5 }}
+              >
+                Gönder
+              </Button>
+            </Box>
+          </Card>
+        </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ bgcolor: "primary.main", color: "white", py: 6 }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                Rahat Up
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Web sitenizi güvenle izleyin.
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                Hızlı Bağlantılar
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {["features", "pricing", "contact"].map((item) => (
+                  <Button
+                    key={item}
+                    onClick={() => scrollToSection(item)}
+                    sx={{
+                      color: "white",
+                      justifyContent: "flex-start",
+                      textTransform: "none",
+                    }}
+                  >
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </Button>
+                ))}
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" gutterBottom>
+                İletişim
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Email: info@rahatup.com
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Tel: +90 (555) 123 45 67
+              </Typography>
+            </Grid>
+          </Grid>
+          <Box
+            sx={{
+              mt: 4,
+              pt: 3,
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              © 2024 Rahat Up. Tüm hakları saklıdır.
+            </Typography>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Mobile Menu */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      >
+        <Box sx={{ width: 250, p: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <IconButton onClick={() => setMobileMenuOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <List>
+            {["features", "pricing", "contact"].map((item) => (
+              <ListItem
+                key={item}
+                button
+                onClick={() => scrollToSection(item)}
+              >
+                <ListItemText
+                  primary={item.charAt(0).toUpperCase() + item.slice(1)}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mt: 2 }}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Hemen Başla
+          </Button>
+        </Box>
+      </Drawer>
+    </Box>
+  );
+};
+
+export default LandingPage;
