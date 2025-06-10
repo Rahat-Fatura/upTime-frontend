@@ -126,7 +126,7 @@ const Login = () => {
         {/* Sağ taraftaki giriş formu */}
 
         <Grid item md={12}>
-          <Typography variant="h4">Rahat ... Hoşgeldiniz</Typography>
+          <Typography variant="h4">Rahat Up Hoşgeldiniz</Typography>
           <Typography variant="body1" color="textSecondary">
             Lütfen hesabınızda oturum açın ve "RAHAT"ınıza bakın :)
           </Typography>
