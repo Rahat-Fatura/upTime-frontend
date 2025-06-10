@@ -142,10 +142,10 @@ const portMonitorFormPage = (update=false) => {
         portMonitor: {
           host: host,
           port: port,
+          timeOut: timeout,
         },
         interval: interval,
         intervalUnit: intervalUnit,
-        timeOut: timeout,
       }
       console.log(formattedData)
       const response = await api.post(`monitors/port/`, formattedData)
@@ -576,7 +576,7 @@ const portMonitorFormPage = (update=false) => {
                 <FormControl fullWidth>
                   <Select
                     value={timeout}
-                    onChange={(e) => setTimeout(e.target.value)}
+                    onChange={(e) => setTimeout(Number(e.target.value))}
                     label="Timeout"
                   >
                     <MenuItem value={10}>10 seconds</MenuItem>
