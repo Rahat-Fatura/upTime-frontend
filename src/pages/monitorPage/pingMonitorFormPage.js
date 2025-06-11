@@ -335,11 +335,6 @@ const pingMonitorFormPage = (update = false) => {
                           Monitor websites and web services
                         </Typography>
                       </Box>
-                      <Chip
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
 
@@ -442,11 +437,6 @@ const pingMonitorFormPage = (update = false) => {
                           Cron job monitoring
                         </Typography>
                       </Box>
-                      <Chip
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />

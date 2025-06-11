@@ -198,10 +198,10 @@ const LandingPage = () => {
                 <Button
                   variant="contained"
                   sx={{
-                    bgcolor: "secondary.main",
+                    bgcolor: "#7f0b9c",
                     color: "white",
                     "&:hover": {
-                      bgcolor: "secondary.dark",
+                      bgcolor: "#30063b",
                     },
                   }}
                   onClick={()=>loginPage()}
@@ -257,12 +257,12 @@ const LandingPage = () => {
                   variant="contained"
                   size="large"
                   sx={{
-                    bgcolor: "secondary.main",
+                    bgcolor: "#7f0b9c",
                     color: "white",
                     px: 4,
                     py: 1.5,
                     "&:hover": {
-                      bgcolor: "secondary.dark",
+                      bgcolor: "#30063b",
                     },
                   }}
                   onClick={()=>registerPage()}

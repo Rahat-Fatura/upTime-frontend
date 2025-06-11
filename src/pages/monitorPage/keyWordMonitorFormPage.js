@@ -350,12 +350,6 @@ const keyWordMonitorPage = (update=false) => {
                           Monitor websites and web services
                         </Typography>
                       </Box>
-                      <Chip
-                        label="Most Popular"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />
@@ -490,12 +484,6 @@ const keyWordMonitorPage = (update=false) => {
                           Cron job monitoring
                         </Typography>
                       </Box>
-                      <Chip
-                        label="Most Popular"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />

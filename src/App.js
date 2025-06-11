@@ -76,11 +76,11 @@ function AppRoutes() {
         }
       } else if (!jwtToken) {
         if (
-          !["/register", "/forgot-password", "/login", "/landing"].includes(
+          !["/register", "/forgot-password", "/login","/"].includes(
             location.pathname
-          )
+          ) 
         ) {
-          navigate("/landing");
+          navigate("/");
         }
       }
       setIsLoading(false);
@@ -99,12 +99,7 @@ function AppRoutes() {
         <Route
           index
           element={
-            window.location.hostname ===
-            process.env.REACT_APP_LANDING_PAGE_DOMAIN ? (
               <LandingPage />
-            ) : (
-              <Navigate to="/homepage" replace />
-            )
           }
         />
        

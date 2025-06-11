@@ -341,11 +341,6 @@ const portMonitorFormPage = (update=false) => {
                           Monitor websites and web services
                         </Typography>
                       </Box>
-                      <Chip
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
 
@@ -448,12 +443,6 @@ const portMonitorFormPage = (update=false) => {
                           Cron job monitoring
                         </Typography>
                       </Box>
-                      <Chip
-                        label="Most Popular"
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />

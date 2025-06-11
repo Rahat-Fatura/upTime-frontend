@@ -334,11 +334,6 @@ const newMonitorPage = (update=false) => {
                           Monitor websites and web services
                         </Typography>
                       </Box>
-                      <Chip
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />
@@ -473,11 +468,6 @@ const newMonitorPage = (update=false) => {
                           Cron job monitoring
                         </Typography>
                       </Box>
-                      <Chip
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
                     </Box>
                   </MenuItem>
                   <Divider />
