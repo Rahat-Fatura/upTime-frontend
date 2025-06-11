@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
-import { cookies } from '../../utils/cookie'
 import BuildIcon from '@mui/icons-material/Build';
 
 import {
@@ -314,7 +313,7 @@ export default function Dashboard() {
     {
       field: 'name',
       headerName: 'Monitor name',
-      width: 300,
+      width: 250,
       size: 'medium',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -325,7 +324,7 @@ export default function Dashboard() {
     {
       field: 'host',
       headerName: 'Host',
-      width: 400,
+      width: 300,
       size: 'medium',
       renderCell: (params) => {
         switch (params.row.monitorType) {
@@ -602,7 +601,7 @@ export default function Dashboard() {
   ]
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex'}}>
       <Box
         sx={{
           width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 280 : 0 },
@@ -619,10 +618,10 @@ export default function Dashboard() {
       <Box
         sx={{
           flexGrow: 1,
-          p: { xs: 2, sm: 3 },
+          p: { xs: 2, sm: 3,},
           backgroundColor: '#f8f9fa',
           minHeight: '100vh',
-          maxWidth: '1800px',
+          maxWidth: '1400px',
           margin: '0 auto',
           ml: { xs: 0, sm: isOpen ? '280px' : '60px' },
           transition: 'margin-left 0.3s',
