@@ -283,7 +283,7 @@ export default function MaintanancePage() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 240 : 0 },
+          width: { xs: isOpen ? '100%' : 0, sm: 240 },
           flexShrink: 0,
           transition: 'width 0.8s',
           position: { xs: 'fixed', sm: 'relative' },
@@ -297,7 +297,8 @@ export default function MaintanancePage() {
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, sm: isOpen ? '240px' : 0 },
+          ml: { xs: 0, sm: '120px' },
+          mr: { xs: 0, sm: '120px' },
           transition: 'margin-left 0.3s',
           p: { xs: 2, sm: 3 },
           backgroundColor: '#f5f5f5',

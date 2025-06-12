@@ -604,7 +604,7 @@ export default function Dashboard() {
     <Box sx={{ display: 'flex'}}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 280 : 0 },
+          width: { xs: isOpen ? '100%' : 0, sm: 300},
           flexShrink: 0,
           transition: 'width 0.3s',
           position: { xs: 'fixed', sm: 'relative' },
@@ -623,9 +623,9 @@ export default function Dashboard() {
           minHeight: '100vh',
           maxWidth: '1400px',
           margin: '0 auto',
-          ml: { xs: 0, sm: isOpen ? '280px' : '60px' },
+          ml: { xs: 0, sm: isOpen ? '60px' : '60px' },
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '280px' : '60px'})` },
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '270px' : '270px'})` },
           position: 'relative',
         }}
       >

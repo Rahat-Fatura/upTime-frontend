@@ -59,12 +59,12 @@ const ProfilePage = () => {
   }, []);
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
+      <Grid item md={2.3}>
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Grid>
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
+        md={9.7}
         sx={{
           display: "flex",
           justifyContent: "flex-end",

@@ -29,7 +29,7 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-
+import "../../utils/animateCSS/animate.css"
 const features = [
   {
     icon: <Speed sx={{ fontSize: 40 }} />,
@@ -273,13 +273,17 @@ const LandingPage = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0, scale: 1 }}
+                animate={{ opacity: 1, scale: 0.8 }}
+                transition={{ 
+                  duration: 20,
+                  ease: "backOut",
+                  repeat: Infinity,
+                }}
               >
                 <Box
                   component="img"
-                  src="/images/dashboard-preview.png"
+                  src="https://static.vecteezy.com/system/resources/thumbnails/059/236/222/small/beautiful-modern-a-server-room-filled-with-glowing-servers-cool-blue-light-technical-illustration-style-premium-png.png"
                   alt="Dashboard Preview"
                   sx={{
                     width: "100%",

@@ -128,7 +128,7 @@ export default function MonitoringReportsPage() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: isOpen ? 240 : 0 },
+          width: { xs: isOpen ? '100%' : 0, sm: 240 },
           flexShrink: 0,
           transition: 'width 0.3s',
           position: { xs: 'fixed', sm: 'relative' },
@@ -147,9 +147,10 @@ export default function MonitoringReportsPage() {
           minHeight: '100vh',
           maxWidth: '1800px',
           margin: '0 auto',
-          ml: { xs: 0, sm: isOpen ? '240px' : 0 },
+          ml: { xs: 0, sm: '120px'},
+          mr: { xs: 0, sm: '120px'},
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
+          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '240px'})` },
         }}
       >
         <Box sx={{ 
