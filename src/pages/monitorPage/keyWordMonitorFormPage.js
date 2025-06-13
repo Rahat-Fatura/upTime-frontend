@@ -182,7 +182,7 @@ const keyWordMonitorPage = (update=false) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-          title: response.data.message,
+          title: 'İzleme Başarılı Şekilde Oluşturuldu',
           icon: 'success',
           confirmButtonText: 'Tamam',
         })
@@ -229,7 +229,7 @@ const keyWordMonitorPage = (update=false) => {
         console.log('Response:', response.data)
         if (response.data) {
           Swal.fire({
-                      title: response.data.message,
+                      title: "İzleme Başarılı Şekilde Güncellendi",
                       icon: "success",
                       confirmButtonText: "Tamam",
                   });
@@ -298,13 +298,13 @@ const keyWordMonitorPage = (update=false) => {
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom fontWeight="500">
-              {update.update?"Update Monitor":"New Monitor"}
+              {update.update?"İzleme Güncelle":"İzleme ekle"}
             </Typography>
 
             {/* Monitor Type Selection */}
             <Box sx={{ mb: 4, mt: 3 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Monitor Type
+                İzleme Tipi
               </Typography>
               <FormControl fullWidth>
                 <Select
@@ -347,7 +347,7 @@ const keyWordMonitorPage = (update=false) => {
                           HTTP(S)
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor websites and web services
+                          Web sitelerini ve web api servislerini izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -380,7 +380,7 @@ const keyWordMonitorPage = (update=false) => {
                           Ping
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor network connectivity
+                          Ağ bağlantısından ICMP protokolünden izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -415,7 +415,7 @@ const keyWordMonitorPage = (update=false) => {
                           Port
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor specific ports
+                          Belirli bağlantı portları izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -448,7 +448,7 @@ const keyWordMonitorPage = (update=false) => {
                           Keyword
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor for specific keywords
+                          Web servislerdeki belirli anahtar kelimeleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -481,7 +481,7 @@ const keyWordMonitorPage = (update=false) => {
                           CRON JOB
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Cron job monitoring
+                          Tekrarlanan işleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -501,7 +501,7 @@ const keyWordMonitorPage = (update=false) => {
                         : monitorType === 'port'
                         ? navigate('/user/monitors/new/port')
                         : monitorType === 'keyword'
-                        ? 'Keyword monitor allows you to check for specific words or phrases in the content of a webpage.'
+                        ? 'Anahtar kelime izleyicisi, bir web sayfasının içeriğinde belirli anahtar kelimeleri kontrol etmenizi sağlar.'
                         : monitorType === 'cronjob'
                         ? navigate('/user/monitors/new/cronjob')
                         : 'Select a monitor type to get started.'}
@@ -519,22 +519,22 @@ const keyWordMonitorPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label="Friendly Name"
+                  label="Tanımlayıcı ad"
                   value={friendlyName}
                   onChange={(e) => setFriendlyName(e.target.value)}
-                  helperText="A descriptive name for this monitor"
+                  helperText="İzleme için tanımlayıcı bir ad belirleyin"
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   required
                   fullWidth
-                  label={'URL (or IP)'}
+                  label={'URL (veya IP)'}
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
-                  placeholder={'https://example.com'}
+                  placeholder={'https://rahatup.com'}
                   helperText={
-                    'The URL to monitor including http:// or https://'
+                    'İzlenecek URL http:// veya https:// prtokölünde olmalı'
                   }
                 />
               </Grid>
@@ -548,8 +548,8 @@ const keyWordMonitorPage = (update=false) => {
                   variant="scrollable"
                   scrollButtons="auto"
                 >
-                  <Tab label="Basic Settings" />
-                  <Tab label="Request Details" />
+                  <Tab label="Genel Ayarlar" />
+                  <Tab label="İstek Detayı" />
                   {/*<Tab label="Authentication" />*/}
                 </Tabs>
 
@@ -557,8 +557,8 @@ const keyWordMonitorPage = (update=false) => {
                   {activeTab === 0 && (
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Monitoring Interval</InputLabel>
+                        <Grid item sx={{'pb':1}}>
+                          <InputLabel>Zaman</InputLabel>
                         </Grid>
                         <FormControl fullWidth>
                           <Slider
@@ -579,13 +579,13 @@ const keyWordMonitorPage = (update=false) => {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Time Unit</InputLabel>
+                        <Grid item sx={{'pb':1}}>
+                          <InputLabel>Zaman Birimi</InputLabel>
                         </Grid>
                         <FormControl fullWidth>
                           <Select
                             name="intervalUnit"
-                            value={intervalUnit || 'minutes'}
+                            value={intervalUnit || 'dakika'}
                             label="Birim"
                             onChange={(e) => {
                               setIntervalUnit(e.target.value)
@@ -607,7 +607,7 @@ const keyWordMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="HTTP Method"
+                          label="HTTP Metot"
                           select
                           defaultValue = {update.update? method : 'GET'}
                           onChange={(e) => setMethod(e.target.value)}
@@ -624,7 +624,7 @@ const keyWordMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Custom HTTP Headers (JSON TYPE)"
+                          label="Özel HTTP Başlıkları (JSON)"
                           multiline
                           rows={3}
                           sx={{ mb: 2 }}
@@ -648,7 +648,7 @@ const keyWordMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Custom HTTP Body (JSON TYPE)"
+                          label="Özel HTTP Gövdesi (JSON)"
                           multiline
                           rows={3}
                           sx={{ mb: 2 }}
@@ -686,7 +686,7 @@ const keyWordMonitorPage = (update=false) => {
                           }
                           variant="outlined"
                           size="small"
-                          helperText="Write them separated by commas (ex: 200,201,409)"
+                          helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
                         />
                       </Grid>
                       <Divider sx={{ my: 3 }} />
@@ -694,13 +694,13 @@ const keyWordMonitorPage = (update=false) => {
                         <TextField
                           required
                           fullWidth
-                          label="Enter the keyword you want to check"
+                          label="Kontrol etmek istediğiniz anahtar kelimeyi girin"
                           name="Keyword"
                           value={keyword}
                           onChange={(e) => setKeyword(e.target.value)}
                           variant="outlined"
                           size="small"
-                          helperText="Enter in Html or Json format (ex: <h1>Keyword</h1> or {'key': 'value'})"
+                          helperText="Html veya Json formatında girin (örneğin: <h1>Anahtar Kelime</h1> veya {'anahtar': 'değer'})"
                         />
                       </Grid>
                     </Grid>
@@ -741,8 +741,8 @@ const keyWordMonitorPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Request Timeout</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>İstek Zaman Aşımı</InputLabel>
                 </Grid>
 
                 <FormControl fullWidth>
@@ -751,12 +751,12 @@ const keyWordMonitorPage = (update=false) => {
                     onChange={(e) => setTimeout(e.target.value)}
                     label="Timeout"
                   >
-                    <MenuItem value={10}>10 seconds</MenuItem>
-                    <MenuItem value={20}>20 seconds</MenuItem>
-                    <MenuItem value={30}>30 seconds</MenuItem>
-                    <MenuItem value={40}>40 seconds</MenuItem>
-                    <MenuItem value={50}>50 seconds</MenuItem>
-                    <MenuItem value={60}>60 seconds</MenuItem>
+                    <MenuItem value={10}>10 saniye</MenuItem>
+                    <MenuItem value={20}>20 saniye</MenuItem>
+                    <MenuItem value={30}>30 saniye</MenuItem>
+                    <MenuItem value={40}>40 saniye</MenuItem>
+                    <MenuItem value={50}>50 saniye</MenuItem>
+                    <MenuItem value={60}>60 saniye</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -765,7 +765,7 @@ const keyWordMonitorPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Alert Contacts
+                Bildirim Atılacaklar
               </Typography>
               <Box sx={{ width: '%75', display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
@@ -843,7 +843,7 @@ const keyWordMonitorPage = (update=false) => {
                 color="inherit"
                 onClick={() => turnMonitorPage()}
               >
-                Cancel
+                İptal
               </Button>
               <Box>
                 <Button
@@ -851,7 +851,7 @@ const keyWordMonitorPage = (update=false) => {
                   color="primary"
                   onClick={()=>{update.update? updateMonitor() :createMonitor()}}
                 >
-                  {update.update?'Update Monitor':'Create Monitor'}
+                  {update.update?'İzleme Güncelle':'İzleme Oluştur'}
                 </Button>
               </Box>
             </Box>

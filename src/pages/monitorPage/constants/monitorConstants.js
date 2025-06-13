@@ -17,9 +17,9 @@ export const HTTP_METHODS = [
 ];
 
 export const INTERVAL_UNITS = [
-  { value: 'seconds', label: 'Second' },
-  { value: 'minutes', label: 'Minute' },
-  { value: 'hours', label: 'Hour' },
+  { value: 'seconds', label: 'Saniye' },
+  { value: 'minutes', label: 'Dakika' },
+  { value: 'hours', label: 'Saat' },
 ];
 
 export const REPORT_TIME_UNITS = [

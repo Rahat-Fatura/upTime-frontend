@@ -148,7 +148,7 @@ const cronJobMonitorFormPage = (update=false) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-          title: response.data.message,
+          title: 'İzleme Başarılı Şekilde Oluşturuldu',
           icon: 'success',
           confirmButtonText: 'Tamam',
         })
@@ -179,7 +179,7 @@ const updateMonitor = async(e) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-                    title: response.data.message,
+                    title: "İzleme Başarılı Şekilde Güncellendi",
                     icon: "success",
                     confirmButtonText: "Tamam",
                 });
@@ -248,13 +248,13 @@ const updateMonitor = async(e) => {
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom fontWeight="500">
-              {update.update?"Update Monitor":"New Monitor"}
+              {update.update?"İzleme Güncelle":"İzleme ekle"}
             </Typography>
 
             {/* Monitor Type Selection */}
             <Box sx={{ mb: 4, mt: 3 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Monitor Type
+                İzleme Tipi
               </Typography>
               <FormControl fullWidth>
                 <Select
@@ -297,7 +297,7 @@ const updateMonitor = async(e) => {
                           Ping
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor network connectivity
+                          Ağ bağlantısından ICMP protokolünden izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -332,7 +332,7 @@ const updateMonitor = async(e) => {
                           HTTP(S)
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor websites and web services
+                          Web sitelerini ve web api servislerini izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -368,7 +368,7 @@ const updateMonitor = async(e) => {
                           Port
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor specific ports
+                          Belirli bağlantı portları izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -401,7 +401,7 @@ const updateMonitor = async(e) => {
                           Keyword
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor for specific keywords
+                          Web servislerdeki belirli anahtar kelimeleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -434,7 +434,7 @@ const updateMonitor = async(e) => {
                           CRON JOB
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Cron job monitoring
+                          Tekrarlanan işleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -456,7 +456,7 @@ const updateMonitor = async(e) => {
                         : monitorType === 'keyword'
                         ? navigate('/user/monitors/new/keyword')
                         : monitorType === 'cronjob'
-                        ? 'Cron job monitoring allows you to monitor scheduled tasks and ensure they run as expected.'
+                        ? 'Tekrarlanan iş izleme, zamanlanmış görevleri izlemenize ve beklendiği gibi çalışmasını sağlamanıza olanak tanır.'
                         : 'Select a monitor type to get started.'}
                     </Typography>
                   </Box>
@@ -472,10 +472,10 @@ const updateMonitor = async(e) => {
                 <TextField
                   required
                   fullWidth
-                  label="Friendly Name"
+                  label="Tanımlayıcı ad"
                   value={friendlyName}
                   onChange={(e) => setFriendlyName(e.target.value)}
-                  helperText="A descriptive name for this monitor"
+                  helperText="İzleme için tanımlayıcı bir ad belirleyin"
                 />
               </Grid>
     
@@ -484,20 +484,20 @@ const updateMonitor = async(e) => {
                 <TextField
                   required
                   fullWidth
-                  label="Devition Time"
+                  label="Sapma Zamanı"
                   value={devitionTime}
                   onChange={(e) => setDevitionTime(Number(e.target.value))}
                   type="number"
-                  placeholder="Enter devition time in minutes"
-                  helperText="Devition time in minutes"
+                  placeholder="Sapma zamanı dakika birimden girizin"
+                  helperText="Sapma zamanı dakika birimden girizin"
                 />
               </Grid>
             </Grid>
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Monitoring Interval</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>Zaman</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
                   <Slider
@@ -518,8 +518,8 @@ const updateMonitor = async(e) => {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Time Unit</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>Zaman Birimi</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
                   <Select
@@ -543,7 +543,7 @@ const updateMonitor = async(e) => {
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Alert Contacts
+                Bildirim Atılacaklar
               </Typography>
               <Box sx={{ width: '%75', display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
@@ -552,7 +552,7 @@ const updateMonitor = async(e) => {
                   type="email"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="example@gmail.com"
+                  placeholder="rahatup@gmail.com"
                 />
                 <Button
                   variant="contained"
@@ -621,7 +621,7 @@ const updateMonitor = async(e) => {
                 color="inherit"
                 onClick={() => turnMonitorPage()}
               >
-                Cancel
+                İptal
               </Button>
               <Box>
                 <Button
@@ -629,7 +629,7 @@ const updateMonitor = async(e) => {
                   color="primary"
                   onClick={()=>{update.update? updateMonitor() :createMonitor()}}
                 >
-                  {update.update?'Update Monitor':'Create Monitor'}
+                  {update.update?'İzleme Güncelle':'İzleme Oluştur'}
                 </Button>
               </Box>
             </Box>

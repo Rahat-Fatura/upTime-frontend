@@ -170,7 +170,7 @@ export default function MonitoringReportsPage() {
               fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
-            Monitor Reports
+            İzleme Raporları
           </Typography>
           <IconButton
             onClick={toggleSidebar}

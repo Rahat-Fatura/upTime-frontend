@@ -78,7 +78,7 @@ const Register = () => {
         },
       }}
     >
-      {/* Logo */}
+      {/* Logo 
       <Box
         component="img"
         src="/RahatUp-logo.png"
@@ -91,7 +91,7 @@ const Register = () => {
           height: "auto",
           filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
         }}
-      />
+      /> */}
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box

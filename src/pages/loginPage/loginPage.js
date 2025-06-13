@@ -94,10 +94,10 @@ const Login = () => {
         },
       }}
     >
-      {/* Logo */}
+      {/* Logo 
           <Box
             component="img"
-            src="/RahatUp-logo.png"
+            src="/rahatsistem-logo.png"
             alt="RahatUp Logo"
             sx={{
               position: "absolute",
@@ -107,7 +107,7 @@ const Login = () => {
               height: "auto",
               filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
             }}
-          />
+          />*/}
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         <Box
           sx={{

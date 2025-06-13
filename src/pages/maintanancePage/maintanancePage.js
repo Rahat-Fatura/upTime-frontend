@@ -327,7 +327,7 @@ export default function MaintanancePage() {
                 fontSize: { xs: '1.5rem', sm: '2rem' }
               }}
             >
-              Maintanance Page
+              Bakım Sayfası
             </Typography>
             <IconButton
               onClick={toggleSidebar}

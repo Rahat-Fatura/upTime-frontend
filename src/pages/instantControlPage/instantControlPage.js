@@ -213,7 +213,7 @@ export default function InstantControlPage() {
               fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
-            Instant Control Page
+            Anlık Kontrol Sayfası
           </Typography>
           <IconButton
             onClick={toggleSidebar}

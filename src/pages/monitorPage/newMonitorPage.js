@@ -164,7 +164,7 @@ const newMonitorPage = (update=false) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-                    title: response.data.message,
+                    title: 'İzleme Başarılı Şekilde Oluşturuldu',
                     icon: "success",
                     confirmButtonText: "Tamam",
                 });
@@ -210,7 +210,7 @@ const newMonitorPage = (update=false) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-                    title: response.data.message,
+                    title: "İzleme Başarılı Şekilde Güncellendi",
                     icon: "success",
                     confirmButtonText: "Tamam",
                 });
@@ -279,13 +279,13 @@ const newMonitorPage = (update=false) => {
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom fontWeight="500">
-              {update.update?"Update Monitor":"New Monitor"}
+              {update.update?"İzleme Güncelle":"İzleme ekle"}
             </Typography>
 
             {/* Monitor Type Selection */}
             <Box sx={{ mb: 4, mt: 3 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Monitor Type
+                İzleme Tipi
               </Typography>
               <FormControl fullWidth>
                 <Select
@@ -328,7 +328,7 @@ const newMonitorPage = (update=false) => {
                           HTTP(S)
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor websites and web services
+                          Web sitelerini ve web api servislerini izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -361,7 +361,7 @@ const newMonitorPage = (update=false) => {
                           Ping
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor network connectivity
+                          Ağ bağlantısından ICMP protokolünden izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -396,7 +396,7 @@ const newMonitorPage = (update=false) => {
                           Port
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor specific ports
+                         Belirli bağlantı portları izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -429,7 +429,7 @@ const newMonitorPage = (update=false) => {
                           Keyword
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor for specific keywords
+                          Web servislerdeki belirli anahtar kelimeleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -462,7 +462,7 @@ const newMonitorPage = (update=false) => {
                           CRON JOB
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Cron job monitoring
+                          Tekrarlanan işleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -476,7 +476,7 @@ const newMonitorPage = (update=false) => {
                     />
                     <Typography variant="body2" color="text.secondary">
                       {monitorType === 'http'
-                        ? 'Monitor websites and web services'
+                        ? 'Web sitenizi, API uç noktanızı veya HTTP üzerinde çalışan herhangi bir şeyi izlemek için HTTP(S) izleyicisini kullanın.'
                         : monitorType === 'ping'
                         ? navigate('/user/monitors/new/ping')
                         : monitorType === 'port'
@@ -501,10 +501,10 @@ const newMonitorPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label="Friendly Name"
+                  label="Tanımlayıcı ad"
                   value={friendlyName}
                   onChange={(e) => setFriendlyName(e.target.value)}
-                  helperText="A descriptive name for this monitor"
+                  helperText="İzleme için tanımlayıcı bir ad belirleyin"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -512,15 +512,15 @@ const newMonitorPage = (update=false) => {
                   required
                   fullWidth
                   label={
-                    'URL (or IP)'
+                    'URL (veya IP)'
                   }
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
                   placeholder={
-                    'https://example.com'
+                    'https://rahatup.com'
                   }
                   helperText={
-                     'The URL to monitor including http:// or https://'
+                     'İzlenecek URL http:// veya https:// prtokölünde olmalı'
                   }
                 />
               </Grid>
@@ -534,8 +534,8 @@ const newMonitorPage = (update=false) => {
                   variant="scrollable"
                   scrollButtons="auto"
                 >
-                  <Tab label="Basic Settings" />
-                  <Tab label="Request Details" />
+                  <Tab label="Genel Ayarlar" />
+                  <Tab label="İstek Detayı" />
                   {/*<Tab label="Authentication" />*/}
                 </Tabs>
 
@@ -543,8 +543,8 @@ const newMonitorPage = (update=false) => {
                   {activeTab === 0 && (
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Monitoring Interval</InputLabel>
+                        <Grid item sx={{'pb':1}}>
+                          <InputLabel>Zaman</InputLabel>
                         </Grid>
                         <FormControl fullWidth>
                           <Slider
@@ -565,13 +565,13 @@ const newMonitorPage = (update=false) => {
                       </Grid>
 
                       <Grid item xs={12} sm={6}>
-                        <Grid item>
-                          <InputLabel>Time Unit</InputLabel>
+                        <Grid item sx={{'pb':1}}>
+                          <InputLabel>Zaman Birimi</InputLabel>
                         </Grid>
                         <FormControl fullWidth>
                           <Select
                             name="intervalUnit"
-                            value={intervalUnit || 'minutes'}
+                            value={intervalUnit || 'dakika'}
                             label="Birim"
                             onChange={(e) => {
                               setIntervalUnit(e.target.value)
@@ -593,7 +593,7 @@ const newMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="HTTP Method"
+                          label="HTTP Metot"
                           select
                           defaultValue = {update.update? method : 'GET'}
                           onChange={(e) => setMethod(e.target.value)}
@@ -610,7 +610,7 @@ const newMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Custom HTTP Headers (JSON TYPE)"
+                          label="Özel HTTP Başlıkları (JSON)"
                           multiline
                           rows={3}
                           sx={{ mb: 2 }}
@@ -634,7 +634,7 @@ const newMonitorPage = (update=false) => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Custom HTTP Body (JSON TYPE)"
+                          label="Özel HTTP Gövdesi (JSON)"
                           multiline
                           rows={3}
                           sx={{ mb: 2 }}
@@ -713,8 +713,8 @@ const newMonitorPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Request Timeout</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>İstek Zaman Aşımı</InputLabel>
                 </Grid>
 
                 <FormControl fullWidth>
@@ -723,12 +723,12 @@ const newMonitorPage = (update=false) => {
                     onChange={(e) => setTimeout(e.target.value)}
                     label="Timeout"
                   >
-                    <MenuItem value={10}>10 seconds</MenuItem>
-                    <MenuItem value={20}>20 seconds</MenuItem>
-                    <MenuItem value={30}>30 seconds</MenuItem>
-                    <MenuItem value={40}>40 seconds</MenuItem>
-                    <MenuItem value={50}>50 seconds</MenuItem>
-                    <MenuItem value={60}>60 seconds</MenuItem>
+                    <MenuItem value={10}>10 saniye</MenuItem>
+                    <MenuItem value={20}>20 saniye</MenuItem>
+                    <MenuItem value={30}>30 saniye</MenuItem>
+                    <MenuItem value={40}>40 saniye</MenuItem>
+                    <MenuItem value={50}>50 saniye</MenuItem>
+                    <MenuItem value={60}>60 saniye</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -737,7 +737,7 @@ const newMonitorPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Alert Contacts
+                Bildirim Atılacaklar
               </Typography>
               <Box sx={{ width: '%75', display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
@@ -746,7 +746,7 @@ const newMonitorPage = (update=false) => {
                   type="email"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="example@gmail.com"
+                  placeholder="rahatup@gmail.com"
                 />
                 <Button
                   variant="contained"
@@ -799,7 +799,7 @@ const newMonitorPage = (update=false) => {
                   {emailList.length === 0 && (
                     <MenuItem disabled>
                       <Typography color="text.secondary">
-                        No email added yet
+                        Henüz email eklenmedi
                       </Typography>
                     </MenuItem>
                   )}
@@ -815,14 +815,14 @@ const newMonitorPage = (update=false) => {
                 color="inherit"
                 onClick={() => turnMonitorPage()}
               >
-                Cancel
+                İptal
               </Button>
               <Box>
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={()=>{update.update? updateMonitor() :createMonitor()}}>
-                  {update.update?'Update Monitor':'Create Monitor'}
+                  {update.update?'İzleme Güncelle':'İzleme Oluştur'}
                 </Button>
               </Box>
             </Box>

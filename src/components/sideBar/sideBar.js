@@ -28,16 +28,16 @@ import {
 } from "tabler-icons-react";
 
 const menuItems = [
-  { text: "Monitoring", icon: <Server size={22} />, path: "/user/monitors" },
-  { text: "Reports", icon: <ReportAnalytics size={22} />, path: "/user/monitoringReports" },
-  { text: "Instant Control", icon: <CellTowerIcon size={22} />, path: "/user/instantControl" },
-  { text: "Maintanance", icon: <Engineering size={22} />, path: "/user/maintanance" },
+  { text: "İzleme", icon: <Server size={22} />, path: "/user/monitors" },
+  { text: "Raporlar", icon: <ReportAnalytics size={22} />, path: "/user/monitoringReports" },
+  { text: "Anlık Kontrol", icon: <CellTowerIcon size={22} />, path: "/user/instantControl" },
+  { text: "Bakım", icon: <Engineering size={22} />, path: "/user/maintanance" },
  /* { text: "Team Members", icon: <TopologyBus size={22} />, path: "/user/teamMembers" },
   { text: "Integrations & API", icon: <IntegrationInstructionsOutlined size={22} />, path: "/user/integrationsApi" },*/
 
-  { text: "Profile", icon: <Person size={22} />, path: "/user/profile" },
+  { text: "Profil", icon: <Person size={22} />, path: "/user/profile" },
   {
-    text: "Logout",
+    text: "Çıkış",
     icon: <LogoutOutlinedIcon size={22} />,
     action: logout,
     path: "/login",

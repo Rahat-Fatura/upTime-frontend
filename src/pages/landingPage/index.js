@@ -155,7 +155,7 @@ const LandingPage = () => {
               display: "flex",
               justifyContent: "space-between",
             }}>
-              <img src="/RahatUp-logo.png" alt="Logo" width={40} height={40} style={{
+              <img src="/rahatsistem-logo.png" alt="Logo" width={40} height={40} style={{
               'borderRadius':'10px',
               'paddingRight': '25px'
             }}/>
@@ -180,7 +180,7 @@ const LandingPage = () => {
               </IconButton>
             ) : (
               <Box sx={{ display: "flex", gap: 3 }}>
-                {["features", "pricing", "contact"].map((item) => (
+                {["özellikler", "fiyatlandırma", "iletişim"].map((item) => (
                   <Button
                     key={item}
                     onClick={() => scrollToSection(item)}
@@ -532,7 +532,7 @@ const LandingPage = () => {
                 Hızlı Bağlantılar
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {["features", "pricing", "contact"].map((item) => (
+                {["özellikler", "fiyatlandırma", "iletişim"].map((item) => (
                   <Button
                     key={item}
                     onClick={() => scrollToSection(item)}
@@ -587,7 +587,7 @@ const LandingPage = () => {
             </IconButton>
           </Box>
           <List>
-            {["features", "pricing", "contact"].map((item) => (
+            {["özellikler", "fiyatlandırma", "iletişim"].map((item) => (
               <ListItem
                 key={item}
                 button

@@ -170,11 +170,11 @@ export default function Dashboard() {
     const down = monitors.filter((m) => m.status === 'down').length
     const avgActive = (active / total) * 100
     return [
-      { title: 'Total Monitor', value: total.toString(), color: '#1976d2' },
-      { title: 'Up Monitor', value: active.toString(), color: '#2e7d32' },
-      { title: 'Down Monitor', value: down.toString(), color: '#d32f2f' },
+      { title: 'Toplam', value: total.toString(), color: '#1976d2' },
+      { title: 'Çalışan', value: active.toString(), color: '#2e7d32' },
+      { title: 'Çalışmayan', value: down.toString(), color: '#d32f2f' },
       {
-        title: 'Overall Active',
+        title: 'Aktif İzleme Yüzdesi',
         value: avgActive ? avgActive.toString().substring(0, 5) + '%' : '0%',
         color: '#ed6c02',
       },
@@ -312,7 +312,7 @@ export default function Dashboard() {
   const columns = [
     {
       field: 'name',
-      headerName: 'Monitor name',
+      headerName: 'Adı',
       width: 250,
       size: 'medium',
       renderCell: (params) => (
@@ -418,14 +418,14 @@ export default function Dashboard() {
     },
     {
       field: 'status',
-      headerName: 'Status',
+      headerName: 'Durumu',
       width: 200,
       renderCell: (params) => {
         if (params.value === "uncertain") {
           return (
             <Chip
               icon={<HelpOutline />}
-              label="Uncertain"
+              label="Belirsiz"
               color="warning"
               size="medium"
               sx={{
@@ -442,7 +442,7 @@ export default function Dashboard() {
           return (
             <Chip
               icon={<BuildIcon />}
-              label="Maintenance"
+              label="Bakım modu"
               color="info"
               size="medium"
               sx={{
@@ -460,7 +460,7 @@ export default function Dashboard() {
           return (
             <Chip
               icon={ <WarningIcon />}
-              label={'Down'}
+              label={'Başarısız'}
               color={'error'}
               size="medium"
               sx={{
@@ -477,7 +477,7 @@ export default function Dashboard() {
           return (
             <Chip
               icon={<CheckCircleIcon />}
-              label={'Up'}
+              label={'Başarılı'}
               color={'success'}
               size="medium"
               sx={{
@@ -494,7 +494,7 @@ export default function Dashboard() {
     },
     {
       field: 'succesRate',
-      headerName: 'Success Rate',
+      headerName: 'Başarı Oranı',
       width: 200,
       renderCell: (params) => {
         console.log(params.row.successRate)
@@ -545,7 +545,7 @@ export default function Dashboard() {
     },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: 'İşlemler',
       width: 200,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
@@ -585,7 +585,7 @@ export default function Dashboard() {
     },
     {
       field: 'edit',
-      headerName: 'Edit',
+      headerName: 'Düzenleme',
       width: 120,
       renderCell: (params) => (
         <Button
@@ -646,7 +646,7 @@ export default function Dashboard() {
               fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
-            Monitoring Page
+            İzleme Sayfası
           </Typography>
           <IconButton
             onClick={toggleSidebar}
@@ -714,7 +714,7 @@ export default function Dashboard() {
                 variant="h6"
                 sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
               >
-                Monitors
+                İzleme listesi
               </Typography>
               <Button
                 variant="contained"
@@ -725,7 +725,7 @@ export default function Dashboard() {
                   fontSize: { xs: '0.875rem', sm: '1rem' }
                 }}
               >
-                New Monitor
+                İzleme Ekle
               </Button>
             </Box>
             <Divider sx={{ mb: 2 }} />

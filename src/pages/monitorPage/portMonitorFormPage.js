@@ -152,7 +152,7 @@ const portMonitorFormPage = (update=false) => {
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-          title: response.data.message,
+          title: "İzleme Başarılı Şekilde Oluşturuldu",
           icon: 'success',
           confirmButtonText: 'Tamam',
         })
@@ -185,7 +185,7 @@ const portMonitorFormPage = (update=false) => {
         console.log('Response:', response.data)
         if (response.data) {
           Swal.fire({
-                      title: response.data.message,
+                      title: "İzleme Başarılı Şekilde Güncellendi",
                       icon: "success",
                       confirmButtonText: "Tamam",
                   });
@@ -254,13 +254,13 @@ const portMonitorFormPage = (update=false) => {
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom fontWeight="500">
-              {update.update?"Update Monitor":"New Monitor"}
+              {update.update?"İzleme Güncelle":"İzleme ekle"}
             </Typography>
 
             {/* Monitor Type Selection */}
             <Box sx={{ mb: 4, mt: 3 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Monitor Type
+                İzleme Tipi
               </Typography>
               <FormControl fullWidth>
                 <Select
@@ -303,7 +303,7 @@ const portMonitorFormPage = (update=false) => {
                           Ping
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor network connectivity
+                          Ağ bağlantısından ICMP protokolünden izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -338,7 +338,7 @@ const portMonitorFormPage = (update=false) => {
                           HTTP(S)
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor websites and web services
+                          Web sitelerini ve web api servislerini izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -374,7 +374,7 @@ const portMonitorFormPage = (update=false) => {
                           Port
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor specific ports
+                          Belirli bağlantı portları izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -407,7 +407,7 @@ const portMonitorFormPage = (update=false) => {
                           Keyword
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Monitor for specific keywords
+                          Web servislerdeki belirli anahtar kelimeleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -440,7 +440,7 @@ const portMonitorFormPage = (update=false) => {
                           CRON JOB
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Cron job monitoring
+                          Tekrarlanan işleri izleyin
                         </Typography>
                       </Box>
                     </Box>
@@ -458,7 +458,7 @@ const portMonitorFormPage = (update=false) => {
                         : monitorType === 'ping'
                         ? navigate('/user/monitors/new/ping')
                         : monitorType === 'port'
-                        ? 'IP PORT CONTROLL'
+                        ? 'Sunucunuzdaki herhangi bir hizmeti izleyin. Belirli TCP portlarında çalışan SMTP, POP3, FTP ve diğer hizmetler için kullanışlıdır.'
                         : monitorType === 'keyword'
                         ? navigate('/user/monitors/new/keyword')
                         : monitorType === 'cronjob'
@@ -478,10 +478,10 @@ const portMonitorFormPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label="Friendly Name"
+                  label="Tanımlayıcı ad"
                   value={friendlyName}
                   onChange={(e) => setFriendlyName(e.target.value)}
-                  helperText="A descriptive name for this monitor"
+                  helperText="İzleme için tanımlayıcı bir ad belirleyin"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -492,7 +492,7 @@ const portMonitorFormPage = (update=false) => {
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
                   placeholder={'Ip: 8.8.8.8'}
-                  helperText={'The IP address'}
+                  helperText={'IP addres'}
                 />
               </Grid>
               <Divider sx={{ my: 3 }} />
@@ -500,19 +500,19 @@ const portMonitorFormPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label="Port Number"
+                  label="Port Numarası"
                   value={port}
                   onChange={(e) => setPort(Number(e.target.value))}
-                  placeholder="e.g. 80, 443"
-                  helperText="The port number to monitor (e.g., 80 for HTTP, 443 for HTTPS)"
+                  placeholder="örnek 80, 443"
+                  helperText="İzlenecek ağ port numarası"
                 />
               </Grid>
             </Grid>
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Monitoring Interval</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>Zaman</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
                   <Slider
@@ -533,8 +533,8 @@ const portMonitorFormPage = (update=false) => {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Time Unit</InputLabel>
+                <Grid item sx={{'pb':1}}>
+                  <InputLabel>Zaman Biriimi</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
                   <Select
@@ -558,8 +558,8 @@ const portMonitorFormPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item>
-                  <InputLabel>Request Timeout</InputLabel>
+                <Grid item sx={{'pb':1}}> 
+                  <InputLabel>İstek Zaman Aşımı</InputLabel>
                 </Grid>
 
                 <FormControl fullWidth>
@@ -568,12 +568,12 @@ const portMonitorFormPage = (update=false) => {
                     onChange={(e) => setTimeout(Number(e.target.value))}
                     label="Timeout"
                   >
-                    <MenuItem value={10}>10 seconds</MenuItem>
-                    <MenuItem value={20}>20 seconds</MenuItem>
-                    <MenuItem value={30}>30 seconds</MenuItem>
-                    <MenuItem value={40}>40 seconds</MenuItem>
-                    <MenuItem value={50}>50 seconds</MenuItem>
-                    <MenuItem value={60}>60 seconds</MenuItem>
+                    <MenuItem value={10}>10 saniye</MenuItem>
+                    <MenuItem value={20}>20 saniye</MenuItem>
+                    <MenuItem value={30}>30 saniye</MenuItem>
+                    <MenuItem value={40}>40 saniye</MenuItem>
+                    <MenuItem value={50}>50 saniye</MenuItem>
+                    <MenuItem value={60}>60 saniye</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -582,7 +582,7 @@ const portMonitorFormPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Box sx={{ mb: 4 }}>
               <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-                Alert Contacts
+                Bildirim Atılacaklar
               </Typography>
               <Box sx={{ width: '%75', display: 'flex', gap: 1, mb: 2 }}>
                 <TextField
@@ -591,7 +591,7 @@ const portMonitorFormPage = (update=false) => {
                   type="email"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="example@gmail.com"
+                  placeholder="rahatup@gmail.com"
                 />
                 <Button
                   variant="contained"
@@ -660,7 +660,7 @@ const portMonitorFormPage = (update=false) => {
                 color="inherit"
                 onClick={() => turnMonitorPage()}
               >
-                Cancel
+                İptal
               </Button>
               <Box>
                 <Button
@@ -668,7 +668,7 @@ const portMonitorFormPage = (update=false) => {
                   color="primary"
                   onClick={()=>{update.update? updateMonitor() :createMonitor()}}
                 >
-                  {update.update?'Update Monitor':'Create Monitor'}
+                  {update.update?'İzleme Güncelle':'İzleme Oluştur'}
                 </Button>
               </Box>
             </Box>
