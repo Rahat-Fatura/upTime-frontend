@@ -155,7 +155,7 @@ const LandingPage = () => {
               display: "flex",
               justifyContent: "space-between",
             }}>
-              <img src="/rahatUp-logo.png" alt="Logo" width={40} height={40} style={{
+              <img src="/RahatUp-logo.png" alt="Logo" width={40} height={40} style={{
               'borderRadius':'10px',
               'paddingRight': '25px'
             }}/>
