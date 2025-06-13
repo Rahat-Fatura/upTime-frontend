@@ -76,7 +76,7 @@ function AppRoutes() {
         }
       } else if (!jwtToken) {
         if (
-          !["/register", "/forgot-password", "/login","/"].includes(
+          !["/register", "/forgot-password", "/reset-password", "/login", "/"].includes(
             location.pathname
           ) 
         ) {
@@ -94,16 +94,13 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {console.log(window.location.hostname,"-----",process.env.REACT_APP_LANDING_PAGE_DOMAIN)}
       <Route path="/">
         <Route
           index
           element={
-              <LandingPage />
+            <LandingPage />
           }
         />
-       
-        <Route path="/landing" element={<LandingPage/>} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

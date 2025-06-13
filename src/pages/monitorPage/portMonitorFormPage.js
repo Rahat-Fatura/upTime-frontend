@@ -488,11 +488,11 @@ const portMonitorFormPage = (update=false) => {
                 <TextField
                   required
                   fullWidth
-                  label={'IP (or Host)'}
+                  label={'IP'}
                   value={host}
                   onChange={(e) => setHost(e.target.value)}
-                  placeholder={'8.8.8.8 or exsample.com'}
-                  helperText={'The IP address or hostname to ping'}
+                  placeholder={'Ip: 8.8.8.8'}
+                  helperText={'The IP address'}
                 />
               </Grid>
               <Divider sx={{ my: 3 }} />

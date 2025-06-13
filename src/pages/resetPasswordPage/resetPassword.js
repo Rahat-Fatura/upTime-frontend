@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Grid, Button, Typography, TextField } from '@mui/material'
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew'
 import { useNavigate } from 'react-router-dom'
@@ -10,6 +10,7 @@ import Swal from 'sweetalert2'
 import IconButton from '@mui/material/IconButton'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import { jwtDecode } from 'jwt-decode'
 const ResetPassword = () => {
   const location = useLocation()
   const queryParams = new URLSearchParams(location.search)
@@ -20,6 +21,38 @@ const ResetPassword = () => {
   const [showVerifyPassword, setShowVerifyPassword] = useState(false)
   const navigate = useNavigate()
 
+  useEffect(()=>{
+    let decodeToken;
+    if(token){
+      console.log("Token:",token)
+    try{
+      decodeToken = jwtDecode(token);
+    }
+    catch(error){
+      decodeToken = null;
+    }
+     
+     console.log("Decode Token", decodeToken)
+     if(!decodeToken){
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Access',
+        text: 'Please checked your email link !',
+        confirmButtonText: 'Okey',
+      })
+      navigate("/forgot-password")
+     }
+    }else{
+      Swal.fire({
+        icon: 'error',
+        title: 'Error Access',
+        text: 'Please checked your email link !',
+        confirmButtonText: 'Okey',
+      })
+      navigate("/forgot-password")
+    }
+   
+  },[]);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowVerifyPassword = () => setShowVerifyPassword((show) => !show);
   const handleMouseDownPassword = (event) => {
@@ -42,7 +75,7 @@ const ResetPassword = () => {
     else{
         axios
       .post(
-        `${process.env.REACT_APP_API_URL}v1/auth/reset-password?token=${token}`,
+        `${process.env.REACT_APP_API_URL}/auth/reset-password?token=${token}`,
         {
           password: password,
         },

@@ -12,7 +12,7 @@ const ForgotPassword = () => {
 
 
   const handleSubmit = (event) => {
-    axios.post(`${process.env.REACT_APP_API_URL}v1/auth/forgot-password`,{
+    axios.post(`${process.env.REACT_APP_API_URL}/auth/forgot-password`,{
       email: email
     },{
       headers:{
