@@ -30,7 +30,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { logout } from "../../api/auth/logout";
 
 const menuItems = [
-  { text: "Anasayfa", icon: <Home size={22} />, path: "/admin" },
+  /*{ text: "Kullanıcı detayı", icon: <Home size={22} />, path: "/admin/userDetail" },*/
   {
     text: "Kullanıcılar",
     icon: <GroupOutlinedIcon size={22} />,
@@ -41,11 +41,11 @@ const menuItems = [
     icon: <Settings size={22} />,
     path: "/admin/settings",
   },
-  {
-    text: "Sunucular",
-    icon: <Server size={22}/>,
-    path: "/admin/monitors",
-  },
+ /* {
+    text: "Yeni Kullanıcı",
+    icon: <GroupOutlinedIcon size={22}/>,
+    path: "/admin/newUser",
+  },*/
   {
     text: "Çıkış",
     icon: <LogoutOutlinedIcon size={22} />,

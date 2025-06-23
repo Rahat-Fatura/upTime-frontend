@@ -4,7 +4,8 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import "ag-grid-enterprise";
-import {
+import api from "../../api/auth/axiosInstance.js";
+import{
   Grid,
   Typography,
   Button,
@@ -17,26 +18,44 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import gridSideBar from "../../components/GridSideBar/gridSideBar.js";
 import { createColumnDefs  } from "./columnDefs.js";
 import localeTextTr from "../../locale.tr";
-import { FileInfo } from "tabler-icons-react";
+import { FileInfo, Server } from "tabler-icons-react";
 import localStorage from "local-storage";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import { Monitor } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+
 function AdminUsers() {
   const [isOpen, setIsOpen] = useState(false);
+
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
     console.log(isOpen);
   };
-
+  const [users,setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
   const [totalCount, setTotalCount] = useState(0);
   const [lastScroll, setLastScroll] = useState();
-
+  const navigate = useNavigate();
+  async function getUsers(){
+   try {
+    const users = await api.get("/users");
+    console.log(users.data)
+    setRowData(users.data)
+    setUsers(users.data);
+   } catch (error) {
+    console.log(error)
+    setRowData([])
+    setUsers([]);
+   }
+  }
   useEffect(() => {
+    //getUsers();
     const lastPage = localStorage.get("page");
     const lastPageSize = localStorage.get("pageSize");
     const sideBarOpen = localStorage.get("sidebar");
-
+    
     if (sideBarOpen === "false") {
       setIsOpen(false);
     } else {
@@ -62,6 +81,10 @@ function AdminUsers() {
     };
   }, []);
 
+
+  const handleNewUser = () => {
+    navigate('/admin/newUser');
+  }
   const defaultColDef = useMemo(
     () => ({
       flex: 1,
@@ -74,6 +97,70 @@ function AdminUsers() {
     []
   );
 
+  const ButtonRenderer = (props) => {
+    const {USER_DETAIL, MONITORS} = props;
+    const handleClick = () => {
+      const userInfo=props.data;
+      handleOpen();
+      localStorage.set("scrollPosition", Math.floor(window.scrollY));
+      // Buraya tıklama durumunda yapılacak işlemi ekleyin
+      if(USER_DETAIL){
+        navigate('/admin/userDetail', { state: { userInfo } })
+      }
+      else if(MONITORS){
+        navigate('/admin/userMonitors', { state: { userInfo } })
+      }
+      else{
+        console.log("Geçersiz button ")
+      }
+
+    };
+      
+    return (
+      <Button
+       sx={{
+        "background": "blue",
+       }}
+       onClick={handleClick}>
+        {
+          USER_DETAIL?
+          <GroupOutlinedIcon sx={{
+            'color': 'white',
+            '&:hover':{
+              "color": "blue"
+            },
+          }} size={22}  />
+          :
+          <Monitor sx={{
+            'fill': 'white',
+            '&:hover':{
+              "fill": "blue"
+            },
+          }}/>
+        }
+      </Button>
+    );
+  };
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const localeText = {
+    // Set locale text here
+    columns: "Kolonlar",
+    filters: "Filtreler",
+    // Other translations
+    selectAll: "(Hepsini Seç)",
+    selectAllSearchResults: "(Tüm Arama Sonuçlarını Seç)",
+    searchOoo: "Arama...",
+    blanks: "Boşluklar",
+    noMatches: "Eşleşme Yok",
+    // Add more as needed
+  };
+  const [columnDefs, setColumnDefs] = useState(createColumnDefs(ButtonRenderer));
+
+  const [rowData, setRowData] = useState();
+
+  // Örnek veri
   const fakeData = [
     {
       faturaNo: "2424",
@@ -106,41 +193,6 @@ function AdminUsers() {
       ],
     },
   ];
-  const ButtonRenderer = (props) => {
-    const handleClick = () => {
-      console.log(props.data);
-      handleOpen();
-      localStorage.set("scrollPosition", Math.floor(window.scrollY));
-      // Buraya tıklama durumunda yapılacak işlemi ekleyin
-    };
-
-    return (
-      <Button onClick={handleClick}>
-        <FileInfo></FileInfo>
-      </Button>
-    );
-  };
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const localeText = {
-    // Set locale text here
-    columns: "Kolonlar",
-    filters: "Filtreler",
-    // Other translations
-    selectAll: "(Hepsini Seç)",
-    selectAllSearchResults: "(Tüm Arama Sonuçlarını Seç)",
-    searchOoo: "Arama...",
-    blanks: "Boşluklar",
-    noMatches: "Eşleşme Yok",
-    // Add more as needed
-  };
-  const [columnDefs, setColumnDefs] = useState(createColumnDefs(ButtonRenderer));
-
-  const [rowData, setRowData] = useState();
-
-  // Örnek veri
-
   const buttonRenderer = (params) => {
     return (
       <Button onClick={() => console.log("Detay tıklandı:", params.data)}>
@@ -149,8 +201,8 @@ function AdminUsers() {
     );
   };
 
-  const onGridReady = useCallback((params) => {
-    setRowData(fakeData);
+  const onGridReady = useCallback(() => {
+    getUsers();
   }, []);
   return (
     <Grid container>
@@ -227,12 +279,12 @@ function AdminUsers() {
                   justifyContent: "end",
                 }}
               >
-                <Button className="admin-button">Filtrele</Button>
+                {/*<Button className="admin-button">Filtrele</Button>
                 <Button className="admin-button">
                   Devam eden senk. kontrol et
                 </Button>
-                <Button className="admin-button">Verileri yönet</Button>
-                <Button className="admin-button">Kullanıcı ekle</Button>
+                <Button className="admin-button">Verileri yönet</Button>*/}
+                <Button className="admin-button" onClick={handleNewUser}>Kullanıcı ekle</Button>
               </Grid>
             </Grid>
             <Grid

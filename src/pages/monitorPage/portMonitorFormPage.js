@@ -53,14 +53,16 @@ import {
 } from '@mui/icons-material'
 import ComputerIcon from '@mui/icons-material/Computer'
 import { width } from '@mui/system'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   HTTP_METHODS,
   INTERVAL_UNITS,
   REPORT_TIME_UNITS,
 } from './constants/monitorConstants'
-
-const portMonitorFormPage = (update=false) => {
+import AdminSidebar from '../../components/adminSideBar/adminSideBar'
+import { jwtDecode } from 'jwt-decode'
+import { cookies } from '../../utils/cookie'
+const portMonitorFormPage = (update = false) => {
   const [params, setParams] = useState(useParams())
   const [monitorType, setMonitorType] = useState('port')
   const [friendlyName, setFriendlyName] = useState('')
@@ -77,35 +79,49 @@ const portMonitorFormPage = (update=false) => {
   const [emailInput, setEmailInput] = useState('')
   const [emailList, setEmailList] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
+  const [role, setRole] = useState('')
   const navigate = useNavigate()
-
-   useEffect(() => {
-      const fetchMonitorData= async()=>{
-        try {
-          const response = await api.get(`monitors/port/${params.id}`);
-          setFriendlyName(response.data.monitor.name);
-          setHost(response.data.host);
-          setPort(response.data.port);
-          setTimeout(response.data.timeOut);
-          setInterval(response.data.monitor.interval);
-          setIntervalUnit(response.data.monitor.intervalUnit);
-          setEmailList(response.data.monitor.alertContacts || []);
+  const location = useLocation()
+  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
+  useEffect(() => {
+    const fetchMonitorData = async () => {
+      try {
+        const jwtToken = cookies.get('jwt-access')
+        console.log('JWT Token:', jwtToken)
+        if (jwtToken) {
+          const decodedToken = jwtDecode(jwtToken)
+          setRole(decodedToken.role)
         }
-        catch (error) {
-         Swal.fire({
-            title: "Hata",
-            text: "Monitor bilgileri alınırken bir hata oluştu.",
-            icon: "error",
-            confirmButtonText: "Tamam",
-          });
-          turnMonitorPage();
-          console.error('Monitor bilgileri alınırken hata oluştu:', error)
-        }
+        const response = await api.get(`monitors/port/${params.id}`)
+        setFriendlyName(response.data.monitor.name)
+        setHost(response.data.host)
+        setPort(response.data.port)
+        setTimeout(response.data.timeOut)
+        setInterval(response.data.monitor.interval)
+        setIntervalUnit(response.data.monitor.intervalUnit)
+        setEmailList(response.data.monitor.alertContacts || [])
+      } catch (error) {
+        Swal.fire({
+          title: 'Hata',
+          text: 'Monitor bilgileri alınırken bir hata oluştu.',
+          icon: 'error',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
+        console.error('Monitor bilgileri alınırken hata oluştu:', error)
       }
-      if (update.update) {
-        fetchMonitorData();
+    }
+    if (update.update) {
+      fetchMonitorData()
+    } else {
+      const jwtToken = cookies.get('jwt-access')
+      console.log('JWT Token:', jwtToken)
+      if (jwtToken) {
+        const decodedToken = jwtDecode(jwtToken)
+        setRole(decodedToken.role)
       }
-    },[])
+    }
+  }, [])
 
   useEffect(() => {
     console.log('Interval Unit:', intervalUnit)
@@ -116,17 +132,17 @@ const portMonitorFormPage = (update=false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(interval>=20&&interval<60?interval:20)
+        setInterval(interval >= 20 && interval < 60 ? interval : 20)
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(interval>0&&interval<60?interval:0)
+        setInterval(interval > 0 && interval < 60 ? interval : 0)
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(interval>0&&interval<24?interval:1)
+        setInterval(interval > 0 && interval < 24 ? interval : 1)
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -148,11 +164,14 @@ const portMonitorFormPage = (update=false) => {
         intervalUnit: intervalUnit,
       }
       console.log(formattedData)
-      const response = await api.post(`monitors/port/`, formattedData)
+      const response = await api.post(
+        role === 'admin' ? `monitors/port/${userInfo.id}` : `monitors/port/`,
+        formattedData
+      )
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
-          title: "İzleme Başarılı Şekilde Oluşturuldu",
+          title: 'İzleme Başarılı Şekilde Oluşturuldu',
           icon: 'success',
           confirmButtonText: 'Tamam',
         })
@@ -168,38 +187,41 @@ const portMonitorFormPage = (update=false) => {
     }
   }
 
-  const updateMonitor = async(e) => {
-      try {
-        const formattedData = {
-          name: friendlyName,
-          portMonitor:{
-            host: host,
-            port: port,
-            timeOut: timeout,
-          },
-          interval: interval,
-          intervalUnit: intervalUnit
-        }
-        console.log(formattedData)
-        const response = await api.put(`monitors/port/${params.id}`, formattedData)
-        console.log('Response:', response.data)
-        if (response.data) {
-          Swal.fire({
-                      title: "İzleme Başarılı Şekilde Güncellendi",
-                      icon: "success",
-                      confirmButtonText: "Tamam",
-                  });
-          turnMonitorPage();
-        }
-      } catch (error) {
-        Swal.fire({
-                    title: error.response.data.message,
-                    icon: "error",
-                    confirmButtonText: "Tamam",
-                });
-        console.error('Monitor update error :', error)
+  const updateMonitor = async (e) => {
+    try {
+      const formattedData = {
+        name: friendlyName,
+        portMonitor: {
+          host: host,
+          port: port,
+          timeOut: timeout,
+        },
+        interval: interval,
+        intervalUnit: intervalUnit,
       }
+      console.log(formattedData)
+      const response = await api.put(
+        `monitors/port/${params.id}`,
+        formattedData
+      )
+      console.log('Response:', response.data)
+      if (response.data) {
+        Swal.fire({
+          title: 'İzleme Başarılı Şekilde Güncellendi',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
+      }
+    } catch (error) {
+      Swal.fire({
+        title: error.response.data.message,
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
+      console.error('Monitor update error :', error)
     }
+  }
 
   const handleMonitorTypeChange = (event) => {
     setMonitorType(event.target.value)
@@ -210,7 +232,9 @@ const portMonitorFormPage = (update=false) => {
   }
 
   const turnMonitorPage = () => {
-    navigate('/user/monitors/')
+    role === 'user'
+      ? navigate('/user/monitors/')
+      : navigate('/admin/userMonitors/', { state: { userInfo } })
   }
 
   const handleTabChange = (event, newValue) => {
@@ -247,14 +271,17 @@ const portMonitorFormPage = (update=false) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ width: '240px' }}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+        {role === 'admin' ? (
+          <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
+        ) : (
+          <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+        )}
       </Box>
       <Box sx={{ flexGrow: 1 }}>
-
         <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
           <Paper sx={{ p: 4 }}>
             <Typography variant="h5" gutterBottom fontWeight="500">
-              {update.update?"İzleme Güncelle":"İzleme ekle"}
+              {update.update ? 'İzleme Güncelle' : 'İzleme ekle'}
             </Typography>
 
             {/* Monitor Type Selection */}
@@ -276,7 +303,10 @@ const portMonitorFormPage = (update=false) => {
                     },
                   }}
                 >
-                  <MenuItem disabled={update.update?true:false} value="ping">
+                  <MenuItem
+                    disabled={update.update ? true : false}
+                    value="ping"
+                  >
                     <Box
                       sx={{
                         display: 'flex',
@@ -311,7 +341,10 @@ const portMonitorFormPage = (update=false) => {
 
                   <Divider />
 
-                  <MenuItem disabled={update.update?true:false} value="http">
+                  <MenuItem
+                    disabled={update.update ? true : false}
+                    value="http"
+                  >
                     <Box
                       sx={{
                         display: 'flex',
@@ -380,7 +413,10 @@ const portMonitorFormPage = (update=false) => {
                     </Box>
                   </MenuItem>
                   <Divider />
-                  <MenuItem disabled={update.update?true:false} value="keyword">
+                  <MenuItem
+                    disabled={update.update ? true : false}
+                    value="keyword"
+                  >
                     <Box
                       sx={{
                         display: 'flex',
@@ -413,7 +449,10 @@ const portMonitorFormPage = (update=false) => {
                     </Box>
                   </MenuItem>
                   <Divider />
-                  <MenuItem disabled={update.update?true:false} value="cronjob">
+                  <MenuItem
+                    disabled={update.update ? true : false}
+                    value="cronjob"
+                  >
                     <Box
                       sx={{
                         display: 'flex',
@@ -454,15 +493,31 @@ const portMonitorFormPage = (update=false) => {
                     />
                     <Typography variant="body2" color="text.secondary">
                       {monitorType === 'http'
-                        ? navigate('/user/monitors/new/http')
+                        ? role === 'user'
+                          ? navigate('/user/monitors/new/http')
+                          : navigate('/admin/monitors/new/http', {
+                              state: { userInfo },
+                            })
                         : monitorType === 'ping'
-                        ? navigate('/user/monitors/new/ping')
+                        ? role === 'user'
+                          ? navigate('/user/monitors/new/ping')
+                          : navigate('/admin/monitors/new/ping', {
+                              state: { userInfo },
+                            })
                         : monitorType === 'port'
                         ? 'Sunucunuzdaki herhangi bir hizmeti izleyin. Belirli TCP portlarında çalışan SMTP, POP3, FTP ve diğer hizmetler için kullanışlıdır.'
                         : monitorType === 'keyword'
-                        ? navigate('/user/monitors/new/keyword')
+                        ? role === 'user'
+                          ? navigate('/user/monitors/new/keyword')
+                          : navigate('/admin/monitors/new/keyword', {
+                              state: { userInfo },
+                            })
                         : monitorType === 'cronjob'
-                        ? navigate('/user/monitors/new/cronjob')
+                        ? role === 'user'
+                          ? navigate('/user/monitors/new/cronjob')
+                          : navigate('/admin/monitors/new/cronjob', {
+                              state: { userInfo },
+                            })
                         : 'Select a monitor type to get started.'}
                     </Typography>
                   </Box>
@@ -511,7 +566,7 @@ const portMonitorFormPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item sx={{'pb':1}}>
+                <Grid item sx={{ pb: 1 }}>
                   <InputLabel>Zaman</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
@@ -533,7 +588,7 @@ const portMonitorFormPage = (update=false) => {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Grid item sx={{'pb':1}}>
+                <Grid item sx={{ pb: 1 }}>
                   <InputLabel>Zaman Biriimi</InputLabel>
                 </Grid>
                 <FormControl fullWidth>
@@ -558,7 +613,7 @@ const portMonitorFormPage = (update=false) => {
             <Divider sx={{ my: 3 }} />
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Grid item sx={{'pb':1}}> 
+                <Grid item sx={{ pb: 1 }}>
                   <InputLabel>İstek Zaman Aşımı</InputLabel>
                 </Grid>
 
@@ -666,9 +721,11 @@ const portMonitorFormPage = (update=false) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={()=>{update.update? updateMonitor() :createMonitor()}}
+                  onClick={() => {
+                    update.update ? updateMonitor() : createMonitor()
+                  }}
                 >
-                  {update.update?'İzleme Güncelle':'İzleme Oluştur'}
+                  {update.update ? 'İzleme Güncelle' : 'İzleme Oluştur'}
                 </Button>
               </Box>
             </Box>

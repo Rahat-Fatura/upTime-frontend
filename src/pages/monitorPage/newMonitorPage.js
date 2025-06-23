@@ -40,12 +40,15 @@ import {
 } from '@mui/icons-material'
 import ComputerIcon from '@mui/icons-material/Computer';
 import { width } from '@mui/system'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   HTTP_METHODS,
   INTERVAL_UNITS,
   REPORT_TIME_UNITS,
 } from './constants/monitorConstants'
+import { cookies } from '../../utils/cookie'
+import { jwtDecode } from 'jwt-decode';
+import AdminSidebar from '../../components/adminSideBar/adminSideBar';
 
 const newMonitorPage = (update=false) => {
   const [params, setParams] = useState(useParams())
@@ -67,8 +70,10 @@ const newMonitorPage = (update=false) => {
   const [emailInput, setEmailInput] = useState('')
   const [emailList, setEmailList] = useState([])
   const [anchorEl, setAnchorEl] = useState(null)
+  const [role, setRole] = useState('')
   const navigate = useNavigate()
-
+  const location = useLocation();
+  const [userInfo, setUserInfo] = useState(location.state?.userInfo||{});
   useEffect(() => {
     console.log('Interval Unit:', intervalUnit)
     console.log('Interval Value:', interval)
@@ -78,6 +83,12 @@ const newMonitorPage = (update=false) => {
   useEffect(() => {
     const fetchMonitorData= async()=>{
       try {
+        const jwtToken = cookies.get('jwt-access')
+        console.log('JWT Token:', jwtToken)
+        if (jwtToken) {
+          const decodedToken = jwtDecode(jwtToken);
+          setRole(decodedToken.role)
+        }
         const response = await api.get(`monitors/http/${params.id}`);
         console.log(response.data)
         setFriendlyName(response.data.monitor.name);
@@ -110,6 +121,15 @@ const newMonitorPage = (update=false) => {
     }
     if (update.update) {
       fetchMonitorData();
+    }
+    else{
+      const jwtToken = cookies.get('jwt-access')
+        console.log('JWT Token:', jwtToken)
+        if (jwtToken) {
+          const decodedToken = jwtDecode(jwtToken);
+          console.log('Decoded Token:', decodedToken)
+          setRole(decodedToken.role)
+        }
     }
   },[])
   const getIntervalLimits = (unit) => {
@@ -160,7 +180,8 @@ const newMonitorPage = (update=false) => {
         intervalUnit: intervalUnit,
       }
       console.log(formattedData)
-      const response = await api.post(`monitors/http/`, formattedData)
+      console.log('Role:', role)
+      const response = await api.post(role==='admin'?`monitors/http/${userInfo.id}`:`monitors/http/`, formattedData)
       console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
@@ -235,7 +256,8 @@ const newMonitorPage = (update=false) => {
   }
 
   const turnMonitorPage = () => {
-    navigate('/user/monitors/')
+    console.log('Role:', userInfo)
+    role === 'user'?navigate('/user/monitors/'):navigate('/admin/userMonitors/',{state: {userInfo}});
   }
 
   const handleTabChange = (event, newValue) => {
@@ -272,7 +294,7 @@ const newMonitorPage = (update=false) => {
   return (
     <Box sx={{ display: 'flex' }}>
       <Box sx={{ width: '180px' }}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+        {role==='admin'?<AdminSidebar status={isOpen} toggleSidebar={toggleSidebar}/>:<Sidebar status={isOpen} toggleSidebar={toggleSidebar} />}
       </Box>
       <Box sx={{ flexGrow: 1 }}>
 
@@ -478,13 +500,13 @@ const newMonitorPage = (update=false) => {
                       {monitorType === 'http'
                         ? 'Web sitenizi, API uç noktanızı veya HTTP üzerinde çalışan herhangi bir şeyi izlemek için HTTP(S) izleyicisini kullanın.'
                         : monitorType === 'ping'
-                        ? navigate('/user/monitors/new/ping')
+                        ? role==='user'?navigate('/user/monitors/new/ping'):navigate('/admin/monitors/new/ping',{state: { userInfo }})
                         : monitorType === 'port'
-                        ? navigate('/user/monitors/new/port')
+                        ? role==='user'?navigate('/user/monitors/new/port'):navigate('/admin/monitors/new/port',{state: { userInfo }})
                         : monitorType === 'keyword'
-                        ? navigate('/user/monitors/new/keyword')
+                        ? role==='user'?navigate('/user/monitors/new/keyword'):navigate('/admin/monitors/new/keyword',{state: { userInfo }})
                         : monitorType === 'cronjob'
-                        ? navigate('/user/monitors/new/cronjob')
+                        ? role==='user'?navigate('/user/monitors/new/cronjob'):navigate('/admin/monitors/new/cronjob',{state: { userInfo }})
                         : 'Select a monitor type to get started.'
                       }
                     </Typography>

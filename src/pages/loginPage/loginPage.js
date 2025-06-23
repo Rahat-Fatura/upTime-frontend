@@ -38,10 +38,10 @@ const Login = () => {
   const handleLogin = (event) => {
     login(email, password)
       .then((resp) => {
-        cookies.set("jwt-access", resp.data.tokens.access.token);
-        cookies.set("jwt-access-expires", resp.data.tokens.access.expires);
-        cookies.set("jwt-refresh", resp.data.tokens.refresh.token);
-        cookies.set("jwt-refresh-expires", resp.data.tokens.refresh.expires);
+        cookies.set("jwt-access", resp.data.access.token);
+        cookies.set("jwt-access-expires", resp.data.access.expires);
+        cookies.set("jwt-refresh", resp.data.refresh.token);
+        cookies.set("jwt-refresh-expires", resp.data.refresh.expires);
         if (rememberMe) {
           cookies.set("email", email, { path: "/", maxAge: 60 * 60 * 24 * 30 });
           cookies.set("password", password, { path: "/", maxAge: 60 * 60 * 24 * 30 });
@@ -51,13 +51,10 @@ const Login = () => {
           cookies.remove("password");
           cookies.remove("rememberMe");
         }
-        const decodedToken = jwtDecode(resp.data.tokens.access.token);
-        const role = resp.data.user.role;
-        if (role === "user") {
-          cookies.set("user", resp.data.user);
+        const decodedToken = jwtDecode(resp.data.access.token);
+        if (decodedToken.role === "user") {
           navigate("/user/monitors");
-        } else if (role === "admin") {
-          cookies.set("user", resp.data.user);
+        } else if (decodedToken.role === "admin") {
           navigate("/admin");
         }
       })

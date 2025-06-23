@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
-import BuildIcon from '@mui/icons-material/Build';
-
+import BuildIcon from '@mui/icons-material/Build'
+import { useLocation } from 'react-router-dom'
 import {
   Typography,
   IconButton,
@@ -31,14 +31,17 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Menu as MenuIcon,
+  Report,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
-import { Edit } from 'tabler-icons-react'
+import { Edit, ReportAnalytics } from 'tabler-icons-react'
 import { INITIAL_STATS } from './constants/monitorConstants'
 import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom'
+import AdminSidebar from '../../components/adminSideBar/adminSideBar'
+import NextPlanIcon from '@mui/icons-material/NextPlan';
+import Swal from 'sweetalert2'
 
 const initialFormData = {
   name: '',
@@ -54,7 +57,7 @@ const initialFormData = {
   isActiveByOwner: true,
 }
 
-export default function Dashboard() {
+export default function AdmimMonitors() {
   const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
   const [filteredMonitors, setFilteredMonitors] = useState([])
@@ -62,7 +65,9 @@ export default function Dashboard() {
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
-  const navigate = useNavigate();
+  const location = useLocation()
+  const [userInfo, setUserInfo] = useState(location.state.userInfo);
+  const navigate = useNavigate()
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
     method: Yup.string()
@@ -161,7 +166,15 @@ export default function Dashboard() {
   }
 
   const handleSubmit = async (e) => {
-    navigate('new/http');
+    navigate('/admin/monitors/new/http',{state: { userInfo }})
+  }
+
+  const handleSubmitMaintanance = async (e) => {
+    navigate('/admin/monitors/maintanance',{state: { userInfo }})
+  }
+
+  const handleSubmitReport = async (e) => {
+    navigate('/admin/monitors/report', {state: { userInfo }})
   }
 
   const calculateStats = () => {
@@ -188,7 +201,9 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchMonitors = async () => {
       try {
-        const response = await api.get(`monitors/`)
+        console.log('Fetching monitors...')
+        setUserInfo(location.state.userInfo)
+        const response = await api.get(`monitors/${userInfo.id}`)
         if (response.data) {
           setMonitors(response.data)
           console.log(response.data)
@@ -198,7 +213,6 @@ export default function Dashboard() {
         alertify.error('Monitör verileri alınırken bir hata oluştu.')
       }
     }
-
     const interval = setInterval(fetchMonitors, 20000)
     fetchMonitors()
     return () => clearInterval(interval)
@@ -211,13 +225,13 @@ export default function Dashboard() {
     }
 
     const searchLower = searchQuery.toLowerCase().trim()
-    
+
     if (searchLower === '') {
       setFilteredMonitors(monitors)
       return
     }
 
-    const filtered = monitors.filter(monitor => {
+    const filtered = monitors.filter((monitor) => {
       const nameMatch = monitor.name?.toLowerCase().includes(searchLower)
       const hostMatch = monitor.host?.toLowerCase().includes(searchLower)
       const typeMatch = monitor.monitorType?.toLowerCase().includes(searchLower)
@@ -235,7 +249,7 @@ export default function Dashboard() {
           setMonitors((prevMonitors) =>
             prevMonitors.map((m) =>
               m.id === monitorId
-                ? { ...m, isActiveByOwner: true, status: "uncertain" }
+                ? { ...m, isActiveByOwner: true, status: 'uncertain' }
                 : m
             )
           )
@@ -246,22 +260,21 @@ export default function Dashboard() {
           try {
             const response = await api.put(`monitors/${monitorId}/pause`, {})
             setMonitors((prevMonitors) =>
-            prevMonitors.map((m) =>
-              m.id === monitorId
-                ? { ...m, isActiveByOwner: false, status: "uncertain" }
-                : m
+              prevMonitors.map((m) =>
+                m.id === monitorId
+                  ? { ...m, isActiveByOwner: false, status: 'uncertain' }
+                  : m
+              )
             )
-          )
-          alertify.warning(`${response.data.name} sunucu durduruldu`)
-          }
-          catch (error) {
+            alertify.warning(`${response.data.name} sunucu durduruldu`)
+          } catch (error) {
             console.error('Sunucu durdurulurken hata oluştu:', error)
             alertify.error(
               'Sunucu durdurulurken bir hata oluştu: ' +
                 (error.response?.data?.message || error.message)
             )
           }
-          break;
+          break
         case 'delete':
           if (
             window.confirm('Bu sunucuyu silmek istediğinizden emin misiniz?')
@@ -287,22 +300,46 @@ export default function Dashboard() {
     }
   }
 
+  const handleInstantControl = async (monitor) => {
+    try {
+      const response = await api.get(`monitors/instant-Control/${monitor.id}`);
+      console.log(response.data);
+      Swal.fire({
+        icon: 'success',
+        title: 'Anlık Kontrol Sonucu',
+        text: `Durumu: ${response.data.status}
+               Respone Zamanı: ${response.data.responseTime} ms
+               Hatalı mı: ${response.data.isError ? 'Evet' : 'Hayır'}
+               Mesaj: ${response.data.message}`,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Anlık Kontrol Sonucu',
+        text: `Durumu: ${error.response.data.status}
+               Respone Zamanı: ${error.response.data.responseTime} ms
+               Hatalı mı: ${error.response.data.isError ? 'Evet' : 'Hayır'}
+               Mesaj: ${error.AddIconresponse.data.message}`,
+      });
+    }
+  }
+
   const handleShowDetails = (monitor) => {
     switch (monitor.monitorType) {
       case 'HttpMonitor':
-        navigate(`/user/monitors/${monitor.id}/http`)
+        navigate(`/admin/monitors/${monitor.id}/http`,{state: { userInfo }})
         break
       case 'PingMonitor':
-        navigate(`/user/monitors/${monitor.id}/ping`)
+        navigate(`/admin/monitors/${monitor.id}/ping`,{state: { userInfo }})
         break
       case 'CronJobMonitor':
-        navigate(`/user/monitors/${monitor.id}/cronjob`)
+        navigate(`/admin/monitors/${monitor.id}/cronjob`,{state: { userInfo }})
         break
       case 'PortMonitor':
-        navigate(`/user/monitors/${monitor.id}/port`)
+        navigate(`/admin/monitors/${monitor.id}/port`,{state: { userInfo }})
         break
       case 'KeywordMonitor':
-        navigate(`/user/monitors/${monitor.id}/keyword`)
+        navigate(`/admin/monitors/${monitor.id}/keyword`,{state: { userInfo }})
         break
       default:
         console.error('Unknow monitor type ! :', monitor.monitorType)
@@ -328,92 +365,150 @@ export default function Dashboard() {
       size: 'medium',
       renderCell: (params) => {
         switch (params.row.monitorType) {
-          case "HttpMonitor":
-             return (
-            <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+          case 'HttpMonitor':
+            return (
+              <Box
+                sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography>{params.row.httpMonitor.host}</Typography>
-                
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
-                  <Typography  backgroundColor={
-                params.row.httpMonitor.method==="GET"
-                ? "green" : params.row.httpMonitor.method==="POST"
-                ? "orange" : params.row.httpMonitor.method==="PUT"
-                ? "orange" : params.row.httpMonitor.method==="DELETE"
-                ? "red" : params.row.httpMonitor.method==="HEAD"
-                ? "blue" : params.row.httpMonitor.method==="PATCH"
-                ? "purple" : params.row.httpMonitor.method==="OPTION"
-                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.httpMonitor.method}
-                </Typography>
+                  <Typography fontSize={'80%'}>
+                    {params.row.monitorType}
+                  </Typography>
+                  <Typography
+                    backgroundColor={
+                      params.row.httpMonitor.method === 'GET'
+                        ? 'green'
+                        : params.row.httpMonitor.method === 'POST'
+                        ? 'orange'
+                        : params.row.httpMonitor.method === 'PUT'
+                        ? 'orange'
+                        : params.row.httpMonitor.method === 'DELETE'
+                        ? 'red'
+                        : params.row.httpMonitor.method === 'HEAD'
+                        ? 'blue'
+                        : params.row.httpMonitor.method === 'PATCH'
+                        ? 'purple'
+                        : params.row.httpMonitor.method === 'OPTION'
+                    }
+                    borderRadius={1}
+                    fontStyle={{ color: 'white' }}
+                    fontSize={'80%'}
+                  >
+                    {params.row.httpMonitor.method}
+                  </Typography>
                 </Box>
               </Box>
-              );
+            )
           case 'PingMonitor':
             return (
-              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography>{params.row.pingMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
+                  <Typography fontSize={'80%'}>
+                    {params.row.monitorType}
+                  </Typography>
                 </Box>
               </Box>
-             );
+            )
           case 'CronJobMonitor':
             return (
-              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>CRON JOB URL {"==>"/*params.row.cronJobMonitor.host*/}</Typography>
-                  <Button color='primary' variant="contained" size='small' onClick={()=>{navigator.clipboard.writeText(params.row.cronJobMonitor.host)}}>COPY</Button>
-
+                  <Typography>
+                    CRON JOB URL {'==>' /*params.row.cronJobMonitor.host*/}
+                  </Typography>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    size="small"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        params.row.cronJobMonitor.host
+                      )
+                    }}
+                  >
+                    COPY
+                  </Button>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'80%'}>{params.row.monitorType} </Typography>
+                  <Typography fontSize={'80%'}>
+                    {params.row.monitorType}{' '}
+                  </Typography>
                 </Box>
               </Box>
-             );
+            )
           case 'PortMonitor':
             return (
-              <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography>{params.row.portMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
-                  <Typography borderRadius={1}  backgroundColor={"orange"} fontSize={"80%"}>{params.row.portMonitor.port}</Typography>
+                  <Typography fontSize={'80%'}>
+                    {params.row.monitorType}
+                  </Typography>
+                  <Typography
+                    borderRadius={1}
+                    backgroundColor={'orange'}
+                    fontSize={'80%'}
+                  >
+                    {params.row.portMonitor.port}
+                  </Typography>
                 </Box>
               </Box>
-              
-             );
+            )
           case 'KeywordMonitor':
             return (
-            <Box sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography>{params.row.keyWordMonitor.host}</Typography>
-                
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
-                  <Typography  backgroundColor={
-                params.row.keyWordMonitor.method==="GET"
-                ? "green" : params.row.keyWordMonitor.method==="POST"
-                ? "orange" : params.row.keyWordMonitor.method==="PUT"
-                ? "orange" : params.row.keyWordMonitor.method==="DELETE"
-                ? "red" : params.row.keyWordMonitor.method==="HEAD"
-                ? "blue" : params.row.keyWordMonitor.method==="PATCH"
-                ? "purple" : params.row.keyWordMonitor.method==="OPTION"
-                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.keyWordMonitor.method}
-                </Typography>
+                  <Typography fontSize={'80%'}>
+                    {params.row.monitorType}
+                  </Typography>
+                  <Typography
+                    backgroundColor={
+                      params.row.keyWordMonitor.method === 'GET'
+                        ? 'green'
+                        : params.row.keyWordMonitor.method === 'POST'
+                        ? 'orange'
+                        : params.row.keyWordMonitor.method === 'PUT'
+                        ? 'orange'
+                        : params.row.keyWordMonitor.method === 'DELETE'
+                        ? 'red'
+                        : params.row.keyWordMonitor.method === 'HEAD'
+                        ? 'blue'
+                        : params.row.keyWordMonitor.method === 'PATCH'
+                        ? 'purple'
+                        : params.row.keyWordMonitor.method === 'OPTION'
+                    }
+                    borderRadius={1}
+                    fontStyle={{ color: 'white' }}
+                    fontSize={'80%'}
+                  >
+                    {params.row.keyWordMonitor.method}
+                  </Typography>
                 </Box>
               </Box>
-              );
-            
+            )
+
           default:
             console.error('Unknown monitor type:', params.row.monitorType)
         }
-        
       },
     },
     {
@@ -421,7 +516,7 @@ export default function Dashboard() {
       headerName: 'Durumu',
       width: 200,
       renderCell: (params) => {
-        if (params.value === "uncertain") {
+        if (params.value === 'uncertain') {
           return (
             <Chip
               icon={<HelpOutline />}
@@ -433,12 +528,12 @@ export default function Dashboard() {
                 '& .MuiChip-label': {
                   fontSize: '1rem', // örnek: 16px
                   fontWeight: 'bold',
-                }
+                },
               }}
             />
           )
         }
-        if (params.value === "maintanance") {
+        if (params.value === 'maintanance') {
           return (
             <Chip
               icon={<BuildIcon />}
@@ -451,15 +546,15 @@ export default function Dashboard() {
                   fontSize: '1rem', // örnek: 16px
                   fontWeight: 'bold',
                   fontColor: 'black',
-                }
+                },
               }}
             />
           )
         }
-        if (params.value === "down") {
+        if (params.value === 'down') {
           return (
             <Chip
-              icon={ <WarningIcon />}
+              icon={<WarningIcon />}
               label={'Başarısız'}
               color={'error'}
               size="medium"
@@ -468,12 +563,12 @@ export default function Dashboard() {
                 '& .MuiChip-label': {
                   fontSize: '1rem', // örnek: 16px
                   fontWeight: 'bold',
-                }
+                },
               }}
             />
           )
         }
-        if (params.value === "up") {
+        if (params.value === 'up') {
           return (
             <Chip
               icon={<CheckCircleIcon />}
@@ -485,7 +580,7 @@ export default function Dashboard() {
                 '& .MuiChip-label': {
                   fontSize: '1rem', // örnek: 16px
                   fontWeight: 'bold',
-                }
+                },
               }}
             />
           )
@@ -508,7 +603,9 @@ export default function Dashboard() {
           )
         }
 
-        const successRate = Number(params.row.successRate.substring(0,params.row.successRate.length-1));
+        const successRate = Number(
+          params.row.successRate.substring(0, params.row.successRate.length - 1)
+        )
         console.log(successRate)
         const color =
           successRate >= 90
@@ -552,7 +649,7 @@ export default function Dashboard() {
           {!params.row.isActiveByOwner && (
             <Tooltip title="Başlat">
               <IconButton
-                size="small" 
+                size="small"
                 color="success"
                 onClick={() => handleMonitorAction('start', params.row.id)}
               >
@@ -584,6 +681,18 @@ export default function Dashboard() {
       ),
     },
     {
+      field: 'InstantControl',
+      headerName: 'Test et',
+      width: 120,
+      renderCell: (params) => (
+        <IconButton
+          variant="contained"
+          size="large"
+          onClick={() => handleInstantControl(params.row)}
+        ><NextPlanIcon color='primary' fontSize='large'/></IconButton>
+      ),
+    },
+    {
       field: 'edit',
       headerName: 'Düzenleme',
       width: 120,
@@ -601,10 +710,10 @@ export default function Dashboard() {
   ]
 
   return (
-    <Box sx={{ display: 'flex'}}>
+    <Box sx={{ display: 'flex' }}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 300},
+          width: { xs: isOpen ? '100%' : 0, sm: 300 },
           flexShrink: 0,
           transition: 'width 0.3s',
           position: { xs: 'fixed', sm: 'relative' },
@@ -613,50 +722,55 @@ export default function Dashboard() {
           display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
         }}
       >
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
+        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Box>
       <Box
         sx={{
           flexGrow: 1,
-          p: { xs: 2, sm: 3,},
+          p: { xs: 2, sm: 3 },
           backgroundColor: '#f8f9fa',
           minHeight: '100vh',
-          maxWidth: '1400px',
+          maxWidth: '1600px',
           margin: '0 auto',
           ml: { xs: 0, sm: isOpen ? '60px' : '60px' },
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '270px' : '270px'})` },
+          width: {
+            xs: '100%',
+            sm: `calc(100% - ${isOpen ? '270px' : '270px'})`,
+          },
           position: 'relative',
         }}
       >
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          justifyContent: 'space-between',
-          mb: 3,
-          gap: 2
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            mb: 3,
+            gap: 2,
+          }}
+        >
           <Typography
             variant="h4"
             component="h1"
             sx={{
               fontWeight: 'bold',
               color: '#1976d2',
-              fontSize: { xs: '1.5rem', sm: '2rem' }
+              fontSize: { xs: '1.5rem', sm: '2rem' },
             }}
           >
-            İzleme Sayfası
+            {userInfo?userInfo.name:'...'}'ın izleme Sayfası
           </Typography>
           <IconButton
             onClick={toggleSidebar}
-            sx={{ 
+            sx={{
               display: { xs: 'flex', sm: 'none' },
               bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
                 bgcolor: 'primary.dark',
-              }
+              },
             }}
           >
             <MenuIcon />
@@ -668,16 +782,18 @@ export default function Dashboard() {
           <Grid container spacing={{ xs: 2, sm: 3 }}>
             {currentStats.map((stat) => (
               <Grid item xs={12} sm={6} md={3} key={stat.title}>
-                <Card sx={{ 
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                  }
-                }}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    transition: 'transform 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                    },
+                  }}
+                >
                   <CardContent>
-                    <Typography 
-                      color="text.secondary" 
+                    <Typography
+                      color="text.secondary"
                       gutterBottom
                       sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
                     >
@@ -686,9 +802,9 @@ export default function Dashboard() {
                     <Typography
                       variant="h4"
                       component="div"
-                      sx={{ 
+                      sx={{
                         color: stat.color,
-                        fontSize: { xs: '1.5rem', sm: '2rem' }
+                        fontSize: { xs: '1.5rem', sm: '2rem' },
                       }}
                     >
                       {stat.value}
@@ -707,26 +823,50 @@ export default function Dashboard() {
                 justifyContent: 'space-between',
                 alignItems: { xs: 'flex-start', sm: 'center' },
                 mb: 2,
-                gap: 2
+                gap: 2,
               }}
             >
-              <Typography 
+              <Typography
                 variant="h6"
                 sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}
               >
                 İzleme listesi
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                color="primary"
-                onClick={() => handleSubmit()}
-                sx={{
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                İzleme Ekle
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<ReportAnalytics />}
+                  color="primary"
+                  onClick={() => handleSubmitReport()}
+                  sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                  }}
+                >
+                  Rapor Sayfası
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<BuildIcon />}
+                  color="primary"
+                  onClick={() => handleSubmitMaintanance()}
+                  sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                  }}
+                >
+                  Bakım Sayfası
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  color="primary"
+                  onClick={() => handleSubmit()}
+                  sx={{
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                  }}
+                >
+                  İzleme Ekle
+                </Button>
+              </Box>
             </Box>
             <Divider sx={{ mb: 2 }} />
 
@@ -774,11 +914,11 @@ export default function Dashboard() {
               }}
               sx={{
                 '& .MuiDataGrid-cell': {
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
                 },
                 '& .MuiDataGrid-columnHeader': {
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                },
               }}
             />
           </Paper>
