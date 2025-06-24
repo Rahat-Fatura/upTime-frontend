@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
 import BuildIcon from '@mui/icons-material/Build';
-
+import Swal from 'sweetalert2'
 import {
   Typography,
   IconButton,
@@ -263,15 +263,38 @@ export default function Dashboard() {
           }
           break;
         case 'delete':
-          if (
-            window.confirm('Bu sunucuyu silmek istediğinizden emin misiniz?')
-          ) {
-            const response = await api.delete(`monitors/${monitorId}`)
-            setMonitors((prevMonitors) =>
-              prevMonitors.filter((m) => m.id !== monitorId)
-            )
-            alertify.success(`${response.data.name} sunucu başarılı silindi`)
-          }
+          Swal.fire({
+                title: 'Silmek istediğinizden emin misiniz',
+                icon: 'warning',
+                text: 'İzlemeyi sistemden tamamen silinecektir',
+                showCancelButton: true,
+                showConfirmButton: true,
+                confirmButtonText: 'Evet silmek istiyorum',
+                cancelButtonText: 'Hayır',
+              })
+                .then(async (result) => {
+                  if (result.isConfirmed) {
+                    await api.delete(`monitors/${monitorId}`)
+                    setMonitors((prevMonitors) =>
+                      prevMonitors.filter((m) => m.id !== monitorId)
+                  )
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'İzleme Silindi',
+                      text: 'Başarılı şekilde silindi',
+                      confirmButtonText: 'Tamam',
+                    })
+                  }
+                })
+                .catch((error) => {
+                  console.log(error)
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Hatalı İşlem',
+                    text: error.response.data.message,
+                    confirmButtonText: 'Tamam',
+                  })
+                })
           break
 
         default:
@@ -345,7 +368,7 @@ export default function Dashboard() {
                 ? "red" : params.row.httpMonitor.method==="HEAD"
                 ? "blue" : params.row.httpMonitor.method==="PATCH"
                 ? "purple" : params.row.httpMonitor.method==="OPTION"
-                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.httpMonitor.method}
+                } borderRadius={0.3} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.httpMonitor.method}
                 </Typography>
                 </Box>
               </Box>
@@ -382,7 +405,7 @@ export default function Dashboard() {
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography fontSize={'80%'}>{params.row.monitorType}</Typography>
-                  <Typography borderRadius={1}  backgroundColor={"orange"} fontSize={"80%"}>{params.row.portMonitor.port}</Typography>
+                  <Typography borderRadius={0.1}  backgroundColor={"orange"} fontSize={"80%"}>{params.row.portMonitor.port}</Typography>
                 </Box>
               </Box>
               
@@ -404,7 +427,7 @@ export default function Dashboard() {
                 ? "red" : params.row.keyWordMonitor.method==="HEAD"
                 ? "blue" : params.row.keyWordMonitor.method==="PATCH"
                 ? "purple" : params.row.keyWordMonitor.method==="OPTION"
-                } borderRadius={1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.keyWordMonitor.method}
+                } borderRadius={0.1} fontStyle={{color:"white"}} fontSize={"80%"}>{params.row.keyWordMonitor.method}
                 </Typography>
                 </Box>
               </Box>
@@ -519,7 +542,7 @@ export default function Dashboard() {
 
         return (
           <Box sx={{ width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 ,mt: 2.5}}>
               <LinearProgress
                 variant="determinate"
                 value={successRate}
@@ -620,12 +643,12 @@ export default function Dashboard() {
           flexGrow: 1,
           p: { xs: 2, sm: 3,},
           backgroundColor: '#f8f9fa',
-          minHeight: '100vh',
-          maxWidth: '1400px',
+          minHeight: '100%',
+          maxWidth: '100%',
           margin: '0 auto',
           ml: { xs: 0, sm: isOpen ? '60px' : '60px' },
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '270px' : '270px'})` },
+          width: { xs: '100%', sm: '100%' /*`calc(100% - ${isOpen ? '270px' : '270px'})`*/ },
           position: 'relative',
         }}
       >
@@ -664,7 +687,7 @@ export default function Dashboard() {
         </Box>
         <Divider sx={{ mb: 4 }} />
 
-        <Container maxWidth="xl">
+        <Container maxWidth="100%">
           <Grid container spacing={{ xs: 2, sm: 3 }}>
             {currentStats.map((stat) => (
               <Grid item xs={12} sm={6} md={3} key={stat.title}>

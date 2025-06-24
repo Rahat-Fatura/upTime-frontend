@@ -19,7 +19,7 @@ import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlin
 import UserInfo from "./userProfileInfoPage.js";
 import UserSetting from "./userProfileSettingsPage.js";
 import PasswordSetting from "./passwordChange.js";
-import { cookies } from "../../utils/cookie";
+import api from "../../api/auth/axiosInstance.js";
 import { Password } from "@mui/icons-material";
 const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,13 +27,36 @@ const ProfilePage = () => {
     setIsOpen(!isOpen);
   };
   const [userInfo, setUserInfo] = useState({
-    name: cookies.get("user").name,
+    /*name: cookies.get("user").name,
     email:cookies.get("user").email,
     created_at: String(cookies.get("user").created_at).split("T")[0],
     status: cookies.get("user").status,
     subordinates:cookies.get("user").subordinates,
-    role:cookies.get("user").role
+    role:cookies.get("user").role*/
   });
+
+  const getUserInfo = async () => {
+    try {
+      const response = await api.get("auth/me");
+      const userData = response.data.user;
+      setUserInfo({
+        name: userData.name,
+        email: userData.email,
+        created_at: String(userData.created_at).split("T")[0],
+        status: userData.status,
+        subordinates: userData.subordinates,
+        role: userData.role,
+      });
+
+    }
+    catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  }
+
+  useEffect(() => {
+    getUserInfo();
+  }, []);
   const [userStatus, setUserStatus] = useState(true); //Kullanıcının aktif pasiflik durumunu belirtir.
   const [selectedButtonId, setSelectedButtonId] = useState(1);
 
