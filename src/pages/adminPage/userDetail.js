@@ -22,7 +22,7 @@ import localStorage from 'local-storage'
 import { useLocation, useNavigate } from 'react-router-dom'
 import api from '../../api/auth/axiosInstance.js'
 import Swal from 'sweetalert2'
-
+import { Monitor } from "@mui/icons-material";
 const UserDetail = () => {
   const location = useLocation()
   const userInfo = location.state.userInfo
@@ -265,6 +265,24 @@ const UserDetail = () => {
             >
               <ManageAccountsOutlinedIcon fontSize="medium" />
               Ayarlar
+            </Button>
+          </Grid>
+          <Grid item md={1} sx={{ justifyContent: 'end' }}>
+            <Button
+              fullWidth
+              variant={'contained'}
+              type="submit"
+              sx={{
+                display: 'flex',
+                gap: 1,
+                pt: '1vh',
+                pb: '1vh',
+                background: '#1976d2',
+              }}
+              onClick={() =>navigate('/admin/userMonitors', { state: { userInfo } })}
+            >
+              <Monitor fontSize="medium" />
+              İzledikleri
             </Button>
           </Grid>
           <Grid item md={1} sx={{ justifyContent: 'end' }}>

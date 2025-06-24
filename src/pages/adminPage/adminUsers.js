@@ -31,7 +31,8 @@ function AdminUsers() {
     setIsOpen(!isOpen);
     console.log(isOpen);
   };
-  const [users,setUsers] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -142,6 +143,7 @@ function AdminUsers() {
     );
   };
   const [open, setOpen] = useState(false);
+  const [searchUser, setSearchUser] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const localeText = {
@@ -159,6 +161,52 @@ function AdminUsers() {
   const [columnDefs, setColumnDefs] = useState(createColumnDefs(ButtonRenderer));
 
   const [rowData, setRowData] = useState();
+
+  useEffect(() => {
+      if (!users || users.length === 0) {
+        setFilteredUsers([])
+        return
+      }
+  
+      const searchLower = searchUser.toLowerCase().trim()
+  
+      if (searchLower === '') {
+        setFilteredUsers(users)
+        return
+      }
+  
+      const filtered = users.filter((user) => {
+        const nameMatch = user.name?.toLowerCase().includes(searchLower)
+        const emailMatch = user.email?.toLowerCase().includes(searchLower)
+        
+        return nameMatch || emailMatch
+      })
+  
+      setFilteredUsers(filtered)
+    }, [searchUser, users])
+
+  const handlSearchUser = async () => {
+    if (!users || users.length === 0) {
+        setFilteredUsers([])
+        return
+      }
+  
+      const searchLower = searchUser.toLowerCase().trim()
+  
+      if (searchLower === '') {
+        setFilteredUsers(users)
+        return
+      }
+  
+      const filtered = users.filter((user) => {
+        const nameMatch = user.name?.toLowerCase().includes(searchLower)
+        const emailMatch = user.email?.toLowerCase().includes(searchLower)
+        
+        return nameMatch || emailMatch
+      })
+  
+      setFilteredUsers(filtered)
+  }
 
   // Örnek veri
   const fakeData = [
@@ -262,10 +310,11 @@ function AdminUsers() {
                 >
                   <TextField
                     className="input-field"
-                    placeholder="Ara...(vkn/tckn,ünvan,e-posta)"
+                    placeholder="Ara...(ad veya e-posta)"
+                    onChange={(e) => {setSearchUser(e.target.value)}}
                   />
                   <IconButton className="date-button">
-                    <SearchOutlinedIcon fontSize="small" color="white" />
+                    <SearchOutlinedIcon fontSize="small" color="white" onClick={handlSearchUser} />
                   </IconButton>
                 </Grid>
               </Grid>
@@ -295,7 +344,7 @@ function AdminUsers() {
                 rowSelection="multiple"
                 columnDefs={columnDefs}
                 defaultColDef={defaultColDef}
-                rowData={rowData}
+                rowData={filteredUsers}
                 sideBar={gridSideBar}
                 localeText={localeTextTr}
                 paginationPageSize={10}

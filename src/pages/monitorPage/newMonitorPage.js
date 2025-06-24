@@ -293,7 +293,20 @@ const newMonitorPage = (update=false) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <Box sx={{ width: '180px' }}>
+      <Box sx={{
+          width: {
+            xs: isOpen ? '100%' : 0,
+            sm: isOpen ? '100%' : 0,
+            md: isOpen ? '30%' : 0,
+            lg: isOpen ? '20%' : 0,
+            xlg: isOpen ? '10%' : 0,
+          },
+          flexShrink: 0,
+          transition: 'width 0.3s',
+          position: { xs: 'fixed', sm: 'relative' },
+          zIndex: 1000,
+          height: { xs: '100vh', sm: 'auto' },
+          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },}}>
         {role==='admin'?<AdminSidebar status={isOpen} toggleSidebar={toggleSidebar}/>:<Sidebar status={isOpen} toggleSidebar={toggleSidebar} />}
       </Box>
       <Box sx={{ flexGrow: 1 }}>

@@ -115,7 +115,7 @@ function AppRoutes() {
 
         <Route path="/user/gridPage" element={<GridPage />} />
 
-        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin" element={<AdminUsers />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/users" element={<AdminUsers />} />
         <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
