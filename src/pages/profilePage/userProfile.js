@@ -21,6 +21,7 @@ import UserSetting from "./userProfileSettingsPage.js";
 import PasswordSetting from "./passwordChange.js";
 import api from "../../api/auth/axiosInstance.js";
 import { Password } from "@mui/icons-material";
+import { updateCacheWithNewRows } from "@mui/x-data-grid/hooks/features/rows/gridRowsUtils.js";
 const ProfilePage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => {
@@ -38,13 +39,14 @@ const ProfilePage = () => {
   const getUserInfo = async () => {
     try {
       const response = await api.get("auth/me");
-      console.log("User Info Response:", response.data);
       const userData = response.data.user;
+      console.log("User Data:", userData.updated_at);
       setUserInfo({
         id: userData.id,
         name: userData.name,
         email: userData.email,
         created_at: String(userData.created_at).split("T")[0],
+        updated_at: String(userData.updated_at).split("T")[0],
         isEmailVerified: userData.isEmailVerified,
         status: userData.status,
         subordinates: userData.subordinates,

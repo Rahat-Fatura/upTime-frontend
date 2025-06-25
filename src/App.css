@@ -5,7 +5,7 @@
 
 /* Genel scrollbar ayarları */
 ::-webkit-scrollbar {
-  width: 2vh; 
+  width: 1vh; 
 }
 
 /* Yatay scrollbar */

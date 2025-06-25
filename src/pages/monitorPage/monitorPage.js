@@ -3,6 +3,7 @@ import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
 import BuildIcon from '@mui/icons-material/Build'
 import Swal from 'sweetalert2'
+import MenuButton from '../../components/menuButton/index.js';
 import {
   Typography,
   IconButton,
@@ -61,6 +62,7 @@ export default function Dashboard() {
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
+  const [menuButton, setMenuButton] = useState(false)
   const navigate = useNavigate()
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
@@ -204,6 +206,25 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
+    const fetchMonitors = async () => {
+      try {
+        const response = await api.get(`monitors/`)
+        if (response.data) {
+          setMonitors(response.data)
+          console.log(response.data)
+        }
+      } catch (error) {
+        console.error('Monitör verileri alınırken hata oluştu:', error)
+        alertify.error('Monitör verileri alınırken bir hata oluştu.')
+      }
+    }
+    console.log("MenuButton ÇAlıştı")
+    
+    fetchMonitors()
+    
+  }, [menuButton])
+
+  useEffect(() => {
     if (!monitors || monitors.length === 0) {
       setFilteredMonitors([])
       return
@@ -308,27 +329,7 @@ export default function Dashboard() {
     }
   }
 
-  const handleShowDetails = (monitor) => {
-    switch (monitor.monitorType) {
-      case 'HttpMonitor':
-        navigate(`/user/monitors/${monitor.id}/http`)
-        break
-      case 'PingMonitor':
-        navigate(`/user/monitors/${monitor.id}/ping`)
-        break
-      case 'CronJobMonitor':
-        navigate(`/user/monitors/${monitor.id}/cronjob`)
-        break
-      case 'PortMonitor':
-        navigate(`/user/monitors/${monitor.id}/port`)
-        break
-      case 'KeywordMonitor':
-        navigate(`/user/monitors/${monitor.id}/keyword`)
-        break
-      default:
-        console.error('Unknow monitor type ! :', monitor.monitorType)
-    }
-  }
+  
 
   const columns = [
     {
@@ -338,7 +339,17 @@ export default function Dashboard() {
       size: 'medium',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
-          <Typography fontSize={'1.2rem'}>{params.value}</Typography>
+          <Typography
+            fontSize={{
+              xs: '0.875rem',
+              sm: '1rem',
+              md: '1.125rem',
+              lg: '1.25rem',
+              xlg: '1.5rem',
+            }}
+          >
+            {params.value}
+          </Typography>
         </Box>
       ),
     },
@@ -355,7 +366,15 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 0.5 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'1.2rem'}>
+                  <Typography
+                    fontSize={{
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }}
+                  >
                     {params.row.httpMonitor.host}
                   </Typography>
                 </Box>
@@ -382,7 +401,15 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'1.2rem'}>
+                  <Typography
+                    fontSize={{
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }}
+                  >
                     {params.row.pingMonitor.host}
                   </Typography>
                 </Box>
@@ -399,7 +426,15 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'1.2rem'}>
+                  <Typography
+                    fontSize={{
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }}
+                  >
                     CRON JOB URL {'==>' /*params.row.cronJobMonitor.host*/}
                   </Typography>
                   <Button
@@ -428,7 +463,15 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'1.2rem'}>
+                  <Typography
+                    fontSize={{
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }}
+                  >
                     {params.row.portMonitor.host}
                   </Typography>
                 </Box>
@@ -446,7 +489,15 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography fontSize={'1.2rem'}>
+                  <Typography
+                    fontSize={{
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }}
+                  >
                     {params.row.keyWordMonitor.host}
                   </Typography>
                 </Box>
@@ -489,7 +540,13 @@ export default function Dashboard() {
                 sx={{
                   fontWeight: 'bold',
                   '& .MuiChip-label': {
-                    fontSize: '1rem', // örnek: 16px
+                    fontSize: {
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }, // örnek: 16px
                     fontWeight: 'bold',
                   },
                 }}
@@ -508,7 +565,13 @@ export default function Dashboard() {
                 sx={{
                   fontWeight: 'bold',
                   '& .MuiChip-label': {
-                    fontSize: '1rem', // örnek: 16px
+                    fontSize: {
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }, // örnek: 16px
                     fontWeight: 'bold',
                     fontColor: 'black',
                   },
@@ -528,7 +591,13 @@ export default function Dashboard() {
                 sx={{
                   fontWeight: 'bold',
                   '& .MuiChip-label': {
-                    fontSize: '1rem', // örnek: 16px
+                    fontSize: {
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }, // örnek: 16px
                     fontWeight: 'bold',
                   },
                 }}
@@ -547,7 +616,13 @@ export default function Dashboard() {
                 sx={{
                   fontWeight: 'bold',
                   '& .MuiChip-label': {
-                    fontSize: '1rem', // örnek: 16px
+                    fontSize: {
+                      xs: '0.875rem',
+                      sm: '1rem',
+                      md: '1.125rem',
+                      lg: '1.25rem',
+                      xlg: '1.5rem',
+                    }, // örnek: 16px
                     fontWeight: 'bold',
                   },
                 }}
@@ -569,7 +644,13 @@ export default function Dashboard() {
               <Typography
                 variant="caption"
                 color="text.secondary"
-                fontSize={'1.2rem'}
+                fontSize={{
+                  xs: '0.875rem',
+                  sm: '1rem',
+                  md: '1.125rem',
+                  lg: '1.25rem',
+                  xlg: '1.5rem',
+                }}
               >
                 No info
               </Typography>
@@ -660,19 +741,8 @@ export default function Dashboard() {
       field: 'edit',
       headerName: 'Düzenleme',
       width: 120,
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<Edit />}
-          onClick={() => handleShowDetails(params.row)}
-          sx={{
-            mt: 1,
-          }}
-        >
-          ...
-        </Button>
-      ),
+      renderCell: (params) => (<MenuButton monitor={params.row} setMenuButton={setMenuButton}/>
+),
     },
   ]
 

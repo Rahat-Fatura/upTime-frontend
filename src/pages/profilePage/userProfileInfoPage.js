@@ -88,7 +88,7 @@ const UserProfileInfoPage = ({ userInfo}) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Oluşturma Tarihi"
-                    secondary={String(userInfo.created_at).split('T')[0]}
+                    secondary={userInfo.created_at}
                     
                   />
                 </ListItem>
@@ -98,7 +98,7 @@ const UserProfileInfoPage = ({ userInfo}) => {
                   </ListItemIcon>
                   <ListItemText
                     primary="Güncelleme Tarihi"
-                    secondary={String(userInfo.updated_at).split('T')[0]?String(userInfo.updated_at).split('T')[0] : ""}
+                    secondary={userInfo.updated_at}
                   />
                 </ListItem>
                 <ListItem>
