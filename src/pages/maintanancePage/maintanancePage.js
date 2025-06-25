@@ -431,7 +431,7 @@ export default function MaintanancePage() {
                   />
                   <Divider />
                   <CardContent>
-                    <TimeInfoBox>
+                    {/*<TimeInfoBox>
                       <Typography 
                         variant="h5" 
                         color="text.secondary"
@@ -442,7 +442,7 @@ export default function MaintanancePage() {
                       >
                         {monitor.host}
                       </Typography>
-                    </TimeInfoBox>
+                    </TimeInfoBox>*/}
                     
                     <Box 
                       sx={{ 

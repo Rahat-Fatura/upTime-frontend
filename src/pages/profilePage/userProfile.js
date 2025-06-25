@@ -38,11 +38,14 @@ const ProfilePage = () => {
   const getUserInfo = async () => {
     try {
       const response = await api.get("auth/me");
+      console.log("User Info Response:", response.data);
       const userData = response.data.user;
       setUserInfo({
+        id: userData.id,
         name: userData.name,
         email: userData.email,
         created_at: String(userData.created_at).split("T")[0],
+        isEmailVerified: userData.isEmailVerified,
         status: userData.status,
         subordinates: userData.subordinates,
         role: userData.role,
@@ -57,7 +60,6 @@ const ProfilePage = () => {
   useEffect(() => {
     getUserInfo();
   }, []);
-  const [userStatus, setUserStatus] = useState(true); //Kullanıcının aktif pasiflik durumunu belirtir.
   const [selectedButtonId, setSelectedButtonId] = useState(1);
 
   const handleButtonClick = (buttonId) => {
@@ -242,29 +244,12 @@ const ProfilePage = () => {
               Ayarlar
             </Button>
           </Grid>
-          <Grid item md={1}>
-            <Button
-              fullWidth
-              variant={selectedButtonId === 3 ? "contained" : "text"}
-              type="submit"
-              className={
-                selectedButtonId === 3 ? "selected-button" : "unselected-button"
-              }
-              sx={{ display: "flex", gap: 1, pt: "1vh", pb: "1vh" }}
-              onClick={() => handleButtonClick(3)}
-            >
-              <Password fontSize="medium" />
-              Şifre Değiştir
-            </Button>
-          </Grid>
         </Grid>
         {selectedButtonId === 1 ? (
           <UserInfo userInfo={userInfo}/>
         ) : selectedButtonId === 2 ? (
           <UserSetting userInfo={userInfo} />
-        ) : selectedButtonId === 3 ? (
-          <PasswordSetting />
-        ) :
+        ) : 
         (
           ""
         )}

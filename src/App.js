@@ -41,6 +41,8 @@ import UserDetail from './pages/adminPage/userDetail.js'
 import AdmimMonitors from './pages/adminPage/adminMonitorPage.js'
 import AdminMaintance from './pages/adminPage/adminMaintanance/maintanancePage.js'
 import AdminMonitoringReportsPage from './pages/adminPage/adminMonitoringReportsPage.js'
+import VerifyEmailPage from './pages/verifyEmailPage/verifyEmailPage.js'
+
 const NotFound = () => {
   return (
     <div
@@ -109,6 +111,7 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/register" element={<Register />} />
 
         <Route path="/user/profile" element={<ProfilePage />} />
