@@ -30,6 +30,9 @@ import {
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import '../../utils/animateCSS/animate.css'
+import Swal from 'sweetalert2'
+import downScrollPng from '../../assets/images/down_scroll.png'
+import api from '../../api/auth/axiosInstance'
 const features = [
   {
     icon: <Speed sx={{ fontSize: 40 }} />,
@@ -64,6 +67,7 @@ const pricingPlans = [
       'Email bildirimleri',
     ],
     buttonText: 'Başla',
+    buttonType: 'free',
     highlighted: false,
   },
   {
@@ -77,6 +81,7 @@ const pricingPlans = [
       'API erişimi',
     ],
     buttonText: 'Seç',
+    buttonType: 'solo',
     highlighted: true,
   },
   {
@@ -90,6 +95,7 @@ const pricingPlans = [
       'Özel entegrasyonlar',
     ],
     buttonText: 'İletişime Geç',
+    buttonType: 'private',
     highlighted: false,
   },
 ]
@@ -99,6 +105,9 @@ const LandingPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate()
 
   const loginPage = () => {
@@ -124,6 +133,57 @@ const LandingPage = () => {
     }
   }
 
+  const handlePricingButton = (text) =>{
+    switch(text){
+      case'free':{
+        navigate('/login')
+        break
+      }
+      case'solo':{
+        Swal.fire({
+          icon: 'info',
+          title: 'Bilgilendirme',
+          text: 'Bu paket geliştirme aşamasında !'
+        })
+        break
+      }
+      case'private':{
+        scrollToSection("iletişim")
+        break
+      }
+      default:{
+        break
+      }
+    }
+  }
+
+  const handlContactUser = async() =>{
+     console.log(name)
+     console.log(email)
+     console.log(message)
+     try{
+        const response = await api.post('users/landing',{
+          name: name,
+          email: email,
+          message: message
+        })
+        Swal.fire({
+          icon: 'success',
+          title: 'Email Gönderildi !',
+          text: 'Sistem Yöneticileri En Kısa Zamanda Sizinle İletişme Geçecekler',
+          confirmButtonText: 'Tamam'
+        })
+     }
+     catch(error){
+      console.log(error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Email Gönderlemedi !',
+        text: 'Lütfen Emilinizi Kontrol Ediniz Yada +90 (555) 123 45 67 Numaramızla Whatsappdan İletişme Geçiniz !'
+      })
+
+     }
+  }
   return (
     <Box sx={{ overflow: 'hidden' }}>
       {/* Navbar */}
@@ -312,7 +372,8 @@ const LandingPage = () => {
               >
                 <Box
                   component="img"
-                  src="https://w7.pngwing.com/pngs/390/305/png-transparent-arrow-computer-icons-down-arrow-angle-triangle-logo.png" // ya da istediğin görsel
+                  onMouseEnter={()=>scrollToSection('özellikler')}
+                  src={downScrollPng}// ya da istediğin görs
                   alt="Scroll Down"
                   sx={{
                     width: { xs: 40, sm: 40, md: 50, lg: 70 , xl: 80 },
@@ -320,7 +381,11 @@ const LandingPage = () => {
                     ml:{ xs: '50%', sm: '50%', md: '0', lg: '0', xl: '0' },
                     mb: { xs: 3, sm: 3, md: 0},
                     borderRadius: '50%',
+                    background: '#e8e9ff',
                     mx: 'auto',
+                    ':hover':{
+                       
+                    }
                   }}
                 />
               </motion.div>
@@ -329,7 +394,7 @@ const LandingPage = () => {
         </Container>
       </Box>
       {/* Features Section */}
-      <Box id="features" sx={{ py: 10, bgcolor: 'grey.50' }}>
+      <Box id="özellikler" sx={{ py: 10, bgcolor: 'grey.50' }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -383,7 +448,7 @@ const LandingPage = () => {
       </Box>
 
       {/* Pricing Section */}
-      <Box id="pricing" sx={{ py: 10 }}>
+      <Box id="fiyatlandırma" sx={{ py: 10 }}>
         <Container maxWidth="lg">
           <Typography
             variant="h3"
@@ -406,11 +471,11 @@ const LandingPage = () => {
                       display: 'flex',
                       flexDirection: 'column',
                       position: 'relative',
-                      ...(plan.highlighted && {
+                      ":hover": {
                         border: '2px solid',
                         borderColor: 'primary.main',
                         transform: 'scale(1.05)',
-                      }),
+                      },
                     }}
                   >
                     {plan.highlighted && (
@@ -455,6 +520,7 @@ const LandingPage = () => {
                         variant={plan.highlighted ? 'contained' : 'outlined'}
                         fullWidth
                         size="large"
+                        onClick={()=>handlePricingButton(plan.buttonType)}
                       >
                         {plan.buttonText}
                       </Button>
@@ -468,7 +534,7 @@ const LandingPage = () => {
       </Box>
 
       {/* Contact Section */}
-      <Box id="contact" sx={{ py: 10, bgcolor: 'grey.50' }}>
+      <Box id="iletişim" sx={{ py: 10, bgcolor: 'grey.50' }}>
         <Container maxWidth="md">
           <Typography
             variant="h3"
@@ -485,12 +551,14 @@ const LandingPage = () => {
                   label="Adınız"
                   variant="outlined"
                   sx={{ mb: 2 }}
+                  onChange={(e)=>{setName(e.target.value)}}
                 />
                 <TextField
                   fullWidth
                   label="Email Adresiniz"
                   variant="outlined"
                   sx={{ mb: 2 }}
+                  onChange={(e)=>{setEmail(e.target.value)}}
                 />
                 <TextField
                   fullWidth
@@ -498,6 +566,7 @@ const LandingPage = () => {
                   variant="outlined"
                   multiline
                   rows={4}
+                  onChange={(e)=>{setMessage(e.target.value)}}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -533,7 +602,7 @@ const LandingPage = () => {
               </Grid>
             </Grid>
             <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Button variant="contained" size="large" sx={{ px: 4, py: 1.5 }}>
+              <Button variant="contained" size="large" sx={{ px: 4, py: 1.5 }} onClick={()=>handlContactUser()}>
                 Gönder
               </Button>
             </Box>
@@ -559,6 +628,7 @@ const LandingPage = () => {
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {['özellikler', 'fiyatlandırma', 'iletişim'].map((item) => (
+                  
                   <Button
                     key={item}
                     onClick={() => scrollToSection(item)}
@@ -566,6 +636,7 @@ const LandingPage = () => {
                       color: 'white',
                       justifyContent: 'flex-start',
                       textTransform: 'none',
+                      width: `${item.length}em`
                     }}
                   >
                     {item.charAt(0).toUpperCase() + item.slice(1)}
@@ -613,7 +684,7 @@ const LandingPage = () => {
             </IconButton>
           </Box>
           <List>
-            {['özellikler', 'fiyatlandırma', 'iletişim'].map((item) => (
+            {['features', 'pricing', 'contact'].map((item) => (
               <ListItem key={item} button onClick={() => scrollToSection(item)}>
                 <ListItemText
                   primary={item.charAt(0).toUpperCase() + item.slice(1)}

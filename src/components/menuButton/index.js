@@ -298,8 +298,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         })
         
       }
-      
-      
+  
     }
   }
 
