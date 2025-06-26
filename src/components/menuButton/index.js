@@ -24,6 +24,9 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
+import { margin } from '@mui/system'
+import { IconButton } from '@mui/material'
+import MonitorDetail from '../../pages/monitorPage/monitorDetail'
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -68,7 +71,7 @@ const StyledMenu = styled((props) => (
   },
 }))
 
-export default function CustomizedMenus({ monitor, setMenuButton }) {
+export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
   const navigate = useNavigate()
@@ -223,7 +226,9 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
             text: 'Başarılı şekilde silindi',
             confirmButtonText: 'Tamam',
           })
-          setMenuButton(true)
+          setMonitors((prevMonitors) =>
+                  prevMonitors.filter((m) => m.id !== monitor.id)
+                )
         }
       })
       .catch((error) => {
@@ -248,7 +253,13 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
           text: 'İzleme başarıyla durduruldu.',
           confirmButtonText: 'Tamam',
         })
-        setMenuButton(true)
+        setMonitors((prevMonitors) =>
+            prevMonitors.map((m) =>
+              m.id === monitor.id
+                ? { ...m, isActiveByOwner: false, status: 'uncertain' }
+                : m
+            )
+          )
       } catch (error) {
         console.error('Sunucu durdurulurken hata oluştu:', error)
         handleClose();
@@ -269,7 +280,13 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
           text: 'İzleme başarıyla başlatıldı.',
           confirmButtonText: 'Tamam',
         })
-        setMenuButton(true)
+        setMonitors((prevMonitors) =>
+            prevMonitors.map((m) =>
+              m.id === monitor.id
+                ? { ...m, isActiveByOwner: true, status: 'uncertain' }
+                : m
+            )
+          )
       } catch (error) {
         console.error('Sunucu çalıştırılırken hata oluştu:', error)
         handleClose();
@@ -285,9 +302,14 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
       
     }
   }
+
+  const handlDetailMenu = (monitor) => {
+    console.log(monitor)
+  }
+
   return (
-    <div>
-      <Button
+    <div style={{'margin-top': '5px', 'margin-left': '15px'}}>
+      <IconButton
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
         aria-haspopup="true"
@@ -297,8 +319,8 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
         onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
-        Düzenle
-      </Button>
+        <MoreHorizIcon />
+      </IconButton>
       <StyledMenu
         /*sx={{
           ml: '10%',
@@ -319,7 +341,7 @@ export default function CustomizedMenus({ monitor, setMenuButton }) {
           <EditIcon />
           Düzenle
         </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={()=>handlDetailMenu(monitor)} disableRipple>
           <InfoIcon />
           Detayı
         </MenuItem>

@@ -3,7 +3,7 @@ import alertify from 'alertifyjs'
 import api from '../../api/auth/axiosInstance'
 import BuildIcon from '@mui/icons-material/Build'
 import Swal from 'sweetalert2'
-import MenuButton from '../../components/menuButton/index.js';
+import MenuButton from '../../components/menuButton/index.js'
 import {
   Typography,
   IconButton,
@@ -62,7 +62,6 @@ export default function Dashboard() {
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
-  const [menuButton, setMenuButton] = useState(false)
   const navigate = useNavigate()
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
@@ -206,25 +205,6 @@ export default function Dashboard() {
   }, [])
 
   useEffect(() => {
-    const fetchMonitors = async () => {
-      try {
-        const response = await api.get(`monitors/`)
-        if (response.data) {
-          setMonitors(response.data)
-          console.log(response.data)
-        }
-      } catch (error) {
-        console.error('Monitör verileri alınırken hata oluştu:', error)
-        alertify.error('Monitör verileri alınırken bir hata oluştu.')
-      }
-    }
-    console.log("MenuButton ÇAlıştı")
-    
-    fetchMonitors()
-    
-  }, [menuButton])
-
-  useEffect(() => {
     if (!monitors || monitors.length === 0) {
       setFilteredMonitors([])
       return
@@ -247,95 +227,11 @@ export default function Dashboard() {
     setFilteredMonitors(filtered)
   }, [searchQuery, monitors])
 
-  const handleMonitorAction = async (action, monitorId) => {
-    try {
-      switch (action) {
-        case 'start':
-          const res = await api.put(`monitors/${monitorId}/play`, {})
-          setMonitors((prevMonitors) =>
-            prevMonitors.map((m) =>
-              m.id === monitorId
-                ? { ...m, isActiveByOwner: true, status: 'uncertain' }
-                : m
-            )
-          )
-          alertify.success(`${res.data.name} sunucu başlatıldı`)
-          break
-
-        case 'pause':
-          try {
-            const response = await api.put(`monitors/${monitorId}/pause`, {})
-            setMonitors((prevMonitors) =>
-              prevMonitors.map((m) =>
-                m.id === monitorId
-                  ? { ...m, isActiveByOwner: false, status: 'uncertain' }
-                  : m
-              )
-            )
-            alertify.warning(`${response.data.name} sunucu durduruldu`)
-          } catch (error) {
-            console.error('Sunucu durdurulurken hata oluştu:', error)
-            alertify.error(
-              'Sunucu durdurulurken bir hata oluştu: ' +
-                (error.response?.data?.message || error.message)
-            )
-          }
-          break
-        case 'delete':
-          Swal.fire({
-            title: 'Silmek istediğinizden emin misiniz',
-            icon: 'warning',
-            text: 'İzlemeyi sistemden tamamen silinecektir',
-            showCancelButton: true,
-            showConfirmButton: true,
-            confirmButtonText: 'Evet silmek istiyorum',
-            cancelButtonText: 'Hayır',
-          })
-            .then(async (result) => {
-              if (result.isConfirmed) {
-                await api.delete(`monitors/${monitorId}`)
-                setMonitors((prevMonitors) =>
-                  prevMonitors.filter((m) => m.id !== monitorId)
-                )
-                Swal.fire({
-                  icon: 'success',
-                  title: 'İzleme Silindi',
-                  text: 'Başarılı şekilde silindi',
-                  confirmButtonText: 'Tamam',
-                })
-              }
-            })
-            .catch((error) => {
-              console.log(error)
-              Swal.fire({
-                icon: 'error',
-                title: 'Hatalı İşlem',
-                text: error.response.data.message,
-                confirmButtonText: 'Tamam',
-              })
-            })
-          break
-
-        default:
-          alertify.error('Geçersiz işlem')
-          console.error('Geçersiz işlem')
-      }
-    } catch (error) {
-      console.error('İşlem sırasında bir hata oluştu:', error)
-      alertify.error(
-        'İşlem sırasında bir hata oluştu: ' +
-          (error.response?.data?.message || error.message)
-      )
-    }
-  }
-
-  
-
   const columns = [
     {
       field: 'name',
       headerName: 'Adı',
-      width: 250,
+      width: 300,
       size: 'medium',
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
@@ -356,7 +252,7 @@ export default function Dashboard() {
     {
       field: 'host',
       headerName: 'Host',
-      width: 300,
+      width: 350,
       size: 'medium',
       renderCell: (params) => {
         switch (params.row.monitorType) {
@@ -529,220 +425,227 @@ export default function Dashboard() {
       headerName: 'Durumu',
       width: 200,
       renderCell: (params) => {
-        if (params.value === 'uncertain') {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-              <Chip
-                icon={<HelpOutline />}
-                label="Belirsiz"
-                color="warning"
-                size="medium"
-                sx={{
-                  fontWeight: 'bold',
-                  '& .MuiChip-label': {
-                    fontSize: {
-                      xs: '0.875rem',
-                      sm: '1rem',
-                      md: '1.125rem',
-                      lg: '1.25rem',
-                      xlg: '1.5rem',
-                    }, // örnek: 16px
-                    fontWeight: 'bold',
-                  },
-                }}
-              />
-            </Box>
-          )
-        }
-        if (params.value === 'maintanance') {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-              <Chip
-                icon={<BuildIcon />}
-                label="Bakım modu"
-                color="info"
-                size="medium"
-                sx={{
-                  fontWeight: 'bold',
-                  '& .MuiChip-label': {
-                    fontSize: {
-                      xs: '0.875rem',
-                      sm: '1rem',
-                      md: '1.125rem',
-                      lg: '1.25rem',
-                      xlg: '1.5rem',
-                    }, // örnek: 16px
-                    fontWeight: 'bold',
-                    fontColor: 'black',
-                  },
-                }}
-              />
-            </Box>
-          )
-        }
-        if (params.value === 'down') {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-              <Chip
-                icon={<WarningIcon />}
-                label={'Başarısız'}
-                color={'error'}
-                size="medium"
-                sx={{
-                  fontWeight: 'bold',
-                  '& .MuiChip-label': {
-                    fontSize: {
-                      xs: '0.875rem',
-                      sm: '1rem',
-                      md: '1.125rem',
-                      lg: '1.25rem',
-                      xlg: '1.5rem',
-                    }, // örnek: 16px
-                    fontWeight: 'bold',
-                  },
-                }}
-              />
-            </Box>
-          )
-        }
+        // Uptime Robot tarzı renk ve metinler
+        let color = '#bdbdbd'
+        let pulseColor = '#e0e0e0'
+        let text = 'Belirsiz'
         if (params.value === 'up') {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-              <Chip
-                icon={<CheckCircleIcon />}
-                label={'Başarılı'}
-                color={'success'}
-                size="medium"
+          color = '#2e7d32'
+          pulseColor = 'rgba(46,125,50,0.3)'
+          text = 'Çalışıyor'
+        } else if (params.value === 'down') {
+          color = '#d32f2f'
+          pulseColor = 'rgba(211,47,47,0.3)'
+          text = 'Çalışmıyor'
+        } else if (params.value === 'maintanance') {
+          color = '#ed6c02'
+          pulseColor = 'rgba(237,108,2,0.3)'
+          text = 'Bakım'
+        }
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+            <Box sx={{ position: 'relative', width: 32, height: 32 }}>
+              {/* Pulse animasyon */}
+              <Box
                 sx={{
-                  fontWeight: 'bold',
-                  '& .MuiChip-label': {
-                    fontSize: {
-                      xs: '0.875rem',
-                      sm: '1rem',
-                      md: '1.125rem',
-                      lg: '1.25rem',
-                      xlg: '1.5rem',
-                    }, // örnek: 16px
-                    fontWeight: 'bold',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: pulseColor,
+                  animation: 'pulseAnim 1.6s infinite cubic-bezier(0.66,0,0,1)',
+                  zIndex: 1,
+                  '@keyframes pulseAnim': {
+                    '0%': { transform: 'scale(1)', opacity: 0.7 },
+                    '70%': { transform: 'scale(1.7)', opacity: 0 },
+                    '100%': { transform: 'scale(1.7)', opacity: 0 },
                   },
                 }}
               />
-            </Box>
-          )
-        }
-      },
-    },
-    {
-      field: 'succesRate',
-      headerName: 'Başarı Oranı',
-      width: 200,
-      renderCell: (params) => {
-        console.log(params.row.successRate)
-        if (!params.row.successRate) {
-          return (
-            <Box sx={{ width: '100%', textAlign: 'center' }}>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                fontSize={{
-                  xs: '0.875rem',
-                  sm: '1rem',
-                  md: '1.125rem',
-                  lg: '1.25rem',
-                  xlg: '1.5rem',
-                }}
-              >
-                No info
-              </Typography>
-            </Box>
-          )
-        }
-
-        const successRate = Number(
-          params.row.successRate.substring(0, params.row.successRate.length - 1)
-        )
-        console.log(successRate)
-        const color =
-          successRate >= 90
-            ? 'success'
-            : successRate >= 70
-            ? 'warning'
-            : 'error'
-
-        return (
-          <Box sx={{ width: '100%' }}>
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', mb: 0.5, mt: 2.5 }}
-            >
-              <LinearProgress
-                variant="determinate"
-                value={successRate}
-                color={color}
+              {/* Ana renkli yuvarlak */}
+              <Box
                 sx={{
-                  width: '100%',
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: '#e0e0e0',
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  background: color,
+                  border: '2.5px solid white',
+                  boxShadow: '0 0 8px 0 ' + color,
+                  zIndex: 2,
+                  position: 'relative',
+                  transition: 'box-shadow 0.3s, filter 0.3s',
+                  '&:hover': {
+                    boxShadow: '0 0 16px 2px ' + color,
+                    filter: 'brightness(1.15)',
+                  },
                 }}
               />
             </Box>
             <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'block', textAlign: 'center' }}
+              fontWeight={700}
+              fontSize={{ xs: '1rem', sm: '1.1rem', md: '1.2rem' }}
+              color={color}
+              sx={{ letterSpacing: 0.5 }}
             >
-              {params.row.successRate}
+              {text}
             </Typography>
           </Box>
         )
       },
     },
     {
-      field: 'actions',
-      headerName: 'İşlemler',
-      width: 200,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          {!params.row.isActiveByOwner && (
-            <Tooltip title="Başlat">
-              <IconButton
-                size="small"
-                color="success"
-                onClick={() => handleMonitorAction('start', params.row.id)}
-              >
-                <PlayArrowIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-          {params.row.isActiveByOwner && (
-            <Tooltip title="Pause">
-              <IconButton
-                size="small"
-                color="warning"
-                onClick={() => handleMonitorAction('pause', params.row.id)}
-              >
-                <PauseIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-          <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              color="error"
-              onClick={() => handleMonitorAction('delete', params.row.id)}
+      field: 'logs',
+      headerName: 'Başarı Oranı',
+      width: 400,
+      renderCell: (params) => {
+        const logsRate = params.row.logs || []
+        const total = logsRate.length
+        const successCount = logsRate.filter(
+          (log) => log.status === 'up'
+        ).length
+        const errorCount = logsRate.filter(
+          (log) => log.status === 'down' || log.isError
+        ).length
+        const lastLog = logsRate[logsRate.length - 1]
+        const rate = total > 0 ? Math.round((successCount / total) * 100) : 0
+        const logs = params.row.logs.slice(-15) || []
+        const size = logs.length
+        for(let i=size; i<15; i++){
+          logs[i]=
+          {
+            id: '',
+            monitorId: '',
+            status: '',
+            responseTime: '',
+            isError: '',
+            createdAt: ''
+          }
+        }
+        // Animasyon için delay hesapla
+        const baseDelay = 60 // ms
+        return (
+          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              {logs.map((log, idx) => (
+                <Tooltip
+                  key={idx}
+                  title={
+                    <Box>
+                      <Typography fontSize={13} fontWeight={600}>
+                        Log Detay
+                      </Typography>
+                      <Typography fontSize={12}>Durum: {log.status==='up'?'Başarılı':log.status==='down'?'Başarısız':'Belirsiz'}</Typography>
+                      <Typography fontSize={12}>
+                        Yanıt Süresi: {log.responseTime} ms
+                      </Typography>
+                      <Typography fontSize={12}>
+                        Tarih: {log.createdAt}
+                      </Typography>
+                    </Box>
+                  }
+                  arrow
+                  placement="top"
+                >
+                  <Box
+                    sx={{
+                      width: 14,
+                      height: 30,
+                      borderRadius: 1,
+                      backgroundColor:
+                        log.status === 'up' ? '#2e7d32'
+                         : log.status === 'down'?'#d32f2f'
+                         : 'rgba(25, 118, 210, 0.15)',
+                      transition:
+                        'background 0.3s, box-shadow 0.3s, transform 0.3s, opacity 0.5s',
+                      border: '1px solid #e0e0e0',
+                      opacity: 0,
+                      transform: 'translateY(-10px)',
+                      animation: `fadeInBar 0.5s ${
+                        (idx * baseDelay) / 1000
+                      }s forwards`,
+                      '&:hover': {
+                        transform: 'scale(1.18)',
+                        boxShadow: '0 0 8px 2px rgba(25, 118, 210, 0.15)',
+                        filter: 'brightness(1.15)',
+                      },
+                      '@keyframes fadeInBar': {
+                        from: { opacity: 0, transform: 'translateY(-10px)' },
+                        to: { opacity: 1, transform: 'translateY(0)' },
+                      },
+                    }}
+                  />
+                </Tooltip>
+              ))}
+            </Box>
+            <Tooltip
+              title={
+                <Box>
+                  <Typography fontWeight={600} fontSize={14} mb={1}>
+                    Log Detayları
+                  </Typography>
+                  <Typography fontSize={13}>Toplam Log: {total}</Typography>
+                  <Typography fontSize={13}>
+                    Başarılı: {successCount}
+                  </Typography>
+                  <Typography fontSize={13}>Hatalı: {errorCount}</Typography>
+                  {lastLog && (
+                    <Box mt={1}>
+                      <Typography fontSize={13} fontWeight={600}>
+                        Son Log
+                      </Typography>
+                      <Typography fontSize={12}>
+                        Durum: {lastLog.status==='up'?'Başarılı':lastLog.status==='down'?'Başarısız':'Belirsiz'}
+                      </Typography>
+                      <Typography fontSize={12}>
+                        Yanıt Süresi: {lastLog.responseTime} ms
+                      </Typography>
+                      <Typography fontSize={12}>
+                        Tarih: {lastLog.createdAt}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              }
+              arrow
+              placement="top"
             >
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      ),
+              <Box
+                sx={{ width: '100%', textAlign: 'center', cursor: 'pointer' }}
+              >
+                <Typography
+                  variant="caption"
+                  color={
+                    rate >= 80
+                      ? 'success.main'
+                      : rate >= 50
+                      ? 'warning.main'
+                      : 'error.main'
+                  }
+                  fontWeight={600}
+                  fontSize={{ xs: '0.95rem', sm: '1.1rem' }}
+                >
+                  %{rate}
+                </Typography>
+              </Box>
+            </Tooltip>
+          </Box>
+        )
+      },
     },
     {
       field: 'edit',
-      headerName: 'Düzenleme',
-      width: 120,
-      renderCell: (params) => (<MenuButton monitor={params.row} setMenuButton={setMenuButton}/>
-),
+      headerName: '',
+      width: 100,
+      renderCell: (params) => (
+        <MenuButton
+          monitor={params.row}
+          monitors={monitors}
+          setMonitors={setMonitors}
+          sx={{ mt: 2 }}
+        />
+      ),
     },
   ]
 

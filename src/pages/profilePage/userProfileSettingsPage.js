@@ -194,7 +194,7 @@ const saveChangesInfo = async () => {
             label="Adres"
             className="input-field"
             variant="outlined"
-            defaultValue={'....'}
+            defaultValue={''}
             disabled
           />
         </Grid>
@@ -204,7 +204,7 @@ const saveChangesInfo = async () => {
             label=""
             variant="outlined"
             className="input-field"
-            defaultValue={'.....'}
+            defaultValue={''}
             disabled
           />
         </Grid>
@@ -214,7 +214,7 @@ const saveChangesInfo = async () => {
             label="Telefon No"
             variant="outlined"
             className="input-field"
-            defaultValue={'.......'}
+            defaultValue={''}
             disabled
           />
         </Grid>
