@@ -128,7 +128,13 @@ export default function MonitoringReportsPage() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 240 },
+          width: {
+            xs: isOpen ? '100%' : '0%',
+            sm: isOpen ? '100%' : '0%',
+            md: isOpen ? '15%' : '5%',
+            lg: isOpen ? '15%' : '3%',
+            xlg: isOpen ? '15%' : '3%',
+          },
           flexShrink: 0,
           transition: 'width 0.3s',
           position: { xs: 'fixed', sm: 'relative' },
@@ -141,16 +147,20 @@ export default function MonitoringReportsPage() {
       </Box>
       <Box
         sx={{
-          flexGrow: 1,
+          width: {
+            xs: isOpen ? '0%' : '100%',
+            sm: isOpen ? '0%' : '100%',
+            md: isOpen ? '85%' : '95%',
+            lg: isOpen ? '95%' : '95%',
+            xlg: isOpen ? '95%' : '98%',
+          },
+          //flexGrow: 1,
           p: { xs: 2, sm: 3 },
           backgroundColor: '#f8f9fa',
-          minHeight: '100vh',
-          maxWidth: '1800px',
           margin: '0 auto',
-          ml: { xs: 0, sm: '120px'},
-          mr: { xs: 0, sm: '120px'},
+          ml: { xs: 0, sm: '20px'},
+          //mr: { xs: 0, sm: '10px'},
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '240px'})` },
         }}
       >
         <Box sx={{ 
@@ -158,8 +168,6 @@ export default function MonitoringReportsPage() {
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
-          mb: 3,
-          gap: 2
         }}>
           <Typography
             variant="h4"
@@ -167,7 +175,13 @@ export default function MonitoringReportsPage() {
             sx={{
               fontWeight: 'bold',
               color: theme.palette.primary.main,
-              fontSize: { xs: '1.5rem', sm: '2rem' }
+              fontSize: {
+                xs: '0.5rem',
+                sm: '0.8rem',
+                md: '1rem',
+                lg: '1.5rem',
+                xlg: '2rem',
+              },
             }}
           >
             İzleme Raporları
@@ -183,14 +197,13 @@ export default function MonitoringReportsPage() {
               }
             }}
           >
-            <MenuIcon />
+            <MenuIcon /> 
           </IconButton>
         </Box>
-        <Divider sx={{ mb: 4 }} />
+        <Divider sx={{ mb: 2 }} />
 
         <Box sx={{ mb: 4 }}>
           <TextField
-            fullWidth
             placeholder="Monitor adı ile arama yapın..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -218,7 +231,7 @@ export default function MonitoringReportsPage() {
 
         <Grid container spacing={{ xs: 2, sm: 3 }}>
           {filteredLogs.map((log) => (
-            <Grid item xs={12} sm={6} md={4} key={log.id}>
+            <Grid item key={log.id}>
               <StatCard>
                 <CardContent>
                   <Typography 
@@ -227,7 +240,7 @@ export default function MonitoringReportsPage() {
                     gutterBottom 
                     sx={{ 
                       fontWeight: 'bold',
-                      fontSize: { xs: '1.1rem', sm: '1.25rem' }
+                      fontSize: { xs: '0.5rem', sm: '0.7rem', md: '0.9rem', lg: '1rem', xlg:'1.2rem' }
                     }}
                   >
                     {log.name}

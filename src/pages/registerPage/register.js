@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState } from 'react'
 import Swal from 'sweetalert2'
+import { useFormik } from 'formik'
+import { registerFormSchema } from '../../utils/formSchema/formSchemas'
 import {
   Box,
   Button,
@@ -13,6 +15,7 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
+  Link,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { Visibility, VisibilityOff, Person, Email, Lock } from '@mui/icons-material'
@@ -21,23 +24,19 @@ import axios from 'axios'
 const Register = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [email, setEmail] = useState('')
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
-  const [agree, setAgree] = useState(false)
 
-  const handleSubmit = async () => {
-    axios
+  const submit = async (values,action) => {
+      axios
       .post(`${process.env.REACT_APP_API_URL}auth/register`, {
-        name: username,
-        email: email,
-        password: password,
+        name: values.username,
+        email: values.email,
+        password: values.password,
       })
       .then((response) => {
         Swal.fire({
-          title: response.data.name,
+          title: 'Kayıt İşlemi',
           icon: 'success',
           text: 'Başarıyla kayıt oldunuz.',
           confirmButtonText: 'Tamam',
@@ -52,7 +51,23 @@ const Register = () => {
           confirmButtonText: 'Tamam',
         })
       })
+    
   }
+
+  const {values,errors,handleChange,handleSubmit}=useFormik({
+      initialValues:{
+        username: '',
+        email: '',
+        password: '',
+        agree: false
+      },
+      validationSchema: registerFormSchema,
+      onSubmit: submit,
+      validateOnChange: false,
+      validateOnBlur: false
+  });
+
+  
 
   return (
     <Box
@@ -141,11 +156,13 @@ const Register = () => {
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <TextField
+                id='username'
                 fullWidth
                 label="Kullanıcı Adı"
                 variant="outlined"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={values.username}
+                onChange={handleChange}
+                helperText={(<Typography variant='p' color={'red'}>{errors.username}</Typography>)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -170,11 +187,13 @@ const Register = () => {
               />
 
               <TextField
+                id='email'
                 fullWidth
                 label="Email"
                 variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={values.email}
+                onChange={handleChange/*(e) => setEmail(e.target.value)*/}
+                helperText={(<Typography variant='p' color={'red'}>{errors.email}</Typography>)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -199,11 +218,13 @@ const Register = () => {
               />
 
               <TextField
+                id='password'
                 fullWidth
                 label="Şifre"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={values.password}
+                onChange={handleChange/*(e) => setPassword(e.target.value)*/}
+                helperText={(<Typography variant='p' color={'red'}>{errors.password}</Typography>)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -247,8 +268,14 @@ const Register = () => {
                 }}
               >
                 <Checkbox
-                  checked={agree}
-                  onChange={(e) => setAgree(e.target.checked)}
+                  id='agree'
+                  checked={values.agree}
+                  onChange={handleChange/*(e) =>{
+                    setAgree(e.target.checked)
+                    if(e.target.checked){
+                      setErrorMessage('')
+                    }
+                  }*/}
                   sx={{
                     color: "#1976d2",
                     "&.Mui-checked": {
@@ -256,30 +283,36 @@ const Register = () => {
                     },
                   }}
                 />
-                <Typography variant="body2" sx={{ color: "#666" }}>
-                  Gizlilik Politikası ve Şartlarını
-                </Typography>
-                <Button
+                <Link
+                  href="https://uptime-test-api.rahatyonetim.com/privasyPolisy.html"
+                  target='_blank'
                   className="unframed-button"
                   sx={{
                     color: "#1976d2",
                     textTransform: "none",
                     p: 0,
                     minWidth: "auto",
+                    textDecoration: 'none',
                     "&:hover": {
                       color: "#1565c0",
                       textDecoration: "underline",
                     },
                   }}
                 >
+                  Gizlilik Politikası ve Şartlarını
+                </Link>
+                <Typography variant="body2" sx={{ color: "#666" }}>
                   kabul ediyorum
-                </Button>
+                </Typography>
+                
               </Box>
-
+              <Typography variant="body2" sx={{ color: "red" }}>
+                  {errors.agree}
+              </Typography>
               <Button
                 fullWidth
                 variant="contained"
-                onClick={handleSubmit}
+                onClick={()=>handleSubmit()}
                 sx={{
                   mt: 2,
                   py: 1.5,

@@ -33,6 +33,8 @@ import '../../utils/animateCSS/animate.css'
 import Swal from 'sweetalert2'
 import downScrollPng from '../../assets/images/down_scroll.png'
 import api from '../../api/auth/axiosInstance'
+import { useFormik } from 'formik'
+import { landingFormSchema } from '../../utils/formSchema/formSchemas'
 const features = [
   {
     icon: <Speed sx={{ fontSize: 40 }} />,
@@ -105,9 +107,6 @@ const LandingPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
   const navigate = useNavigate()
 
   const loginPage = () => {
@@ -157,15 +156,14 @@ const LandingPage = () => {
     }
   }
 
-  const handlContactUser = async() =>{
-     console.log(name)
-     console.log(email)
-     console.log(message)
+  const handlContactUser = async(values,action) =>{
+    console.log('Hello0000 ')
      try{
+      console.log("Burdaaaa")
         const response = await api.post('users/landing',{
-          name: name,
-          email: email,
-          message: message
+          name: values.name,
+          email: values.email,
+          message: values.message
         })
         Swal.fire({
           icon: 'success',
@@ -184,6 +182,17 @@ const LandingPage = () => {
 
      }
   }
+
+  const {values,errors,handleChange,handleSubmit} = useFormik({
+    initialValues:{
+      name: '',
+      email: '',
+      message: ''
+    },
+    validationSchema: landingFormSchema,
+    onSubmit: handlContactUser
+  })
+
   return (
     <Box sx={{ overflow: 'hidden' }}>
       {/* Navbar */}
@@ -379,13 +388,11 @@ const LandingPage = () => {
                     width: { xs: 40, sm: 40, md: 50, lg: 70 , xl: 80 },
                     height: { xs: 40, sm: 40, md: 50, lg: 70 , xl: 80 },
                     ml:{ xs: '50%', sm: '50%', md: '0', lg: '0', xl: '0' },
-                    mb: { xs: 3, sm: 3, md: 0},
+                    mr:{xs: 0, sm: 0, md: 5, lg: 10, xl: 5 },
+                    mb: { xs: 3, sm: 3, md: 5, lg: 7},
                     borderRadius: '50%',
                     background: '#e8e9ff',
                     mx: 'auto',
-                    ':hover':{
-                       
-                    }
                   }}
                 />
               </motion.div>
@@ -547,26 +554,35 @@ const LandingPage = () => {
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <TextField
+                  id='name'
                   fullWidth
+                  value={values.name}
                   label="Adınız"
                   variant="outlined"
                   sx={{ mb: 2 }}
-                  onChange={(e)=>{setName(e.target.value)}}
+                  onChange={handleChange}
+                  helperText={(<Typography variant='p' color={'red'}>{errors.name}</Typography>)}
                 />
                 <TextField
+                  id='email'
                   fullWidth
+                  value={values.email}
                   label="Email Adresiniz"
                   variant="outlined"
                   sx={{ mb: 2 }}
-                  onChange={(e)=>{setEmail(e.target.value)}}
+                  onChange={handleChange}
+                  helperText={(<Typography variant='p' color={'red'}>{errors.email}</Typography>)}
                 />
                 <TextField
+                  id='message'
                   fullWidth
+                  value={values.message}
                   label="Mesajınız"
                   variant="outlined"
                   multiline
                   rows={4}
-                  onChange={(e)=>{setMessage(e.target.value)}}
+                  onChange={handleChange}
+                  helperText={(<Typography variant='p' color={'red'}>{errors.message}</Typography>)}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -602,7 +618,7 @@ const LandingPage = () => {
               </Grid>
             </Grid>
             <Box sx={{ mt: 3, textAlign: 'center' }}>
-              <Button variant="contained" size="large" sx={{ px: 4, py: 1.5 }} onClick={()=>handlContactUser()}>
+              <Button variant="contained" size="large" sx={{ px: 4, py: 1.5 }} onClick={()=>handleSubmit()}>
                 Gönder
               </Button>
             </Box>

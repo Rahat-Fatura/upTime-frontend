@@ -19,32 +19,31 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff, Email, Lock } from "@mui/icons-material";
 import { login } from "../../api/auth/login/index";
+import { useFormik } from "formik";
+import { loginFormShcema } from "../../utils/formSchema/formSchemas";
+
 
 const Login = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setEmail(cookies.get("email"));
-    setPassword(cookies.get("password"));
     setRememberMe(cookies.get("rememberMe"));
   }, []);
 
-  const handleLogin = (event) => {
-    login(email, password)
+  const handleLogin = (values, acrion) => {
+    login(values.email, values.password)
       .then((resp) => {
         cookies.set("jwt-access", resp.data.access.token);
         cookies.set("jwt-access-expires", resp.data.access.expires);
         cookies.set("jwt-refresh", resp.data.refresh.token);
         cookies.set("jwt-refresh-expires", resp.data.refresh.expires);
         if (rememberMe) {
-          cookies.set("email", email, { path: "/", maxAge: 60 * 60 * 24 * 30 });
-          cookies.set("password", password, { path: "/", maxAge: 60 * 60 * 24 * 30 });
+          cookies.set("email", values.email, { path: "/", maxAge: 60 * 60 * 24 * 30 });
+          cookies.set("password", values.password, { path: "/", maxAge: 60 * 60 * 24 * 30 });
           cookies.set("rememberMe", rememberMe, { path: "/", maxAge: 60 * 60 * 24 * 30 });
         } else {
           cookies.remove("email");
@@ -67,6 +66,15 @@ const Login = () => {
         });
       });
   };
+  const {values,errors,handleChange,handleSubmit}=useFormik({
+    initialValues:{
+      email: cookies.get("email") || '',
+      password: cookies.get("password") || '',
+    },
+    onSubmit: handleLogin,
+    validationSchema: loginFormShcema
+  })
+  
 
   return (
     <Box
@@ -157,11 +165,13 @@ const Login = () => {
 
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <TextField
+                id="email"
                 fullWidth
                 label="Email"
                 variant="outlined"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={values.email}
+                onChange={handleChange}
+                helperText={(<Typography variant='p' color={'red'}>{errors.email}</Typography>)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -186,11 +196,13 @@ const Login = () => {
               />
 
               <TextField
+                id="password"
                 fullWidth
                 label="Şifre"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={values.password}
+                onChange={handleChange}
+                helperText={(<Typography variant='p' color={'red'}>{errors.password}</Typography>)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -266,7 +278,7 @@ const Login = () => {
               <Button
                 fullWidth
                 variant="contained"
-                onClick={handleLogin}
+                onClick={handleSubmit}
                 sx={{
                   mt: 2,
                   py: 1.5,
