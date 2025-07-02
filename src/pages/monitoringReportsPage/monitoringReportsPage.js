@@ -125,15 +125,15 @@ export default function MonitoringReportsPage() {
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', }}>
       <Box
         sx={{
           width: {
-            xs: isOpen ? '100%' : '0%',
-            sm: isOpen ? '100%' : '0%',
-            md: isOpen ? '15%' : '5%',
-            lg: isOpen ? '15%' : '3%',
-            xlg: isOpen ? '15%' : '3%',
+            xs: isOpen ? '100%' : 0,
+            sm: isOpen ? '100%' : 0,
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '19.16%' : '6.5%',
+            xlg: isOpen ? '19.16%' : '2.5%',
           },
           flexShrink: 0,
           transition: 'width 0.3s',
@@ -148,17 +148,18 @@ export default function MonitoringReportsPage() {
       <Box
         sx={{
           width: {
-            xs: isOpen ? '0%' : '100%',
-            sm: isOpen ? '0%' : '100%',
-            md: isOpen ? '85%' : '95%',
-            lg: isOpen ? '95%' : '95%',
-            xlg: isOpen ? '95%' : '98%',
+            xs: isOpen ? 0 : '100%',
+            sm: isOpen ? 0 : '100%',
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '78%' : '80%',
+            xlg: isOpen ? '80.74%' : '97.5%',
           },
-          //flexGrow: 1,
-          p: { xs: 2, sm: 3 },
-          backgroundColor: '#f8f9fa',
+          flexGrow: 1,
+          pt: { xs: 2, sm: 3 },
+          pr: { xs: 2, sm: 3 },
+          pl: 1,
           margin: '0 auto',
-          ml: { xs: 0, sm: '20px'},
+          //ml: { xs: 0, sm: '20px'},
           //mr: { xs: 0, sm: '10px'},
           transition: 'margin-left 0.3s',
         }}
@@ -168,6 +169,7 @@ export default function MonitoringReportsPage() {
           flexDirection: { xs: 'column', sm: 'row' },
           alignItems: { xs: 'flex-start', sm: 'center' },
           justifyContent: 'space-between',
+          mb: 2,
         }}>
           <Typography
             variant="h4"
@@ -176,11 +178,11 @@ export default function MonitoringReportsPage() {
               fontWeight: 'bold',
               color: theme.palette.primary.main,
               fontSize: {
-                xs: '0.5rem',
+                xs: '0.8rem',
                 sm: '0.8rem',
                 md: '1rem',
-                lg: '1.5rem',
-                xlg: '2rem',
+                lg: '1.2rem',
+                xlg: '1.5rem',
               },
             }}
           >
@@ -202,7 +204,7 @@ export default function MonitoringReportsPage() {
         </Box>
         <Divider sx={{ mb: 2 }} />
 
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 2 }}>
           <TextField
             placeholder="Monitor adı ile arama yapın..."
             value={searchQuery}
@@ -215,6 +217,7 @@ export default function MonitoringReportsPage() {
               ),
             }}
             sx={{
+               width:'40%',
               backgroundColor: 'white',
               borderRadius: 2,
               '& .MuiOutlinedInput-root': {
@@ -232,7 +235,7 @@ export default function MonitoringReportsPage() {
         <Grid container spacing={{ xs: 2, sm: 3 }}>
           {filteredLogs.map((log) => (
             <Grid item key={log.id}>
-              <StatCard>
+              <StatCard sx={{backgroundColor:'#ffff'}}>
                 <CardContent>
                   <Typography 
                     variant="h5" 

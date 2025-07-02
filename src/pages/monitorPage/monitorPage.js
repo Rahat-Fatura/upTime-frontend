@@ -37,7 +37,7 @@ import { INITIAL_STATS } from './constants/monitorConstants'
 import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
-
+import MonitorStatus from '../../components/Animate/monitorStatus.js'
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -62,6 +62,8 @@ export default function Dashboard() {
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
+
+
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
     method: Yup.string()
@@ -167,14 +169,15 @@ export default function Dashboard() {
     const total = monitors.length
     const active = monitors.filter((m) => m.status === 'up').length
     const down = monitors.filter((m) => m.status === 'down').length
+    const uncertain = monitors.filter((m) => m.status === 'uncertain').length
     const avgActive = (active / total) * 100
-    console.log('aktif:',avgActive)
     return [
       { title: 'Toplam', value: total.toString(), color: '#1976d2' },
       { title: 'Çalışan', value: active.toString(), color: '#2e7d32' },
       { title: 'Çalışmayan', value: down.toString(), color: '#d32f2f' },
+      { title: 'Belirsiz', value: uncertain.toString(), color: '#f5f102' },
       {
-        title: 'Çalışan Yüzdesi',
+        title: 'Yüzdesi',
         value: avgActive ? avgActive.toString() + '%' : '0%',
         color: '#ed6c02',
       },
@@ -218,8 +221,45 @@ export default function Dashboard() {
     }
 
     const filtered = monitors.filter((monitor) => {
+      let hostMatch
+      switch (monitor.monitorType) {
+        case 'httpMonitor': {
+          hostMatch = monitor.httpMonitor.host
+            ?.toLowerCase()
+            .includes(searchLower)
+          break
+        }
+        case 'portMonitor': {
+          hostMatch = monitor.portMonitor.host
+            ?.toLowerCase()
+            .includes(searchLower)
+          break
+        }
+        case 'keyWordMonitor': {
+          hostMatch = monitor.keyWordMonitor.host
+            ?.toLowerCase()
+            .includes(searchLower)
+          break
+        }
+        case 'pingMonitor': {
+          hostMatch = monitor.pingMonitor.host
+            ?.toLowerCase()
+            .includes(searchLower)
+          break
+        }
+        case 'cronJobMonitor': {
+          hostMatch = monitor.cronJobMonitor.host
+            ?.toLowerCase()
+            .includes(searchLower)
+          break
+        }
+        default: {
+          hostMatch = false
+          break
+        }
+      }
+
       const nameMatch = monitor.name?.toLowerCase().includes(searchLower)
-      const hostMatch = monitor.host?.toLowerCase().includes(searchLower)
       const typeMatch = monitor.monitorType?.toLowerCase().includes(searchLower)
       return nameMatch || hostMatch || typeMatch
     })
@@ -231,101 +271,25 @@ export default function Dashboard() {
     {
       field: 'status',
       headerName: '',
-      width: '10%',
-      flex: 1,
+      flex: 0.5,
       renderCell: (params) => {
-        // Uptime Robot tarzı renk ve metinler
-        let color = '#bdbdbd'
-        let pulseColor = '#e0e0e0'
-        let text = 'Belirsiz'
-        if (params.value === 'up') {
-          color = '#2e7d32'
-          pulseColor = 'rgba(46,125,50,0.3)'
-          text = 'Çalışıyor'
-        } else if (params.value === 'down') {
-          color = '#d32f2f'
-          pulseColor = 'rgba(211,47,47,0.3)'
-          text = 'Çalışmıyor'
-        } else if (params.value === 'maintanance') {
-          color = '#ed6c02'
-          pulseColor = 'rgba(237,108,2,0.3)'
-          text = 'Bakım'
-        }
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ position: 'relative', width: 32, height: 32 }}>
-              {/* Pulse animasyon */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: 15,
-                  height: 15,
-                  borderRadius: '50%',
-                  background: pulseColor,
-                  animation: 'pulseAnim 1.6s infinite cubic-bezier(0.66,0,0,1)',
-                  zIndex: 1,
-                  /* '@keyframes pulseAnim': {
-                    '0%': { transform: 'scale(1)', opacity: 1 },
-                    '25%': { transform: 'scale(1)', opacity: 0.75 },
-                    '50%': { transform: 'scale(1.7)', opacity: 0.5 },
-                    '75%': { transform: 'scale(1)', opacity: 0.4 },
-                    '100%': { transform: 'scale(1.7)', opacity: 0.3 },
-                  },*/
-                  margin: '30%',
-                }}
-              />
-              {/* Ana renkli yuvarlak */}
-              <Box
-                sx={{
-                  width: 18,
-                  height: 18,
-                  borderRadius: '50%',
-                  background: color,
-                  border: '2.5px solid white',
-                  boxShadow: '0 0 8px 0 ' + color,
-                  zIndex: 2,
-                  position: 'absolute',
-                  transition: 'box-shadow 0.3s, filter 0.3s',
-                  /*'&:hover': {
-                    boxShadow: '5px 5px 0px 0px ' + color,
-                    filter: 'brightness(1.15)',
-                  },*/
-                  margin: '30%',
-                }}
-              />
-            </Box>
-            <Typography
-              /* fontWeight={700}
-              fontSize={{ xs: '1rem', sm: '1.1rem', md: '1.2rem' }}*/
-              color={color}
-              sx={{ letterSpacing: 0.5 }}
-            >
-              {/*text*/}
-            </Typography>
-          </Box>
-        )
+        return <MonitorStatus status={params.value} />
       },
     },
-    {
+    /* {
       field: 'name',
       headerName: 'Adı',
-      width: '20%',
-      flex: 3,
-      size: 'medium',
+      flex: 2,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1, margin: '5' }}>
           <Typography>{params.value}</Typography>
         </Box>
       ),
-    },
+    },*/
     {
       field: 'host',
       headerName: 'Host',
-      width: '30%',
-      flex: 5,
-      size: 'medium',
+      flex: 3,
       renderCell: (params) => {
         switch (params.row.monitorType) {
           case 'HttpMonitor':
@@ -366,26 +330,27 @@ export default function Dashboard() {
             )
           case 'CronJobMonitor':
             return (
-              <Box sx={{ display: 'flex-column', gap: 1 }}>
+              <Box sx={{ display:'flex', alignItems:'center'}}>
+                <Box sx={{ display: 'flex-column', gap: 1 }}>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography>{params.row.name}</Typography>
+                </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <Typography>{params.row.monitorType}</Typography>
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    size="small"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        params.row.cronJobMonitor.host
-                      )
-                    }}
-                    sx={{
-                      width: '5rem',
-                    }}
-                  >
-                    Copy
-                  </Button>
                 </Box>
               </Box>
+              <Button variant="contained" size='small' width={'30%'}
+               onClick={()=>{
+                 navigator.clipboard.writeText(params.row.cronJobMonitor.host)
+               }}
+               sx={{
+                ml:2, borderRadius: '15%', height:15
+              }}>
+                Link
+              </Button>
+              </Box>
+              
             )
           case 'PortMonitor':
             return (
@@ -433,22 +398,11 @@ export default function Dashboard() {
     {
       field: 'logs',
       headerName: 'Başarı Oranı',
-      width: '30%',
-      flex: 5,
+      flex: 2,
       renderCell: (params) => {
-        const logsRate = params.row.logs || []
-        const total = logsRate.length
-        const successCount = logsRate.filter(
-          (log) => log.status === 'up'
-        ).length
-        const errorCount = logsRate.filter(
-          (log) => log.status === 'down' || log.isError
-        ).length
-        const lastLog = logsRate[logsRate.length - 1]
-        const rate = total > 0 ? Math.round((successCount / total) * 100) : 0
-        const logs = params.row.logs.slice(-15) || []
+        const logs = params.row.logs.slice(-25) || []
         const size = logs.length
-        for (let i = size; i < 15; i++) {
+        for (let i = size; i < 25; i++) {
           logs[i] = {
             id: '',
             monitorId: '',
@@ -481,10 +435,12 @@ export default function Dashboard() {
                         Yanıt Süresi: {log.responseTime} ms
                       </Typography>
                       <Typography fontSize={12}>
-                        Tarih: {String(log.createdAt).split('T')[0]}
+                        Tarih: {String(log.createdAt).split('T')[0] || ''}
                       </Typography>
                       <Typography fontSize={12}>
-                        Saat: {String(log.createdAt).split('T')[1].split('.')[0]}
+                        Saat:{' '}
+                        {String(log.createdAt).split('T')[1]?.split('.')[0] ||
+                          ''}
                       </Typography>
                     </Box>
                   }
@@ -493,8 +449,8 @@ export default function Dashboard() {
                 >
                   <Box
                     sx={{
-                      width: 7,
-                      height: 30,
+                      width: 5,
+                      height: 20,
                       borderRadius: 1,
                       backgroundColor:
                         log.status === 'up'
@@ -516,73 +472,89 @@ export default function Dashboard() {
                 </Tooltip>
               ))}
             </Box>
-            <Tooltip
-              title={
-                <Box>
-                  <Typography fontWeight={600} fontSize={15} mb={1}>
-                    Log Detayları
-                  </Typography>
-                  <Typography fontSize={13}>Toplam Log: {total}</Typography>
-                  <Typography fontSize={13}>
-                    Başarılı: {successCount}
-                  </Typography>
-                  <Typography fontSize={13}>Hatalı: {errorCount}</Typography>
-                  {lastLog && (
-                    <Box mt={1}>
-                      <Typography fontSize={13} fontWeight={600}>
-                        Son Log
-                      </Typography>
-                      <Typography fontSize={12}>
-                        Durum:{' '}
-                        {lastLog.status === 'up'
-                          ? 'Başarılı'
-                          : lastLog.status === 'down'
-                          ? 'Başarısız'
-                          : 'Belirsiz'}
-                      </Typography>
-                      <Typography fontSize={12}>
-                        Yanıt Süresi: {lastLog.responseTime} ms
-                      </Typography>
-                      <Typography fontSize={12}>
-                        Tarih: {String(lastLog.createdAt).split('T')[0]}
-                      </Typography>
-                      <Typography fontSize={12}>
-                        Saat: {String(lastLog.createdAt).split('T')[1].split('.')[0]}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              }
-              arrow
-              placement="top"
-            >
-              <Box
-                sx={{ width: '100%', textAlign: 'center', cursor: 'pointer' }}
-              >
-                <Typography
-                  variant="caption"
-                  color={
-                    rate >= 80
-                      ? 'success.main'
-                      : rate >= 50
-                      ? 'warning.main'
-                      : 'error.main'
-                  }
-                  fontWeight={600}
-                  fontSize={{ xs: '0.5rem', sm: '0.8rem' }}
-                >
-                  %{rate}
-                </Typography>
-              </Box>
-            </Tooltip>
           </Box>
         )
       },
     },
     {
-      field: 'edit',
+      field: 'succesRate',
       headerName: '',
-      width: '10%',
+      flex: 0.5,
+      renderCell: (params) => {
+        const logsRate = params.row.logs || []
+        const total = logsRate.length
+        const successCount = logsRate.filter(
+          (log) => log.status === 'up'
+        ).length
+        const errorCount = logsRate.filter(
+          (log) => log.status === 'down' || log.isError
+        ).length
+        const lastLog = logsRate[logsRate.length - 1]
+        const rate = total > 0 ? Math.round((successCount / total) * 100) : 0
+        return (
+          <Tooltip
+            title={
+              <Box>
+                <Typography fontWeight={600} fontSize={15} mb={1}>
+                  Log Detayları
+                </Typography>
+                <Typography fontSize={13}>Toplam Log: {total}</Typography>
+                <Typography fontSize={13}>Başarılı: {successCount}</Typography>
+                <Typography fontSize={13}>Hatalı: {errorCount}</Typography>
+                {lastLog && (
+                  <Box mt={1}>
+                    <Typography fontSize={13} fontWeight={600}>
+                      Son Log
+                    </Typography>
+                    <Typography fontSize={12}>
+                      Durum:{' '}
+                      {lastLog.status === 'up'
+                        ? 'Başarılı'
+                        : lastLog.status === 'down'
+                        ? 'Başarısız'
+                        : 'Belirsiz'}
+                    </Typography>
+                    <Typography fontSize={12}>
+                      Yanıt Süresi: {lastLog?.responseTime} ms
+                    </Typography>
+                    <Typography fontSize={12}>
+                      Tarih: {String(lastLog?.createdAt).split('T')[0] || ''}
+                    </Typography>
+                    <Typography fontSize={12}>
+                      Saat:{' '}
+                      {String(lastLog?.createdAt).split('T')[1].split('.')[0] ||
+                        ''}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            }
+            arrow
+            placement="top"
+          >
+            <Box sx={{ width: '100%', textAlign: 'center', cursor: 'pointer' }}>
+              <Typography
+                variant="caption"
+                color={
+                  rate >= 80
+                    ? 'success.main'
+                    : rate >= 50
+                    ? 'warning.main'
+                    : 'error.main'
+                }
+                fontWeight={600}
+                fontSize={{ xs: '0.5rem', sm: '0.8rem' }}
+              >
+                %{rate}
+              </Typography>
+            </Box>
+          </Tooltip>
+        )
+      },
+    },
+    {
+      field: 'edit',
+      headerName: 'İşlemler',
       flex: 1,
       renderCell: (params) => (
         <MenuButton
@@ -596,15 +568,15 @@ export default function Dashboard() {
   ]
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex',  backgroundColor: '#f8f9fa', }}>
       <Box
         sx={{
           width: {
             xs: isOpen ? '100%' : 0,
             sm: isOpen ? '100%' : 0,
-            md: isOpen ? '30%' : '5%',
-            lg: isOpen ? '15%' : '3%',
-            xlg: isOpen ? '15%' : '5%',
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '19.16%' : '6.5%',
+            xlg: isOpen ? '19.16%' : '2.5%',
           },
           flexShrink: 0,
           transition: 'width 0.3s',
@@ -621,18 +593,17 @@ export default function Dashboard() {
           width: {
             xs: isOpen ? 0 : '100%',
             sm: isOpen ? 0 : '100%',
-            md: isOpen ? 0 : '100%',
-            lg: isOpen ? '5%' : '95%',
-            xlg: isOpen ? '5%' : '95%',
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '78%' : '80%',
+            xlg: isOpen ? '80.74%' : '97.5%',
           },
           flexShrink: 0,
           flexGrow: 1,
-          p: { xs: 2, sm: 3 },
-          backgroundColor: '#f8f9fa',
+          pt: { xs: 2, sm: 3 },
+          pr: { xs: 2, sm: 3 },
+          pl: 1,
           margin: '0 auto',
-          ml: { xs: 0, sm: isOpen ? '30px' : '50px' },
           transition: 'margin-left 0.3s',
-          //width: { xs: '100%', sm: '100%' /*`calc(100% - ${isOpen ? '270px' : '270px'})`*/ },
           position: 'relative',
         }}
       >
@@ -642,6 +613,7 @@ export default function Dashboard() {
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'flex-start', sm: 'center' },
             justifyContent: 'space-between',
+            mb: 2,
             gap: 1,
           }}
         >
@@ -652,12 +624,13 @@ export default function Dashboard() {
               fontWeight: 'bold',
               color: theme.palette.primary.main,
               fontSize: {
-                xs: '0.5rem',
+                xs: '0.8rem',
                 sm: '0.8rem',
                 md: '1rem',
-                lg: '1.5rem',
-                xlg: '2rem',
+                lg: '1.2rem',
+                xlg: '1.5rem',
               },
+              backgroundColor: '#ffff'
             }}
           >
             İzleme Sayfası
@@ -665,7 +638,7 @@ export default function Dashboard() {
           <IconButton
             onClick={toggleSidebar}
             sx={{
-              display: { xs: 'flex', sm: 'flex', md:'none'},
+              display: { xs: 'flex', sm: 'flex', md: 'none' },
               bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
@@ -678,173 +651,225 @@ export default function Dashboard() {
         </Box>
         <Divider sx={{ mb: 2 }} />
 
-          <Grid container spacing={{ xs: 2, sm: 3, md: 4, lg: 5, xlg: 6 }} sx={{mb:1}}>
-            {currentStats.map((stat) => (
-              <Grid item xs={12} sm={6} md={2} lg={3} xlg={3} key={stat.title}>
-                <Card
-                  sx={{
-                    height: '70px',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-5px)',
-                    },
-                  }}
+        <Grid
+          container
+          spacing={{ xs: 2, sm: 3, md: 4, lg: 5, xlg: 6 }}
+          sx={{ mb: 1 }}
+        >
+          {currentStats.map((stat) => (
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              md={2}
+              key={stat.title}
+              mb={1}
+            >
+              <Card
+                sx={{
+                  display:"flex",
+                  height: '40px',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  },
+                  alignItems: 'center',
+                  borderRadius: '0.1%',
+                  backgroundColor: '#ffff'
+                }}
+              >
+                <CardContent
+                  sx={{ display: 'flex', alignItems:"center", justifyContent:'space-between'}}
                 >
-                  <CardContent sx={{display: 'flex', justifyContent: 'space-between'}}>
-                    <Typography
-                      color="text.secondary"
-                      component='div'
-                      sx={{
-                        fontSize: {
-                          xs: '0.2rem',
-                          sm: '0.8rem',
-                          md: '1rem',
-                          lg: '1.2rem',
-                          xlg: '1.5rem',
-                        },
-                        
-                      }}
-                    >
-                      {stat.title}
-                    </Typography>
-                    <Typography
-                      variant="h4"
-                      component="div"
-                      sx={{
-                        color: stat.color,
-                        fontSize: {
-                          xs: '0.5rem',
-                          sm: '0.8rem',
-                          md: '1rem',
-                          lg: '1.5rem',
-                          xlg: '2rem',
-                        },
-                      }}
-                    >
-                      {stat.value}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-          <Paper sx={{ p: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 }}}>
-            <Box
+                  <Typography
+                    color="text.secondary"
+                    component="div"
+                    sx={{
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.5rem',
+                      },
+                    }}
+                  >
+                    {stat.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    component="div"
+                    sx={{
+                      color: stat.color,
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.2rem',
+                      },
+                    }}
+                  >
+                    {stat.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        <Paper sx={{ p: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 }, backgroundColor: '#ffff' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              mb: 2,
+              gap: 2,
+            }}
+          >
+            <Typography
+              variant="h6"
               sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'space-between',
-                alignItems: { xs: 'flex-start', sm: 'center' },
-                mb: 2,
-                gap: 2,
+                fontSize: {
+                  xs: '0.8rem',
+                  sm: '0.8rem',
+                  md: '1rem',
+                  lg: '1rem',
+                  xlg: '1.2rem',
+                },
               }}
             >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontSize: {
-                    xs: '0.5rem',
-                    sm: '0.8rem',
-                    md: '1rem',
-                    lg: '1.2rem',
-                    xlg: '1.5rem',
-                  },
-                }}
-              >
-                İzleme listesi
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => handleSubmit()}
-                color="primary"
-                sx={{
-                  fontSize: {
-                    xs: '0.2rem',
-                    sm: '0.4rem',
-                    md: '0.6rem',
-                    lg: '0.8rem',
-                    xlg: '1rem',
-                  },
-                }}
-              >
-                İzleme Ekle
-              </Button>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-
-            <Box sx={{ mb: 3 }}>
-              <TextField
-                fullWidth
-                placeholder="Monitor adı ile arama yapın..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  backgroundColor: 'white',
-                  borderRadius: 2,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: 'primary.main',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: 'primary.main',
-                    },
-                  },
-                }}
-              />
-            </Box>
-
-            <DataGrid
-              rows={filteredMonitors}
-              columns={columns}
-              pageSizeOptions={[5, 10, 25]}
-              autoHeight
-              disableRowSelectionOnClick
-              initialState={{
-                sorting: {
-                  sortModel: [{ field: 'name', sort: 'asc' }],
-                },
-                pagination: {
-                  paginationModel: { pageSize: 10 },
+              İzleme listesi
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleSubmit()}
+              color="primary"
+              sx={{
+                fontSize: {
+                  xs: '0.7rem',
+                  sm: '0.7rem',
+                  md: '0.7rem',
+                  lg: '0.7rem',
+                  xlg: '1rem',
                 },
               }}
+            >
+              İzleme Ekle
+            </Button>
+          </Box>
+          <Divider sx={{ mb: 2 }} />
+
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              //size='small'
+              placeholder="Izleme adı veya host ile arama yapın..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" fontSize="smal" />
+                  </InputAdornment>
+                ),
+              }}
               sx={{
-                '& .MuiDataGrid-cell': {
-                  fontSize: {
-                    xs: '0.5em',
-                    sm: '0.7rem',
-                    md: '0.9rem',
-                    lg: '1.1rem',
-                    xlg: '1.2rem',
-                  },
-                  lineHeight: 1.5,
-                  alignContent: 'center',
-                  alignItems: 'center',
+                width: '40%',
+                height: '15px',
+                backgroundColor: 'white',
+                borderRadius: 2,
+                '& .MuiInputBase-root': {
+                  height: 30,
+                  fontSize: '0.8rem',
+                  fontFamily:'sans-serif'
                 },
-                '& .MuiDataGrid-columnHeader': {
-                  fontSize: {
-                    xs: '0.5em',
-                    sm: '0.7rem',
-                    md: '0.7rem',
-                    lg: '1rem',
-                    xlg: '1.2rem',
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
                   },
-                  '&::-webkit-scrollbar': {
-                    width: '4px',
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
                   },
-                  fontWeight: 'bold',
                 },
               }}
             />
-          </Paper>
-        
+          </Box>
+
+          <DataGrid
+            rows={filteredMonitors}
+            columns={columns}
+            pageSizeOptions={[5, 10, 25]}
+            rowHeight={38}
+            autoHeight
+            disableRowSelectionOnClick
+            localeText={{
+              MuiTablePagination: {
+                fontSize: {
+                  xs: '0.3rem',
+                  sm: '0.4rem',
+                  md: '0.5rem',
+                  lg: '0.7rem',
+                  xlg: '0.9rem',
+                },
+                labelRowsPerPage: 'Sayfa başına satır',
+              },
+            }}
+            initialState={{
+              sorting: {
+                sortModel: [{ field: 'name', sort: 'asc' }],
+              },
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            sx={{
+              '& .MuiDataGrid-cell': {
+                fontSize: '0.3rem',
+
+                alignContent: 'center',
+                alignItems: 'center',
+              },
+              '& .MuiTypography-root': {
+                fontSize: {
+                  xs: '0.3rem',
+                  sm: '0.4rem',
+                  md: '0.5rem',
+                  lg: '0.7rem',
+                  xlg: '0.9rem',
+                },
+              },
+              '& .MuiTablePagination-selectLabel': {
+                fontSize: {
+                  xs: '0.3rem',
+                  sm: '0.4rem',
+                  md: '0.5rem',
+                  lg: '0.7rem',
+                  xlg: '0.9rem',
+                },
+              },
+              '& .MuiTablePagination-displayedRows': {
+                fontSize: '12px',
+                color: 'gray', // "1–5 of 20" gibi metin
+              },
+              '& .MuiDataGrid-columnHeader': {
+                fontSize: {
+                  xs: '0.3rem',
+                  sm: '0.4rem',
+                  md: '0.5rem',
+                  lg: '0.7rem',
+                  xlg: '0.9rem',
+                },
+
+                '&::-webkit-scrollbar': {
+                  width: '4px',
+                },
+                fontWeight: 'bold',
+              },
+            }}
+          />
+        </Paper>
       </Box>
     </Box>
   )

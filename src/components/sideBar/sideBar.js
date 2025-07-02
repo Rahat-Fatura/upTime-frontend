@@ -155,7 +155,7 @@ const Sidebar = ({ status, toggleSidebar }) => {
         width: "99%",
         height: "100%",
         borderRadius: "8px",
-        backgroundColor: "#11a0e24d",
+        backgroundColor: "#1976d281",
         transform: "scaleX(0)",
         transformOrigin: "0 50%",
         transition: "transform 0.475s",

@@ -33,6 +33,7 @@ import { styled } from '@mui/material/styles'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import MenuIcon from '@mui/icons-material/Menu'
+import MonitorStatus from '../../components/Animate/monitorStatus';
 
 const StatusBadge = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(0.5, 1),
@@ -283,9 +284,15 @@ export default function MaintanancePage() {
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
       <Box
         sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 240 },
+          width: {
+            xs: isOpen ? '100%' : 0,
+            sm: isOpen ? '100%' : 0,
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '19.16%' : '6.5%',
+            xlg: isOpen ? '19.16%' : '2.5%',
+          },
           flexShrink: 0,
-          transition: 'width 0.8s',
+          transition: 'width 0.3s',
           position: { xs: 'fixed', sm: 'relative' },
           zIndex: 1000,
           height: { xs: '100vh', sm: 'auto' },
@@ -297,15 +304,23 @@ export default function MaintanancePage() {
       <Box
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, sm: '120px' },
-          mr: { xs: 0, sm: '120px' },
+          //ml: { xs: 0, sm: '120px' },
+          //mr: { xs: 0, sm: '120px' },
           transition: 'margin-left 0.3s',
-          p: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 3 },
+          pr: { xs: 2, sm: 3 },
+          pl: 1,
           backgroundColor: '#f5f5f5',
-          minHeight: '100vh',
+          //minHeight: '100vh',
           position: 'relative',
           zIndex: 1,
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
+          width: {
+            xs: isOpen ? 0 : '100%',
+            sm: isOpen ? 0 : '100%',
+            md: isOpen ? '30%' : '2.5%',
+            lg: isOpen ? '78%' : '80%',
+            xlg: isOpen ? '80.74%' : '97.5%',
+          },
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -314,7 +329,7 @@ export default function MaintanancePage() {
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'flex-start', sm: 'center' },
             justifyContent: 'space-between',
-            mb: 4,
+            mb: 2,
             gap: 2
           }}>
             <Typography 
@@ -324,7 +339,13 @@ export default function MaintanancePage() {
                 fontWeight: 'bold',
                 color: 'primary.main',
                 textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-                fontSize: { xs: '1.5rem', sm: '2rem' }
+                fontSize: {
+                  xs: '0.5rem',
+                  sm: '0.8rem',
+                  md: '1rem',
+                  lg: '1.5rem',
+                  xlg: '2rem',
+                },
               }}
             >
               Bakım Sayfası
@@ -343,11 +364,10 @@ export default function MaintanancePage() {
               <MenuIcon />
             </IconButton>
           </Box>
-          <Divider sx={{ mb: 4 }} />
+          <Divider sx={{ mb: 2 }} />
 
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ mb: 3 }}>
             <TextField
-              fullWidth
               placeholder="Monitor adı ile arama yapın..."
               value={searchQuery}
               onChange={(e) => {
@@ -362,6 +382,7 @@ export default function MaintanancePage() {
                 ),
               }}
               sx={{
+                width: '40%',
                 backgroundColor: 'white',
                 borderRadius: 2,
                 '& .MuiOutlinedInput-root': {
@@ -404,25 +425,14 @@ export default function MaintanancePage() {
                 >
                   <CardHeader
                     avatar={
-                      <Tooltip title={getStatusText(monitor.status)}>
-                        <Avatar 
-                          sx={{ 
-                            bgcolor: `${getStatusColor(monitor.status)}.main`,
-                            width: { xs: 32, sm: 40 },
-                            height: { xs: 32, sm: 40 },
-                            boxShadow: 2
-                          }}
-                        >
-                          {getStatusIcon(monitor.status)}
-                        </Avatar>
-                      </Tooltip>
+                      <MonitorStatus status={monitor.status}/> 
                     }
                     title={
                       <Typography 
                         variant="h6" 
                         sx={{ 
                           fontWeight: 'bold',
-                          fontSize: { xs: '1rem', sm: '1.25rem' }
+                          fontSize: { xs: '0.5rem', sm: '0.7rem', md: '0.9rem', lg: '1rem', xlg:'1.2rem' }
                         }}
                       >
                         {monitor.name}
@@ -632,7 +642,7 @@ export default function MaintanancePage() {
                           handleSubmit(monitor.id)
                         }
                       }}
-                      fullWidth
+                      
                       color={
                         (monitor.maintanance != null)
                         ? (monitor.maintanance.status == true)
@@ -643,15 +653,22 @@ export default function MaintanancePage() {
                       sx={{
                         py: { xs: 1, sm: 1.5 },
                         fontWeight: 'bold',
+                        fontSize: {
+                          xs: '0.2rem',
+                          sm: '0.4rem',
+                          md: '0.6rem',
+                          lg: '0.8rem',
+                          xlg: '1rem',
+                        },
                         textTransform: 'none',
                         boxShadow: 2,
                         borderRadius: 2,
-                        fontSize: { xs: '0.875rem', sm: '1rem' },
                         '&:hover': {
                           boxShadow: 4,
                           transform: 'translateY(-2px)',
                         },
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        alignItems:'end'
                       }}
                     >
                       {(monitor.maintanance != null)

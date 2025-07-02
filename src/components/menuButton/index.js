@@ -24,9 +24,10 @@ import {
   Menu as MenuIcon,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
-import { margin } from '@mui/system'
+import { fontSize, margin } from '@mui/system'
 import { IconButton } from '@mui/material'
 import MonitorDetail from '../../pages/monitorPage/monitorDetail'
+import { pink } from '@mui/material/colors'
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -45,7 +46,8 @@ const StyledMenu = styled((props) => (
   '& .MuiPaper-root': {
     borderRadius: 6,
     marginTop: theme.spacing(1),
-    minWidth: 180,
+    minWidth: 120,
+    transform: 'translateY(-5px)', 
     color: 'rgb(55, 65, 81)',
     boxShadow:
       'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -54,7 +56,7 @@ const StyledMenu = styled((props) => (
     },
     '& .MuiMenuItem-root': {
       '& .MuiSvgIcon-root': {
-        fontSize: 18,
+        fontSize: 15,
         color: theme.palette.text.secondary,
         marginRight: theme.spacing(1.5),
       },
@@ -227,8 +229,8 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
             confirmButtonText: 'Tamam',
           })
           setMonitors((prevMonitors) =>
-                  prevMonitors.filter((m) => m.id !== monitor.id)
-                )
+            prevMonitors.filter((m) => m.id !== monitor.id)
+          )
         }
       })
       .catch((error) => {
@@ -246,7 +248,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
     if (monitor.isActiveByOwner) {
       try {
         const response = await api.put(`monitors/${monitor.id}/pause`, {})
-        handleClose();
+        handleClose()
         Swal.fire({
           icon: 'success',
           title: 'İzleme Durduruldu',
@@ -254,15 +256,15 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           confirmButtonText: 'Tamam',
         })
         setMonitors((prevMonitors) =>
-            prevMonitors.map((m) =>
-              m.id === monitor.id
-                ? { ...m, isActiveByOwner: false, status: 'uncertain' }
-                : m
-            )
+          prevMonitors.map((m) =>
+            m.id === monitor.id
+              ? { ...m, isActiveByOwner: false, status: 'uncertain' }
+              : m
           )
+        )
       } catch (error) {
         console.error('Sunucu durdurulurken hata oluştu:', error)
-        handleClose();
+        handleClose()
         Swal.fire({
           icon: 'error',
           title: 'Hata',
@@ -273,7 +275,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
     } else {
       try {
         const res = await api.put(`monitors/${monitor.id}/play`, {})
-        handleClose();
+        handleClose()
         Swal.fire({
           icon: 'success',
           title: 'İzleme Çalıştırıldı',
@@ -281,24 +283,22 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           confirmButtonText: 'Tamam',
         })
         setMonitors((prevMonitors) =>
-            prevMonitors.map((m) =>
-              m.id === monitor.id
-                ? { ...m, isActiveByOwner: true, status: 'uncertain' }
-                : m
-            )
+          prevMonitors.map((m) =>
+            m.id === monitor.id
+              ? { ...m, isActiveByOwner: true, status: 'uncertain' }
+              : m
           )
+        )
       } catch (error) {
         console.error('Sunucu çalıştırılırken hata oluştu:', error)
-        handleClose();
+        handleClose()
         Swal.fire({
           icon: 'error',
           title: 'Hata',
           text: 'İzleme çalıştırılamadı. Lütfen tekrar deneyin.',
           confirmButtonText: 'Tamam',
         })
-        
       }
-  
     }
   }
 
@@ -307,8 +307,9 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
   return (
-    <div style={{'margin-top': '5px', 'margin-left': '15px'}}>
+    <div style={{ 'margin-top': '0px', 'margin-left': '15px' }}>
       <IconButton
+        size="small"
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
         aria-haspopup="true"
@@ -321,11 +322,6 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         <MoreHorizIcon />
       </IconButton>
       <StyledMenu
-        /*sx={{
-          ml: '10%',
-          mb: '5%',
-          mt: '0%',
-        }}*/
         id="demo-customized-menu"
         slotProps={{
           list: {
@@ -336,24 +332,63 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handleEditDetails(monitor)} disableRipple>
-          <EditIcon />
+        <MenuItem
+          sx={{
+            fontSize: 12,
+            weight: 'auto',
+            color:'#f8833e'
+          }}
+          onClick={() => handleEditDetails(monitor)}
+          disableRipple
+        >
+          <EditIcon color="primary" />
           Düzenle
         </MenuItem>
-        <MenuItem onClick={()=>handlDetailMenu(monitor)} disableRipple>
-          <InfoIcon />
+        <MenuItem
+          sx={{
+            fontSize: 12,
+            weight: 'auto',
+            color:'#413ef8f3'
+          }}
+          onClick={() => handlDetailMenu(monitor)}
+          disableRipple
+        >
+          <InfoIcon color='primary' />
           Detayı
         </MenuItem>
         {/*<Divider sx={{ my: 0.5 }} />*/}
-        <MenuItem onClick={() => handleTestButton(monitor)} disableRipple>
+        <MenuItem
+          sx={{
+            fontSize: 12,
+             weight: 'auto'
+          }}
+          onClick={() => handleTestButton(monitor)}
+          disableRipple
+        >
           <ArchiveIcon />
           Test et
         </MenuItem>
-        <MenuItem onClick={() => handleWorkMonitorMenu(monitor)} disableRipple>
+        <MenuItem
+          sx={{
+            fontSize: 12,
+            weight: 'auto',
+            color: '#f533bb'
+          }}
+          onClick={() => handleWorkMonitorMenu(monitor)}
+          disableRipple
+        >
           {monitor.isActiveByOwner ? <PauseIcon /> : <PlayArrowIcon />}
           {monitor.isActiveByOwner ? 'Durdur' : 'Çalıştır'}
         </MenuItem>
-        <MenuItem onClick={() => handlDeleteMenu(monitor)} disableRipple>
+        <MenuItem
+          sx={{
+            fontSize: 12,
+            weight: 'auto',
+            color: '#fc0a0a'
+          }}
+          onClick={() => handlDeleteMenu(monitor)}
+          disableRipple
+        >
           <DeleteIcon />
           Kaldır
         </MenuItem>
