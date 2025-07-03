@@ -24,17 +24,26 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts'
 import SearchIcon from '@mui/icons-material/Search'
 import MenuIcon from '@mui/icons-material/Menu'
-
+import localStorage from 'local-storage'
 export default function MonitoringReportsPage() {
   const theme = useTheme()
   const [isOpen, setIsOpen] = useState(true)
   const [logs, setLogs] = useState([])
   const [filteredLogs, setFilteredLogs] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
@@ -47,13 +56,13 @@ export default function MonitoringReportsPage() {
     }
 
     const searchLower = searchQuery.toLowerCase().trim()
-    
+
     if (searchLower === '') {
       setFilteredLogs(logs)
       return
     }
 
-    const filtered = logs.filter(log => {
+    const filtered = logs.filter((log) => {
       const nameMatch = log.name?.toLowerCase().includes(searchLower)
       const hostMatch = log.host?.toLowerCase().includes(searchLower)
       return nameMatch || hostMatch
@@ -111,6 +120,24 @@ export default function MonitoringReportsPage() {
     fetchLogs()
   }, [])
 
+  useEffect(() => {
+        const sideBarOpen = localStorage.get("sidebar");
+    
+        if (sideBarOpen === "false") {
+          setIsOpen(false);
+        } else {
+          setIsOpen(true);
+        }
+    
+        const cleanupLocalStorage = () => {
+          localStorage.clear();
+        };
+        window.addEventListener("beforeunload", cleanupLocalStorage);
+        return () => {
+          window.removeEventListener("beforeunload", cleanupLocalStorage);
+        };
+  }, []);
+
   const chartData = (log) => [
     { name: 'Başarılı', value: log.logs.successRequests, color: '#4caf50' },
     { name: 'Başarısız', value: log.logs.failedRequests, color: '#f44336' },
@@ -118,14 +145,23 @@ export default function MonitoringReportsPage() {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
         <CircularProgress />
       </Box>
     )
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa', }}>
+    <Box
+      sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}
+    >
       <Box
         sx={{
           width: {
@@ -164,13 +200,15 @@ export default function MonitoringReportsPage() {
           transition: 'margin-left 0.3s',
         }}
       >
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', sm: 'row' },
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          justifyContent: 'space-between',
-          mb: 2,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
+            mb: 2,
+          }}
+        >
           <Typography
             variant="h4"
             component="h1"
@@ -190,146 +228,195 @@ export default function MonitoringReportsPage() {
           </Typography>
           <IconButton
             onClick={toggleSidebar}
-            sx={{ 
+            sx={{
               display: { xs: 'flex', sm: 'none' },
               bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
                 bgcolor: 'primary.dark',
-              }
+              },
             }}
           >
-            <MenuIcon /> 
+            <MenuIcon />
           </IconButton>
         </Box>
         <Divider sx={{ mb: 2 }} />
-
-        <Box sx={{ mb: 2 }}>
-          <TextField
-            placeholder="Monitor adı ile arama yapın..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-            sx={{
-               width:'40%',
-              backgroundColor: 'white',
-              borderRadius: 2,
-              '& .MuiOutlinedInput-root': {
-                '&:hover fieldset': {
-                  borderColor: 'primary.main',
+        <Box sx={{
+          border: '0.1px solid ',
+          borderColor: '#5c5554',
+          backgroundColor: '#ffff',   
+          borderRadius: '5px',        
+          padding: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },                
+          
+        }}>
+          <Box sx={{ mb: 4, mt: 2 }}>
+            <TextField
+              //size='small'
+              placeholder="Izleme adı veya host ile arama yapın..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" fontSize="smal" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: '40%',
+                height: '15px',
+                backgroundColor: 'white',
+                borderRadius: 2,
+                '& .MuiInputBase-root': {
+                  height: 30,
+                  fontSize: '0.8rem',
+                  fontFamily: 'sans-serif',
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: 'primary.main',
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: 'primary.main',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: 'primary.main',
+                  },
                 },
-              },
-            }}
-          />
-        </Box>
+              }}
+            />
+          </Box>
 
-        <Grid container spacing={{ xs: 2, sm: 3 }}>
-          {filteredLogs.map((log) => (
-            <Grid item key={log.id}>
-              <StatCard sx={{backgroundColor:'#ffff'}}>
-                <CardContent>
-                  <Typography 
-                    variant="h5" 
-                    component="div" 
-                    gutterBottom 
-                    sx={{ 
-                      fontWeight: 'bold',
-                      fontSize: { xs: '0.5rem', sm: '0.7rem', md: '0.9rem', lg: '1rem', xlg:'1.2rem' }
-                    }}
-                  >
-                    {log.name}
-                  </Typography>
-                  <Typography 
-                    variant="subtitle1" 
-                    color="text.secondary" 
-                    gutterBottom
-                    sx={{ 
-                      fontSize: { xs: '0.875rem', sm: '1rem' },
-                      wordBreak: 'break-all'
-                    }}
-                  >
-                    {log.host}
-                  </Typography>
-                  
-                  <Box sx={{ height: 200, mt: 2 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData(log)}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="value" fill={theme.palette.primary.main}>
-                          {chartData(log).map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 4, lg:8 }}>
+            {filteredLogs.map((log) => (
+              <Grid item key={log.id}>
+                <StatCard sx={{ maxHeight:450, maxWidth: 1000 ,backgroundColor: '#ffff',
+                  border:'0.5px solid gray'
+                 }}>
+                  <CardContent>
+                    <Typography
+                      variant="h5"
+                      component="div"
+                      gutterBottom
+                      sx={{
+                        fontWeight: 'bold',
+                        fontSize: {
+                          xs: '0.8rem',
+                          sm: '0.8rem',
+                          xlg: '1rem',
+                        },
+                      }}
+                    >
+                      {log.name}
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      gutterBottom
+                      sx={{
+                        fontSize: {
+                          xs: '0.8rem',
+                          sm: '0.8rem',
+                          xlg: '1rem',
+                        },
+                        wordBreak: 'break-all',
+                      }}
+                    >
+                      {log.host}
+                    </Typography>
 
-                  <TableContainer component={Paper} sx={{ mt: 2 }}>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <StyledTableCell>Metrik</StyledTableCell>
-                          <StyledTableCell align="right">Değer</StyledTableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        <StyledTableRow>
-                          <StyledTableCell>Toplam İstek</StyledTableCell>
-                          <StyledTableCell align="right">{log.logs.totalRequests}</StyledTableCell>
-                        </StyledTableRow>
-                        <StyledTableRow>
-                          <StyledTableCell>Başarılı İstek</StyledTableCell>
-                          <StyledTableCell align="right">{log.logs.successRequests}</StyledTableCell>
-                        </StyledTableRow>
-                        <StyledTableRow>
-                          <StyledTableCell>Başarısız İstek</StyledTableCell>
-                          <StyledTableCell align="right">{log.logs.failedRequests}</StyledTableCell>
-                        </StyledTableRow>
-                        <StyledTableRow>
-                          <StyledTableCell>Ortalama Yanıt Süresi</StyledTableCell>
-                          <StyledTableCell align="right">{log.logs.avgResponseTime} ms</StyledTableCell>
-                        </StyledTableRow>
-                        <StyledTableRow>
-                          <StyledTableCell>Başarı Oranı</StyledTableCell>
-                          <StyledTableCell align="right">
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <LinearProgress 
-                                variant="determinate" 
-                                value={parseFloat(log.logs.successRate)} 
-                                sx={{ 
-                                  flexGrow: 1,
-                                  backgroundColor: '#ffcdd2',
-                                  '& .MuiLinearProgress-bar': {
-                                    backgroundColor: '#4caf50'
-                                  }
+                    <Box sx={{ height: 150, mt: 1, justifyContent:'start' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={chartData(log)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar
+                            dataKey="value"
+                            fill={theme.palette.primary.main}
+                          >
+                            {chartData(log).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </Box>
+
+                    <TableContainer component={Paper} sx={{ mt: 2 }}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <StyledTableCell>Metrik</StyledTableCell>
+                            <StyledTableCell align="right">
+                              Değer
+                            </StyledTableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <StyledTableRow>
+                            <StyledTableCell>Toplam İstek</StyledTableCell>
+                            <StyledTableCell align="right">
+                              {log.logs.totalRequests}
+                            </StyledTableCell>
+                          </StyledTableRow>
+                          <StyledTableRow>
+                            <StyledTableCell>Başarılı İstek</StyledTableCell>
+                            <StyledTableCell align="right">
+                              {log.logs.successRequests}
+                            </StyledTableCell>
+                          </StyledTableRow>
+                          <StyledTableRow>
+                            <StyledTableCell>Başarısız İstek</StyledTableCell>
+                            <StyledTableCell align="right">
+                              {log.logs.failedRequests}
+                            </StyledTableCell>
+                          </StyledTableRow>
+                          <StyledTableRow>
+                            <StyledTableCell>
+                              Ortalama Yanıt Süresi
+                            </StyledTableCell>
+                            <StyledTableCell align="right">
+                              {log.logs.avgResponseTime} ms
+                            </StyledTableCell>
+                          </StyledTableRow>
+                          <StyledTableRow>
+                            <StyledTableCell>Başarı Oranı</StyledTableCell>
+                            <StyledTableCell align="right">
+                              <Box
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1,
                                 }}
-                              />
-                              <Typography variant="body2">{log.logs.successRate}</Typography>
-                            </Box>
-                          </StyledTableCell>
-                        </StyledTableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-                </CardActions>
-              </StatCard>
-            </Grid>
-          ))}
-        </Grid>
+                              >
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={parseFloat(log.logs.successRate)}
+                                  sx={{
+                                    flexGrow: 1,
+                                    backgroundColor: '#ffcdd2',
+                                    '& .MuiLinearProgress-bar': {
+                                      backgroundColor: '#4caf50',
+                                    },
+                                  }}
+                                />
+                                <Typography variant="body2">
+                                  {log.logs.successRate}
+                                </Typography>
+                              </Box>
+                            </StyledTableCell>
+                          </StyledTableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </CardContent>
+                  <CardActions
+                    sx={{ justifyContent: 'flex-end', p: 2 }}
+                  ></CardActions>
+                </StatCard>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>{' '}
       </Box>
     </Box>
   )

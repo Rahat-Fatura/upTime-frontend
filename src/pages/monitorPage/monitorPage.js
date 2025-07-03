@@ -38,6 +38,7 @@ import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
 import MonitorStatus from '../../components/Animate/monitorStatus.js'
+import localStorage from "local-storage";
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -53,7 +54,7 @@ const initialFormData = {
 }
 
 export default function Dashboard() {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, setIsOpen] = useState(false)
   const [monitors, setMonitors] = useState([])
   const [filteredMonitors, setFilteredMonitors] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -158,7 +159,6 @@ export default function Dashboard() {
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
-    console.log(isOpen)
   }
 
   const handleSubmit = async (e) => {
@@ -273,7 +273,7 @@ export default function Dashboard() {
       headerName: '',
       flex: 0.5,
       renderCell: (params) => {
-        return <MonitorStatus status={params.value} />
+        return <MonitorStatus sx={{width: 12, height: 12, animeWidth: 12, animeHeight: 12}} status={params.value} />
       },
     },
     /* {
@@ -566,7 +566,23 @@ export default function Dashboard() {
       ),
     },
   ]
+  useEffect(() => {
+    const sideBarOpen = localStorage.get("sidebar");
 
+    if (sideBarOpen === "false") {
+      setIsOpen(false);
+    } else {
+      setIsOpen(true);
+    }
+
+    const cleanupLocalStorage = () => {
+      localStorage.clear();
+    };
+    window.addEventListener("beforeunload", cleanupLocalStorage);
+    return () => {
+      window.removeEventListener("beforeunload", cleanupLocalStorage);
+    };
+  }, []);
   return (
     <Box sx={{ display: 'flex',  backgroundColor: '#f8f9fa', }}>
       <Box
@@ -630,7 +646,6 @@ export default function Dashboard() {
                 lg: '1.2rem',
                 xlg: '1.5rem',
               },
-              backgroundColor: '#ffff'
             }}
           >
             İzleme Sayfası
@@ -651,6 +666,15 @@ export default function Dashboard() {
         </Box>
         <Divider sx={{ mb: 2 }} />
 
+        <Box
+          sx={{
+              border: 'solid 0.5px gray',
+              borderColor: '#5c5554',
+              backgroundColor: '#ffff',
+              borderRadius: '5px',
+              padding: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },
+          }}
+        >
         <Grid
           container
           spacing={{ xs: 2, sm: 3, md: 4, lg: 5, xlg: 6 }}
@@ -870,6 +894,7 @@ export default function Dashboard() {
             }}
           />
         </Paper>
+      </Box>
       </Box>
     </Box>
   )

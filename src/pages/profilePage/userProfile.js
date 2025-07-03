@@ -86,12 +86,12 @@ const ProfilePage = () => {
   }, []);
   return (
     <Grid container>
-      <Grid item md={2.3}>
+      <Grid item md={isOpen?2.3:0.75}>
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
       </Grid>
       <Grid
         item
-        md={9.7}
+        md={isOpen?9.7:11.25}
         sx={{
           display: "flex",
           justifyContent: "flex-end",
@@ -105,7 +105,7 @@ const ProfilePage = () => {
           sx={{
             marginTop: "3vh",
             backgroundColor: "white",
-            boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+            boxShadow: "rgba(255, 255, 255, 0.24) 0px 3px 8px",
           }}
         >
           <Card sx={{ width: "100%" }}>

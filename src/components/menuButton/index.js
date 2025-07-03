@@ -303,7 +303,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
   const handlDetailMenu = (monitor) => {
-    console.log(monitor)
+    navigate('detail', {state:{monitor}});
   }
 
   return (

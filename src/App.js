@@ -42,6 +42,7 @@ import AdmimMonitors from './pages/adminPage/adminMonitorPage.js'
 import AdminMaintance from './pages/adminPage/adminMaintanance/maintanancePage.js'
 import AdminMonitoringReportsPage from './pages/adminPage/adminMonitoringReportsPage.js'
 import VerifyEmailPage from './pages/verifyEmailPage/verifyEmailPage.js'
+import MonitorDetail from './pages/monitorPage/monitorDetail.js'
 
 const NotFound = () => {
   return (
@@ -177,7 +178,7 @@ function AppRoutes() {
 
 
         <Route path="/user/monitors" element={<Dashboard />} />
-
+        <Route path="/user/monitors/detail" element={<MonitorDetail/>} />
         <Route path="/user/monitors/new/http" element={<NewMonitorPage />} />
         <Route
           path="/user/monitors/:id/http"
