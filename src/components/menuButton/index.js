@@ -47,7 +47,7 @@ const StyledMenu = styled((props) => (
     borderRadius: 6,
     marginTop: theme.spacing(1),
     minWidth: 120,
-    transform: 'translateY(-5px)', 
+    transform: 'translateY(-5px)',
     color: 'rgb(55, 65, 81)',
     boxShadow:
       'rgb(255, 255, 255) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px',
@@ -303,7 +303,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
   const handlDetailMenu = (monitor) => {
-    navigate('detail', {state:{monitor}});
+    navigate(`${monitor.id}/detail`, { state: {  monitor } })
   }
 
   return (
@@ -336,7 +336,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           sx={{
             fontSize: 12,
             weight: 'auto',
-            color:'#f8833e'
+            color: '#f8833e',
           }}
           onClick={() => handleEditDetails(monitor)}
           disableRipple
@@ -348,19 +348,19 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           sx={{
             fontSize: 12,
             weight: 'auto',
-            color:'#413ef8f3'
+            color: '#413ef8f3',
           }}
           onClick={() => handlDetailMenu(monitor)}
           disableRipple
         >
-          <InfoIcon color='primary' />
+          <InfoIcon color="primary" />
           Detayı
         </MenuItem>
         {/*<Divider sx={{ my: 0.5 }} />*/}
         <MenuItem
           sx={{
             fontSize: 12,
-             weight: 'auto'
+            weight: 'auto',
           }}
           onClick={() => handleTestButton(monitor)}
           disableRipple
@@ -372,7 +372,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           sx={{
             fontSize: 12,
             weight: 'auto',
-            color: '#f533bb'
+            color: '#f533bb',
           }}
           onClick={() => handleWorkMonitorMenu(monitor)}
           disableRipple
@@ -384,7 +384,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           sx={{
             fontSize: 12,
             weight: 'auto',
-            color: '#fc0a0a'
+            color: '#fc0a0a',
           }}
           onClick={() => handlDeleteMenu(monitor)}
           disableRipple

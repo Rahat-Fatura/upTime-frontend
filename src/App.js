@@ -178,7 +178,7 @@ function AppRoutes() {
 
 
         <Route path="/user/monitors" element={<Dashboard />} />
-        <Route path="/user/monitors/detail" element={<MonitorDetail/>} />
+        <Route path="/user/monitors/:id/detail" element={<MonitorDetail/>} />
         <Route path="/user/monitors/new/http" element={<NewMonitorPage />} />
         <Route
           path="/user/monitors/:id/http"

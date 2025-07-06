@@ -30,6 +30,7 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Menu as MenuIcon,
+  Visibility,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit } from 'tabler-icons-react'
@@ -395,6 +396,14 @@ export default function Dashboard() {
         }
       },
     },
+     {
+      field: 'detail',
+      headerName: '',
+      flex: 0.5,
+      renderCell: (params) => {
+        return <Tooltip title='Detay'><IconButton onClick={()=>{navigate(`${params.row.id}/detail`)}}><Visibility label='Detay' fontSize='small' color='primary'/></IconButton></Tooltip>
+      },
+    },
     {
       field: 'logs',
       headerName: 'Başarı Oranı',
@@ -685,7 +694,7 @@ export default function Dashboard() {
               item
               xs={12}
               sm={6}
-              md={2}
+              md={2.5}
               key={stat.title}
               mb={1}
             >
@@ -693,6 +702,7 @@ export default function Dashboard() {
                 sx={{
                   display:"flex",
                   height: '40px',
+                  width:'80%',
                   transition: 'transform 0.2s',
                   '&:hover': {
                     transform: 'translateY(-5px)',
@@ -703,11 +713,11 @@ export default function Dashboard() {
                 }}
               >
                 <CardContent
-                  sx={{ display: 'flex', alignItems:"center", justifyContent:'space-between'}}
+                  sx={{ display: 'flex', alignItems:"center", justifyContent:'space-between',width:'60%'}}
                 >
                   <Typography
                     color="text.secondary"
-                    component="div"
+                    // component="div"
                     sx={{
                       fontSize: {
                         xs: '0.8rem',
@@ -722,7 +732,7 @@ export default function Dashboard() {
                   </Typography>
                   <Typography
                     variant="h4"
-                    component="div"
+                    // component="div"
                     sx={{
                       color: stat.color,
                       fontSize: {

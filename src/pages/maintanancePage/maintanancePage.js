@@ -106,7 +106,7 @@ export default function MaintanancePage() {
   const fetchMonitors = async () => {
     try {
       setLoading(true)
-      const response = await api.get('monitors/maintanance')
+      const response = await api.get('monitors/maintanance/')
       console.log('API Response:', response.data)
 
       if (response.data && Array.isArray(response.data)) {
@@ -195,7 +195,7 @@ export default function MaintanancePage() {
     }
 
     try {
-      const response = await api.post(`monitors/${monitorId}/maintanance`, {
+      const response = await api.post(`monitors/maintanance/${monitorId}`, {
         startTime: startDate,
         endTime: endDate,
       })
@@ -266,7 +266,7 @@ export default function MaintanancePage() {
 
   const handleCancelMaintenance = async (monitorId) => {
     try {
-      const response = await api.put(`monitors/${monitorId}/maintanance/cancel`)
+      const response = await api.put(`monitors/maintanance/${monitorId}`)
       Swal.fire({
         title: 'Succes',
         text: 'Bakım modu başarıyla iptal edildi.',
