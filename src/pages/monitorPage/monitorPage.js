@@ -39,7 +39,7 @@ import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
 import MonitorStatus from '../../components/Animate/monitorStatus.js'
-import localStorage from "local-storage";
+import localStorage from 'local-storage'
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -64,7 +64,6 @@ export default function Dashboard() {
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
-
 
   const validationShcema = Yup.object().shape({
     name: Yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
@@ -178,7 +177,7 @@ export default function Dashboard() {
       { title: 'Çalışmayan', value: down.toString(), color: '#d32f2f' },
       { title: 'Belirsiz', value: uncertain.toString(), color: '#f5f102' },
       {
-        title: 'Yüzdesi',
+        title: 'Çalışan Yüzdesi',
         value: avgActive ? avgActive.toString() + '%' : '0%',
         color: '#ed6c02',
       },
@@ -274,7 +273,12 @@ export default function Dashboard() {
       headerName: '',
       flex: 0.5,
       renderCell: (params) => {
-        return <MonitorStatus sx={{width: 12, height: 12, animeWidth: 12, animeHeight: 12}} status={params.value} />
+        return (
+          <MonitorStatus
+            sx={{ width: 12, height: 12, animeWidth: 12, animeHeight: 12 }}
+            status={params.value}
+          />
+        )
       },
     },
     /* {
@@ -331,27 +335,33 @@ export default function Dashboard() {
             )
           case 'CronJobMonitor':
             return (
-              <Box sx={{ display:'flex', alignItems:'center'}}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex-column', gap: 1 }}>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.name}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography>{params.row.name}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Typography>{params.row.monitorType}</Typography>
+                  </Box>
                 </Box>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Typography>{params.row.monitorType}</Typography>
-                </Box>
+                <Button
+                  variant="contained"
+                  size="small"
+                  width={'30%'}
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      params.row.cronJobMonitor.host
+                    )
+                  }}
+                  sx={{
+                    ml: 2,
+                    borderRadius: '15%',
+                    height: 15,
+                  }}
+                >
+                  Link
+                </Button>
               </Box>
-              <Button variant="contained" size='small' width={'30%'}
-               onClick={()=>{
-                 navigator.clipboard.writeText(params.row.cronJobMonitor.host)
-               }}
-               sx={{
-                ml:2, borderRadius: '15%', height:15
-              }}>
-                Link
-              </Button>
-              </Box>
-              
             )
           case 'PortMonitor':
             return (
@@ -396,12 +406,22 @@ export default function Dashboard() {
         }
       },
     },
-     {
+    {
       field: 'detail',
       headerName: '',
       flex: 0.5,
       renderCell: (params) => {
-        return <Tooltip title='Detay'><IconButton onClick={()=>{navigate(`${params.row.id}/detail`)}}><Visibility label='Detay' fontSize='small' color='primary'/></IconButton></Tooltip>
+        return (
+          <Tooltip title="Detay">
+            <IconButton
+              onClick={() => {
+                navigate(`${params.row.id}/detail`)
+              }}
+            >
+              <Visibility label="Detay" fontSize="small" color="primary" />
+            </IconButton>
+          </Tooltip>
+        )
       },
     },
     {
@@ -576,24 +596,24 @@ export default function Dashboard() {
     },
   ]
   useEffect(() => {
-    const sideBarOpen = localStorage.get("sidebar");
+    const sideBarOpen = localStorage.get('sidebar')
 
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
+    if (sideBarOpen === 'false') {
+      setIsOpen(false)
     } else {
-      setIsOpen(true);
+      setIsOpen(true)
     }
 
     const cleanupLocalStorage = () => {
-      localStorage.clear();
-    };
-    window.addEventListener("beforeunload", cleanupLocalStorage);
+      localStorage.clear()
+    }
+    window.addEventListener('beforeunload', cleanupLocalStorage)
     return () => {
-      window.removeEventListener("beforeunload", cleanupLocalStorage);
-    };
-  }, []);
+      window.removeEventListener('beforeunload', cleanupLocalStorage)
+    }
+  }, [])
   return (
-    <Box sx={{ display: 'flex',  backgroundColor: '#f8f9fa', }}>
+    <Box sx={{ display: 'flex', backgroundColor: '#f8f9fa' }}>
       <Box
         sx={{
           width: {
@@ -657,7 +677,7 @@ export default function Dashboard() {
               },
             }}
           >
-            İzleme Sayfası
+            Monitoring Sayfası
           </Typography>
           <IconButton
             onClick={toggleSidebar}
@@ -677,48 +697,49 @@ export default function Dashboard() {
 
         <Box
           sx={{
-              border: 'solid 0.5px gray',
-              borderColor: '#5c5554',
-              backgroundColor: '#ffff',
-              borderRadius: '5px',
-              padding: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },
+           // border: 'solid 0.5px gray',
+           // borderColor: '#5c5554',
+            //backgroundColor: '#ffff',
+            borderRadius: '5px',
+            padding: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },
           }}
         >
-        <Grid
-          container
-          spacing={{ xs: 2, sm: 3, md: 4, lg: 5, xlg: 6 }}
-          sx={{ mb: 1 }}
-        >
-          {currentStats.map((stat) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={2.5}
-              key={stat.title}
-              mb={1}
-            >
+          <Grid
+            container
+            spacing={{ xs: 2, sm: 3, md: 3, lg: 1.5, xlg: 3.5 }}
+            justifyContent={'space-between'}
+            sx={{ mb: 1 }}
+          >
+            <Grid item xs={12} sm={6} md={2} mb={1}>
               <Card
                 sx={{
-                  display:"flex",
+                  display: 'flex',
                   height: '40px',
-                  width:'80%',
+                  width: '100%',
                   transition: 'transform 0.2s',
                   '&:hover': {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
                   borderRadius: '0.1%',
-                  backgroundColor: '#ffff'
+                  backgroundColor: '#ffff',
                 }}
               >
                 <CardContent
-                  sx={{ display: 'flex', alignItems:"center", justifyContent:'space-between',width:'60%'}}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    height:'100%',
+                    gap: 2,
+                  }}
                 >
                   <Typography
                     color="text.secondary"
-                    // component="div"
+                    component="div"
                     sx={{
+                      lineHeight:'100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -728,13 +749,14 @@ export default function Dashboard() {
                       },
                     }}
                   >
-                    {stat.title}
+                    {currentStats[0]?.title}
                   </Typography>
                   <Typography
                     variant="h4"
-                    // component="div"
+                    component="div"
                     sx={{
-                      color: stat.color,
+                      color: currentStats[0]?.color,
+                      lineHeight:'100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -744,167 +766,421 @@ export default function Dashboard() {
                       },
                     }}
                   >
-                    {stat.value}
+                    {currentStats[0]?.value}
                   </Typography>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-        <Paper sx={{ p: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 }, backgroundColor: '#ffff' }}>
-          <Box
+
+            {/*2........ */}
+            <Grid item xs={12} sm={6} md={2} mb={1}>
+              <Card
+                sx={{
+                  display: 'flex',
+                  height: '40px',
+                  width: '100%',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  },
+                  alignItems: 'center',
+                  borderRadius: '0.1%',
+                  backgroundColor: '#ffff',
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    height:'100%',
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    color="text.secondary"
+                     component="div"
+                    sx={{
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.5rem',
+                      },
+                    }}
+                  >
+                    {currentStats[1]?.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    component="div"
+                    sx={{
+                      color: currentStats[1]?.color,
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.2rem',
+                      },
+                    }}
+                  >
+                    {currentStats[1]?.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/*3........ */}
+            <Grid item xs={12} sm={6} md={2} mb={1}>
+              <Card
+                sx={{
+                  display: 'flex',
+                  height: '40px',
+                  width: '100%',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  },
+                  alignItems: 'center',
+                  borderRadius: '0.1%',
+                  backgroundColor: '#ffff',
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    height:'100%',
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    color="text.secondary"
+                    // component="div"
+                    sx={{
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.5rem',
+                      },
+                    }}
+                  >
+                    {currentStats[2]?.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    // component="div"
+                    sx={{
+                      color: currentStats[2]?.color,
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.2rem',
+                      },
+                    }}
+                  >
+                    {currentStats[2]?.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+            {/*4........ */}
+            <Grid item xs={12} sm={6} md={2} mb={1}>
+              <Card
+                sx={{
+                  display: 'flex',
+                  height: '40px',
+                  width: '100%',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  },
+                  alignItems: 'center',
+                  borderRadius: '0.1%',
+                  backgroundColor: '#ffff',
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    height:'100%',
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    color="text.secondary"
+                    // component="div"
+                    sx={{
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.5rem',
+                      },
+                    }}
+                  >
+                    {currentStats[3]?.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    // component="div"
+                    sx={{
+                      lineHeight:'100%',
+                      color: currentStats[3]?.color,
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.2rem',
+                      },
+                    }}
+                  >
+                    {currentStats[3]?.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/*5........ */}
+            <Grid item xs={12} sm={6} md={4} mb={1}>
+              <Card
+                sx={{
+                  display: 'flex',
+                  height: '40px',
+                  width: '100%',
+                  transition: 'transform 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                  },
+                  alignItems: 'center',
+                  borderRadius: '0.1%',
+                  backgroundColor: '#ffff',
+                }}
+              >
+                <CardContent
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-around',
+                    width: '100%',
+                    height:'100%'
+                  }}
+                >
+                  <Typography
+                    color="text.secondary"
+                     component="div"
+                    sx={{
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.5rem',
+                      },
+                    }}
+                  >
+                    {currentStats[4]?.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                     component="div"
+                    sx={{
+                      color: currentStats[4]?.color,
+                      lineHeight:'100%',
+                      fontSize: {
+                        xs: '0.8rem',
+                        sm: '0.8rem',
+                        md: '1rem',
+                        lg: '1rem',
+                        xlg: '1.2rem',
+                      },
+                    }}
+                  >
+                    {currentStats[4]?.value}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          <Paper
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'space-between',
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              mb: 2,
-              gap: 2,
+              p: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },
+              backgroundColor: '#ffff',
             }}
           >
-            <Typography
-              variant="h6"
+            <Box
               sx={{
-                fontSize: {
-                  xs: '0.8rem',
-                  sm: '0.8rem',
-                  md: '1rem',
-                  lg: '1rem',
-                  xlg: '1.2rem',
-                },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                justifyContent: 'space-between',
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                mb: 2,
+                gap: 2,
               }}
             >
-              İzleme listesi
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => handleSubmit()}
-              color="primary"
-              sx={{
-                fontSize: {
-                  xs: '0.7rem',
-                  sm: '0.7rem',
-                  md: '0.7rem',
-                  lg: '0.7rem',
-                  xlg: '1rem',
-                },
-              }}
-            >
-              İzleme Ekle
-            </Button>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontSize: {
+                    xs: '0.8rem',
+                    sm: '0.8rem',
+                    md: '1rem',
+                    lg: '1rem',
+                    xlg: '1.2rem',
+                  },
+                }}
+              >
+                Monitoring listesi
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => handleSubmit()}
+                color="primary"
+                sx={{
+                  fontSize: {
+                    xs: '0.7rem',
+                    sm: '0.7rem',
+                    md: '0.7rem',
+                    lg: '0.7rem',
+                    xlg: '1rem',
+                  },
+                }}
+              >
+                Monitoring Ekle
+              </Button>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
 
-          <Box sx={{ mb: 3 }}>
-            <TextField
-              //size='small'
-              placeholder="Izleme adı veya host ile arama yapın..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon color="action" fontSize="smal" />
-                  </InputAdornment>
-                ),
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                //size='small'
+                placeholder="Monitoring adı veya host ile arama yapın..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" fontSize="smal" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  width: '40%',
+                  height: '15px',
+                  backgroundColor: 'white',
+                  borderRadius: 2,
+                  '& .MuiInputBase-root': {
+                    height: 30,
+                    fontSize: '0.8rem',
+                    fontFamily: 'sans-serif',
+                  },
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                  },
+                }}
+              />
+            </Box>
+
+            <DataGrid
+              rows={filteredMonitors}
+              columns={columns}
+              pageSizeOptions={[5, 10, 25]}
+              rowHeight={38}
+              autoHeight
+              disableRowSelectionOnClick
+              localeText={{
+                MuiTablePagination: {
+                  fontSize: {
+                    xs: '0.3rem',
+                    sm: '0.4rem',
+                    md: '0.5rem',
+                    lg: '0.7rem',
+                    xlg: '0.9rem',
+                  },
+                  labelRowsPerPage: 'Sayfa başına satır',
+                },
+              }}
+              initialState={{
+                sorting: {
+                  sortModel: [{ field: 'name', sort: 'asc' }],
+                },
+                pagination: {
+                  paginationModel: { pageSize: 10 },
+                },
               }}
               sx={{
-                width: '40%',
-                height: '15px',
-                backgroundColor: 'white',
-                borderRadius: 2,
-                '& .MuiInputBase-root': {
-                  height: 30,
-                  fontSize: '0.8rem',
-                  fontFamily:'sans-serif'
+                '& .MuiDataGrid-cell': {
+                  fontSize: '0.3rem',
+
+                  alignContent: 'center',
+                  alignItems: 'center',
                 },
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: 'primary.main',
+                '& .MuiTypography-root': {
+                  fontSize: {
+                    xs: '0.3rem',
+                    sm: '0.4rem',
+                    md: '0.5rem',
+                    lg: '0.7rem',
+                    xlg: '0.9rem',
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: 'primary.main',
+                },
+                '& .MuiTablePagination-selectLabel': {
+                  fontSize: {
+                    xs: '0.3rem',
+                    sm: '0.4rem',
+                    md: '0.5rem',
+                    lg: '0.7rem',
+                    xlg: '0.9rem',
                   },
+                },
+                '& .MuiTablePagination-displayedRows': {
+                  fontSize: '12px',
+                  color: 'gray', // "1–5 of 20" gibi metin
+                },
+                '& .MuiDataGrid-columnHeader': {
+                  fontSize: {
+                    xs: '0.3rem',
+                    sm: '0.4rem',
+                    md: '0.5rem',
+                    lg: '0.7rem',
+                    xlg: '0.9rem',
+                  },
+
+                  '&::-webkit-scrollbar': {
+                    width: '4px',
+                  },
+                  fontWeight: 'bold',
                 },
               }}
             />
-          </Box>
-
-          <DataGrid
-            rows={filteredMonitors}
-            columns={columns}
-            pageSizeOptions={[5, 10, 25]}
-            rowHeight={38}
-            autoHeight
-            disableRowSelectionOnClick
-            localeText={{
-              MuiTablePagination: {
-                fontSize: {
-                  xs: '0.3rem',
-                  sm: '0.4rem',
-                  md: '0.5rem',
-                  lg: '0.7rem',
-                  xlg: '0.9rem',
-                },
-                labelRowsPerPage: 'Sayfa başına satır',
-              },
-            }}
-            initialState={{
-              sorting: {
-                sortModel: [{ field: 'name', sort: 'asc' }],
-              },
-              pagination: {
-                paginationModel: { pageSize: 10 },
-              },
-            }}
-            sx={{
-              '& .MuiDataGrid-cell': {
-                fontSize: '0.3rem',
-
-                alignContent: 'center',
-                alignItems: 'center',
-              },
-              '& .MuiTypography-root': {
-                fontSize: {
-                  xs: '0.3rem',
-                  sm: '0.4rem',
-                  md: '0.5rem',
-                  lg: '0.7rem',
-                  xlg: '0.9rem',
-                },
-              },
-              '& .MuiTablePagination-selectLabel': {
-                fontSize: {
-                  xs: '0.3rem',
-                  sm: '0.4rem',
-                  md: '0.5rem',
-                  lg: '0.7rem',
-                  xlg: '0.9rem',
-                },
-              },
-              '& .MuiTablePagination-displayedRows': {
-                fontSize: '12px',
-                color: 'gray', // "1–5 of 20" gibi metin
-              },
-              '& .MuiDataGrid-columnHeader': {
-                fontSize: {
-                  xs: '0.3rem',
-                  sm: '0.4rem',
-                  md: '0.5rem',
-                  lg: '0.7rem',
-                  xlg: '0.9rem',
-                },
-
-                '&::-webkit-scrollbar': {
-                  width: '4px',
-                },
-                fontWeight: 'bold',
-              },
-            }}
-          />
-        </Paper>
-      </Box>
+          </Paper>
+        </Box>
       </Box>
     </Box>
   )

@@ -38,7 +38,13 @@ import {
   InfoOutlined,
   DeveloperBoard,
   Computer,
+  Pause,
+  Edit,
+  Delete,
+  NotificationsPaused,
+  PlayArrow,
 } from '@mui/icons-material'
+import localStorage from 'local-storage'
 import { QuestionMark } from 'tabler-icons-react'
 import { styled } from '@mui/material/styles'
 import Dialog from '@mui/material/Dialog'
@@ -62,7 +68,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 export default function MonitorDetail() {
   /*Keyword Dialog*/
   const [keywordDialogOpen, setKeywordDialogOpen] = useState(false)
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const handleClickKeywordDialohOpen = () => {
     setKeywordDialogOpen(true)
   }
@@ -72,12 +78,217 @@ export default function MonitorDetail() {
   /*************/
   const [isOpen, setIsOpen] = useState(false)
   const theme = useTheme()
-  const [monitor, setMonitor] = useState()
+  const [monitor, setMonitor] = useState();
   // const [params, setParams] = useState(useParams())
 
   const { id } = useParams()
 
   const handlDeleteMenu = (monitor) => {
+    Swal.fire({
+      title: 'Silmek istediğinizden emin misiniz',
+      icon: 'warning',
+      text: 'İzlemeyi sistemden tamamen silinecektir',
+      showCancelButton: true,
+      showConfirmButton: true,
+      confirmButtonText: 'Evet silmek istiyorum',
+      cancelButtonText: 'Hayır',
+    })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          await api.delete(`monitors/${monitor.id}`)
+          Swal.fire({
+            icon: 'success',
+            title: 'İzleme Silindi',
+            text: 'Başarılı şekilde silindi',
+            confirmButtonText: 'Tamam',
+          })
+          navigate('/user/monitors')
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Hatalı İşlem',
+          text: error.response.data.message,
+          confirmButtonText: 'Tamam',
+        })
+      })
+  }
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen)
+  }
+
+  const handleEditButton = (monitor) => {
+    switch (monitor.monitorType) {
+      case 'HttpMonitor':
+        navigate(`/user/monitors/${monitor.id}/http`)
+        //handleClose()
+        break
+      case 'PingMonitor':
+        navigate(`/user/monitors/${monitor.id}/ping`)
+        //handleClose()
+        break
+      case 'CronJobMonitor':
+        navigate(`/user/monitors/${monitor.id}/cronjob`)
+        //handleClose()
+        break
+      case 'PortMonitor':
+        navigate(`/user/monitors/${monitor.id}/port`)
+        //handleClose()
+        break
+      case 'KeywordMonitor':
+        navigate(`/user/monitors/${monitor.id}/keyword`)
+        //handleClose()
+        break
+      default:
+        console.error('Unknow monitor type ! :', monitor.monitorType)
+        //handleClose()
+        break
+    }
+  }
+
+  const handleTestButton = async (monitor) => {
+    try {
+      let timerInterval
+
+      Swal.fire({
+        title: 'İzleme test ediliyor!',
+        html: 'Cevap bekleniyor lütfen bekleyiniz.',
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        didOpen: async () => {
+          Swal.showLoading()
+
+          /*const timer = Swal.getPopup().querySelector('b')
+            timerInterval = setInterval(() => {
+              const left = Swal.getTimerLeft?.()
+              if (left !== undefined) timer.textContent = `${left}`
+            }, 100)*/
+
+          try {
+            const response = await api.get(
+              `monitors/instant-Control/${monitor.id}`
+            )
+
+            //clearInterval(timerInterval)
+
+            const result = {
+              status: response.data.status,
+              responseTime: response.data.responseTime,
+              isError: response.data.isError,
+              message: response.data.message,
+              timestamp: new Date().toLocaleTimeString(),
+            }
+
+            Swal.fire({
+              title: 'Cevap Detayları',
+              html: `
+          <div style="text-align: left; font-size: 16px; padding: 10px; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="font-weight: bold; padding: 6px;">Durum:</td>
+                <td style="color: ${
+                  result.isError ? 'red' : 'green'
+                }; padding: 6px;">
+                  ${result.status}
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; padding: 6px;">Yanıt Süresi:</td>
+                <td style="padding: 6px;">${result.responseTime} ms</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; padding: 6px;">Hata:</td>
+                <td style="padding: 6px; color: ${
+                  result.isError ? 'red' : 'green'
+                };">
+                  ${result.isError ? 'HATA VAR' : 'YOK'}
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; padding: 6px;">Mesaj:</td>
+                <td style="padding: 6px;">${
+                  result.message === 'success' ? 'Başarılı' : 'Başarısız'
+                }</td>
+              </tr>
+              <tr>
+                <td style="font-weight: bold; padding: 6px;">Test edilen zaman:</td>
+                <td style="padding: 6px;">${result.imestamp}</td>
+              </tr>
+            </table>
+          </div>
+        `,
+              icon: result.isError ? 'error' : 'success',
+              confirmButtonText: 'Tamam',
+            })
+          } catch (error) {
+            console.error('İstek hatası:', error)
+            clearInterval(timerInterval)
+            Swal.fire({
+              title: 'Hata!',
+              text: 'Sunucudan yanıt alınamadı.',
+              icon: 'error',
+              confirmButtonText: 'Tamam',
+            })
+          }
+        },
+      })
+
+      //handleClose()
+    } catch (error) {
+      console.error('İstek hatası:', error)
+      //handleClose()
+    } finally {
+      //handleClose()
+    }
+  }
+
+  const handlePauseMonitorButton = async (monitor) => {
+    try {
+      const response = await api.put(`monitors/${monitor.id}/pause`, {})
+      Swal.fire({
+        icon: 'success',
+        title: 'İzleme Durduruldu',
+        text: 'İzleme başarıyla durduruldu.',
+        confirmButtonText: 'Tamam',
+      })
+      setMonitor({ ...monitor,isActiveByOwner:false , status: 'uncertain'} );
+    } catch (error) {
+      console.error('Sunucu durdurulurken hata oluştu:', error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Hata',
+        text: 'İzleme durdurulamadı. Lütfen tekrar deneyin.',
+        confirmButtonText: 'Tamam',
+      })
+    }
+  }
+
+  const handlePlayMonitorButton = async (monitor) => {
+    try {
+      const res = await api.put(`monitors/${monitor.id}/play`, {})
+      Swal.fire({
+        icon: 'success',
+        title: 'İzleme Çalıştırıldı',
+        text: 'İzleme başarıyla başlatıldı.',
+        confirmButtonText: 'Tamam',
+      })
+      setMonitor({...monitor,isActiveByOwner:true,status: 'uncertain'});
+    } catch (error) {
+      console.error('Sunucu çalıştırılırken hata oluştu:', error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Hata',
+        text: 'İzleme çalıştırılamadı. Lütfen tekrar deneyin.',
+        confirmButtonText: 'Tamam',
+      })
+    }
+  }
+
+  const handleDeleteButton = (monitor) => {
+    try {
       Swal.fire({
         title: 'Silmek istediğinizden emin misiniz',
         icon: 'warning',
@@ -96,7 +307,7 @@ export default function MonitorDetail() {
               text: 'Başarılı şekilde silindi',
               confirmButtonText: 'Tamam',
             })
-            navigate('/user/monitors');
+            navigate('/user/monitors')
           }
         })
         .catch((error) => {
@@ -108,10 +319,7 @@ export default function MonitorDetail() {
             confirmButtonText: 'Tamam',
           })
         })
-    }
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
+    } catch (error) {}
   }
 
   const getMonitorById = async (monitorId) => {
@@ -193,6 +401,23 @@ export default function MonitorDetail() {
     }
   }
 
+   useEffect(() => {
+      const sideBarOpen = localStorage.get('sidebar')
+  
+      if (sideBarOpen === 'false') {
+        setIsOpen(false)
+      } else {
+        setIsOpen(true)
+      }
+  
+      const cleanupLocalStorage = () => {
+        localStorage.clear()
+      }
+      window.addEventListener('beforeunload', cleanupLocalStorage)
+      return () => {
+        window.removeEventListener('beforeunload', cleanupLocalStorage)
+      }
+    }, [])
   return monitor ? (
     <Grid container spacing={2}>
       <Grid item md={isOpen ? 2.3 : 0.75}>
@@ -280,51 +505,85 @@ export default function MonitorDetail() {
                 }}
                 gap={1}
               >
-                <Button
+                <IconButton
                   variant="contained"
                   sx={{
-                    bgcolor: theme.palette.secondary,
+                    bgcolor: theme.palette.secondary.dark,
                     borderRadius: '10%',
                     height: 25,
                     fontSize: '0.75rem',
+                    color: 'white',
+                    ':hover':{
+                      bgcolor: theme.palette.secondary.main,
+                    }
                   }}
+                  onClick={() => handleEditButton(monitor)}
                 >
+                  <Edit fontSize="small" color="#ffff"></Edit>
                   Düzenle
-                </Button>
-                <Button
+                </IconButton>
+                <IconButton
                   variant="contained"
                   sx={{
                     bgcolor: theme.palette.primary.dark,
                     borderRadius: '10%',
                     height: 25,
                     fontSize: '0.75rem',
+                    color: 'white',
+                    ':hover':{
+                      bgcolor: theme.palette.primary.main,
+                    }
                   }}
+                  onClick={() => handleTestButton(monitor)}
                 >
+                  <NotificationsPaused fontSize="small" color="#ffff" />
                   Test et
-                </Button>
+                </IconButton>
 
-                <Button
+                <IconButton
                   variant="contained"
                   sx={{
                     bgcolor: theme.palette.primary.main,
                     borderRadius: '10%',
                     height: 25,
                     fontSize: '0.75rem',
+                    color: 'white',
+                    ':hover':{
+                      bgcolor: theme.palette.primary.dark,
+                    }
+                  }}
+                  onClick={() => {
+                    if (monitor.isActiveByOwner) {
+                      handlePauseMonitorButton(monitor)
+                    } else {
+                      handlePlayMonitorButton(monitor)
+                    }
                   }}
                 >
-                  Durdur
-                </Button>
-                <Button
+                  {monitor.isActiveByOwner ? (
+                    <Pause color="#ffff" fontSize="small" />
+                  ) : (
+                    <PlayArrow color="#ffff" fontSize="small" />
+                  )}
+                  {monitor.isActiveByOwner ? 'Durdur' : 'Çalıştır'}
+                </IconButton>
+                <IconButton
                   variant="contained"
                   sx={{
                     bgcolor: theme.palette.error.main,
                     borderRadius: '10%',
                     height: 25,
                     fontSize: '0.75rem',
+                    color: 'white',
+                    ':hover':{
+                      bgcolor: theme.palette.error.dark,
+                    }
                   }}
+                  onClick={() => handleDeleteButton(monitor)}
                 >
+                  <Delete color="#ffff" fontSize="small" />
                   Sil
-                </Button>
+                </IconButton>
               </Grid>
             </Grid>
           </Grid>
@@ -341,7 +600,7 @@ export default function MonitorDetail() {
             <Grid container spacing={2}>
               {/* Genel Bilgiler */}
               <Grid item md={6}>
-                <Card sx={{ height: '100%' }}>
+                <Card sx={{ height: '100%', bgcolor: 'white' }}>
                   <CardContent>
                     <Typography
                       variant="h6"
@@ -442,7 +701,7 @@ export default function MonitorDetail() {
               {/* Http Monitor Detayları */}
               {monitor?.httpMonitor && (
                 <Grid item md={6}>
-                  <Card sx={{ height: '100%' }}>
+                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
                     <CardContent>
                       <Typography
                         variant="h6"
@@ -557,7 +816,7 @@ export default function MonitorDetail() {
               {/* Ping Monitor Detayları */}
               {monitor?.pingMonitor && (
                 <Grid item md={6}>
-                  <Card sx={{ height: '100%' }}>
+                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
                     <CardContent>
                       <Typography
                         variant="h6"
@@ -624,7 +883,7 @@ export default function MonitorDetail() {
               {/* Port Monitor Detayları */}
               {monitor?.portMonitor && (
                 <Grid item md={6}>
-                  <Card sx={{ height: '100%' }}>
+                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
                     <CardContent>
                       <Typography
                         variant="h6"
@@ -722,7 +981,7 @@ export default function MonitorDetail() {
               {/* Keyword Monitor Detayları */}
               {monitor?.keyWordMonitor && (
                 <Grid item md={6}>
-                  <Card sx={{ height: '100%' }}>
+                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
                     <CardContent>
                       <Typography
                         variant="h6"
@@ -810,7 +1069,7 @@ export default function MonitorDetail() {
                               >
                                 Kontrol Edilen Obje
                               </DialogTitle>
-                              
+
                               <DialogContent dividers>
                                 <Typography gutterBottom>
                                   {monitor.keyWordMonitor.keyWord}
@@ -819,9 +1078,11 @@ export default function MonitorDetail() {
                               <DialogActions>
                                 <Button
                                   autoFocus
-                                  onClick={()=>{
-                                    navigator.clipboard.writeText(monitor.keyWordMonitor.keyWord);
-                                    handleClickKeywordDialogClose();
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(
+                                      monitor.keyWordMonitor.keyWord
+                                    )
+                                    handleClickKeywordDialogClose()
                                   }}
                                 >
                                   Kopyala
@@ -884,7 +1145,7 @@ export default function MonitorDetail() {
               {/* Cronjob Monitor Detayları */}
               {monitor?.cronJobMonitor && (
                 <Grid item md={6}>
-                  <Card sx={{ height: '100%' }}>
+                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
                     <CardContent>
                       <Typography
                         variant="h6"
@@ -914,7 +1175,8 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.9rem' }}
                             >
-                              {monitor.cronJobMonitor.host.substring(0, 20)+'...'}
+                              {monitor.cronJobMonitor.host.substring(0, 20) +
+                                '...'}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
@@ -939,7 +1201,7 @@ export default function MonitorDetail() {
                               >
                                 Bağlantı
                               </DialogTitle>
-                              
+
                               <DialogContent dividers>
                                 <Typography gutterBottom>
                                   {monitor.cronJobMonitor.host}
@@ -948,9 +1210,11 @@ export default function MonitorDetail() {
                               <DialogActions>
                                 <Button
                                   autoFocus
-                                  onClick={()=>{
-                                    navigator.clipboard.writeText(monitor.cronJobMonitor.host);
-                                    handleClickKeywordDialogClose();
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(
+                                      monitor.cronJobMonitor.host
+                                    )
+                                    handleClickKeywordDialogClose()
                                   }}
                                 >
                                   Kopyala
@@ -1003,6 +1267,38 @@ export default function MonitorDetail() {
                                 : ''}
                             </Typography>
                           </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Son gelen istek tarihi
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              sx={{ fontSize: '0.9rem' }}
+                            >
+                              {monitor.cronJobMonitor.lastRequestTime.split("T")[0]}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Son gelen istek saati
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              sx={{ fontSize: '0.9rem' }}
+                            >
+                              {monitor.cronJobMonitor.lastRequestTime.split("T")[1].split(".")[0]}
+                            </Typography>
+                          </Grid>
                         </Grid>
                       </Box>
                     </CardContent>
@@ -1012,7 +1308,7 @@ export default function MonitorDetail() {
 
               {/* Response Time İstatistikleri */}
               <Grid item md={12}>
-                <Card>
+                <Card sx={{bgcolor: 'white'}}>
                   <CardContent>
                     <Typography
                       variant="h6"
@@ -1112,7 +1408,7 @@ export default function MonitorDetail() {
 
               {/* İstatistikler */}
               <Grid item md={12}>
-                <Card>
+                <Card sx={{ bgcolor: 'white'}}>
                   <CardContent>
                     <Typography
                       variant="h6"
@@ -1217,7 +1513,7 @@ export default function MonitorDetail() {
 
               {/* Son Loglar */}
               <Grid item md={12}>
-                <Card>
+                <Card sx={{bgcolor: 'white'}}>
                   <CardContent>
                     <Typography
                       variant="h6"
@@ -1291,140 +1587,147 @@ export default function MonitorDetail() {
           </Grid>
           {/*Sağ taraf alanı*/}
           {monitor !== null && (
-            <Grid item md={4} sx={{ display: 'flex', flexDirection: 'column', pr:0, alignItems: 'center' }}>
-              <Grid md={12} sx={{}}>
+            <Grid
+              item
+              md={4}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                pr: 0,
+                alignItems: 'center',
+              }}
+            >
+              <Grid md={12} sx={{ mr: 3 }}>
                 <ReportTable stats={stats} />
-              </Grid>
-              {/* Sunucu Sahibi Bilgileri */}
-              <Grid md={12}>
-              {monitor?.serverOwner && (
-                <Card sx={{ mt: 2, maxWidth:375, width: 275 }}>
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        fontSize: '0.9rem',
-                      }}
-                    >
-                      <Person color="primary" />
-                      Sunucu Sahibi Bilgileri
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            Ad Soyad
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            fontWeight="bold"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            {monitor.serverOwner.name}
-                          </Typography>
+
+                {monitor?.serverOwner && (
+                  <Card sx={{ mt: 2, bgcolor: 'white' }}>
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        gutterBottom
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <Person color="primary" />
+                        Sunucu Sahibi Bilgileri
+                      </Typography>
+                      <Box sx={{ mt: 2 }}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Ad Soyad
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              fontWeight="bold"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              {monitor.serverOwner.name}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              E-posta
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              {monitor.serverOwner.email}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Rol
+                            </Typography>
+                            <Chip
+                              label={monitor.serverOwner.role}
+                              size="small"
+                              color="info"
+                              sx={{ fontSize: '0.75rem', height: 22 }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Durum
+                            </Typography>
+                            <Chip
+                              label={
+                                monitor.serverOwner.status ? 'Aktif' : 'Pasif'
+                              }
+                              size="small"
+                              color={
+                                monitor.serverOwner.status ? 'success' : 'error'
+                              }
+                              sx={{ fontSize: '0.75rem', height: 22 }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              E-posta Doğrulama
+                            </Typography>
+                            <Chip
+                              label={
+                                monitor.serverOwner.isEmailVerified
+                                  ? 'Doğrulandı'
+                                  : 'Doğrulanmadı'
+                              }
+                              size="small"
+                              color={
+                                monitor.serverOwner.isEmailVerified
+                                  ? 'success'
+                                  : 'warning'
+                              }
+                              sx={{ fontSize: '0.75rem', height: 22 }}
+                            />
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              Oluşturulma
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontSize: '0.8rem' }}
+                            >
+                              {new Date(
+                                monitor.serverOwner.created_at
+                              ).toLocaleString('tr-TR')}
+                            </Typography>
+                          </Grid>
                         </Grid>
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            E-posta
-                          </Typography>
-                          <Typography
-                            variant="body1"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            {monitor.serverOwner.email}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            Rol
-                          </Typography>
-                          <Chip
-                            label={monitor.serverOwner.role}
-                            size="small"
-                            color="info"
-                            sx={{ fontSize: '0.75rem', height: 22 }}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            Durum
-                          </Typography>
-                          <Chip
-                            label={
-                              monitor.serverOwner.status ? 'Aktif' : 'Pasif'
-                            }
-                            size="small"
-                            color={
-                              monitor.serverOwner.status ? 'success' : 'error'
-                            }
-                            sx={{ fontSize: '0.75rem', height: 22 }}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            E-posta Doğrulama
-                          </Typography>
-                          <Chip
-                            label={
-                              monitor.serverOwner.isEmailVerified
-                                ? 'Doğrulandı'
-                                : 'Doğrulanmadı'
-                            }
-                            size="small"
-                            color={
-                              monitor.serverOwner.isEmailVerified
-                                ? 'success'
-                                : 'warning'
-                            }
-                            sx={{ fontSize: '0.75rem', height: 22 }}
-                          />
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            Oluşturulma
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontSize: '0.8rem' }}
-                          >
-                            {new Date(
-                              monitor.serverOwner.created_at
-                            ).toLocaleString('tr-TR')}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  </CardContent>
-                </Card>
-              )}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                )}
               </Grid>
             </Grid>
           )}

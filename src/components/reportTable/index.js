@@ -31,9 +31,6 @@ import {
 const ReportTable = ({ stats }) => {
   const theme = useTheme()
 
-
-  
-
   const chartData = () => [
     { name: 'Başarılı', value: stats.upLogs, color: '#4caf50' },
     { name: 'Başarısız', value: stats.downLogs, color: '#f44336' },
@@ -67,7 +64,8 @@ const ReportTable = ({ stats }) => {
       border: 0,
     },
     '&:hover': {
-      backgroundColor: theme.palette.action.selected,
+      //backgroundColor: theme.palette.action.selected,
+      backgroundColor: '#7296f7bd'
     },
   }))
 
@@ -96,15 +94,12 @@ const ReportTable = ({ stats }) => {
   }
 
   return stats?(
-    <Grid container spacing={{ xs: 2, sm: 3, md: 4, lg: 8 }}>
-      <Grid item>
-        <StatCard
+    <Grid container /*spacing={{ xs: 2, sm: 3, md: 4, lg: 8 }}*/>
+      <Grid md={12}>
+        <Card
           sx={{
-            maxHeight: 415,
-            maxWidth: 375,
-            width:275,
-            backgroundColor: '#ffff',
-            border: '0.2px solid gray',
+           backgroundColor: '#ffff',
+           width: '100%'
           }}
         >
           <CardContent>
@@ -220,7 +215,7 @@ const ReportTable = ({ stats }) => {
             </TableContainer>
           </CardContent>
           <CardActions sx={{ justifyContent: 'flex-end', p: 0.5 }}></CardActions>
-        </StatCard>
+        </Card>
       </Grid>
     </Grid>
   ):(<div></div>)
