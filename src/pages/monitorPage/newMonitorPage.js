@@ -22,6 +22,7 @@ import {
   FormHelperText,
   Slider,
   Menu,
+  Alert,
 } from '@mui/material'
 import {
   Language as LanguageIcon,
@@ -49,6 +50,8 @@ import {
 import { cookies } from '../../utils/cookie'
 import { jwtDecode } from 'jwt-decode'
 import AdminSidebar from '../../components/adminSideBar/adminSideBar'
+import { useFormik } from 'formik'
+import { newHttpMonitorFormShhema } from '../../utils/formSchema/formSchemas'
 
 const NewMonitorPage = (update = false) => {
   const [params, setParams] = useState(useParams())
@@ -153,31 +156,47 @@ const NewMonitorPage = (update = false) => {
     }
   }
 
-  const createMonitor = async (e) => {
+  const createMonitor = async (values,actions) => {
     try {
+      // const formattedData = {
+      //   name: friendlyName,
+      //   httpMonitor: {
+      //     host: host,
+      //     method: method,
+      //     body: body
+      //       ? typeof body === 'string'
+      //         ? JSON.parse(body)  
+      //         : body
+      //       : {},
+      //     headers: headers
+      //       ? typeof headers === 'string'
+      //         ? JSON.parse(headers)
+      //         : headers
+      //       : {},
+      //     allowedStatusCodes:
+      //       allowedStatusCodes.length > 0
+      //         ? [] //allowedStatusCodes.split(',').map((code) => code.trim())
+      //         : [],
+      //     timeOut: timeout,
+      //   },
+      //   interval: interval,
+      //   intervalUnit: intervalUnit,
+      // }
       const formattedData = {
-        name: friendlyName,
+        name: values.name,
         httpMonitor: {
-          host: host,
-          method: method,
-          body: body
-            ? typeof body === 'string'
-              ? JSON.parse(body)
-              : body
-            : {},
-          headers: headers
-            ? typeof headers === 'string'
-              ? JSON.parse(headers)
-              : headers
-            : {},
+          host: values.host,
+          method: values.method,
+          body: JSON.parse(values.body),
+          headers: JSON.parse(values.headers),
           allowedStatusCodes:
             allowedStatusCodes.length > 0
-              ? [] //allowedStatusCodes.split(',').map((code) => code.trim())
+              ? allowedStatusCodes.split(',').map((code) => code.trim())
               : [],
-          timeOut: timeout,
+          timeOut: values.timeOut,
         },
-        interval: interval,
-        intervalUnit: intervalUnit,
+        interval: values.interval,
+        intervalUnit: values.intervalUnit,
       }
       console.log(formattedData)
       console.log('Role:', role)
@@ -300,6 +319,22 @@ const NewMonitorPage = (update = false) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
+  const {values,errors,handleChange,handleSubmit}= useFormik({
+    initialValues:{
+      name: '',
+      host: '',
+      method: 'GET',
+      body: '',
+      headers: '',
+      allowedStatusCodes:'',
+      timeOut: 30,
+      interval: 5,
+      intervalUnit: 'minutes'
+    },
+    validationSchema: newHttpMonitorFormShhema,
+    onSubmit: createMonitor
+  });
+
   return (
     <Box sx={{ display: 'flex' }}>
       <Box
@@ -344,8 +379,6 @@ const NewMonitorPage = (update = false) => {
           position: 'relative',
         }}
       >
-        {/*<Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>*/}
-        {/*<Paper sx={{ p: 4 }}>*/}
         <Box
           sx={{
             display: 'flex',
@@ -391,680 +424,715 @@ const NewMonitorPage = (update = false) => {
         {/* Monitor Type Selection */}
         <Grid
           container
-          gap={1}
-          sx={{ display: 'flex', flexDirection: 'column' }}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'white',
+            borderRadius: '12px',
+          }}
+          mb={4}
         >
+          {/*Alert */}
+          <Grid
+            item
+            md={12}
+            padding={2}
+            display={'flex'}
+            flexDirection={'column'}
+          >
+            <Grid item md={12} alignContent={'end'}>
+              <Typography variant="subtitle1" gutterBottom></Typography>
+            </Grid>
+            <Grid item md={12}>
+              <Alert severity="info">
+                {monitorType === 'http'
+                  ? 'Web sitenizi, API uç noktanızı veya HTTP üzerinde çalışan herhangi bir şeyi izlemek için HTTP(S) izleyicisini kullanın.'
+                  : monitorType === 'ping'
+                  ? role === 'user'
+                    ? navigate('/user/monitors/new/ping')
+                    : navigate('/admin/monitors/new/ping', {
+                        state: { userInfo },
+                      })
+                  : monitorType === 'port'
+                  ? role === 'user'
+                    ? navigate('/user/monitors/new/port')
+                    : navigate('/admin/monitors/new/port', {
+                        state: { userInfo },
+                      })
+                  : monitorType === 'keyword'
+                  ? role === 'user'
+                    ? navigate('/user/monitors/new/keyword')
+                    : navigate('/admin/monitors/new/keyword', {
+                        state: { userInfo },
+                      })
+                  : monitorType === 'cronjob'
+                  ? role === 'user'
+                    ? navigate('/user/monitors/new/cronjob')
+                    : navigate('/admin/monitors/new/cronjob', {
+                        state: { userInfo },
+                      })
+                  : 'Select a monitor type to get started.'}
+              </Alert>
+            </Grid>
+          </Grid>
           {/*Birinci satır*/}
           <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
+            <Grid
+              item
+              md={12}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} /*alignContent={'end'}*/>
                 <Typography gutterBottom>Monitoring Tipi</Typography>
               </Grid>
               <Grid item md={12}>
-                <FormControl sx={{ width: '100%'}}>
-                    <Select
-                      fullWidth
-                      value={monitorType}
-                      onChange={handleMonitorTypeChange}
-                      displayEmpty
-                      MenuProps={{
-                        PaperProps: {
-                          sx: {
-                            bgcolor: 'white', // Açılır MENÜ arkaplanı
-                          },
+                <FormControl sx={{ width: '100%' }}>
+                  <Select
+                    fullWidth
+                    value={monitorType}
+                    onChange={handleMonitorTypeChange}
+                    displayEmpty
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          bgcolor: 'white',
                         },
-                      }}
-                      sx={{
-                        '& .MuiSelect-select': {
+                      },
+                    }}
+                    sx={{
+                      '& .MuiSelect-select': {
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0,
+                        py: 0.6,
+                      },
+                    }}
+                  >
+                    <MenuItem value="http" sx={{ bgcolor: 'white' }}>
+                      <Box
+                        sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          gap: 0,
-                          py: 0.6,
-                          bgcolor:'white'
-                        },
+                          gap: 2,
+                          width: '100%',
+                          //bgcolor: 'white',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            bgcolor: '#3f51b5',
+                            p: 0.6,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 48,
+                          }}
+                        >
+                          <PublicIcon sx={{ color: 'white', fontSize: 20 }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" fontWeight="500">
+                            HTTP(S)
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Web sitelerini ve web api servislerini izleyin
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                      disabled={update.update ? true : false}
+                      value="ping"
+                      sx={{
                         bgcolor: 'white',
-                        '& fieldset': {
-                          borderColor: '#ccc', // opsiyonel: gri border
-                        },
-                        '&:hover fieldset': {
-                            borderColor: '#',
-                         },
-                        '&.Mui-focused fieldset': {
-                           borderColor: '#1976d2', // focus olduğunda
-                          },
-
+                        ':hover': { bgcolor: '#b1d1f1c5' },
                       }}
                     >
-                      <MenuItem value="http" sx={{bgcolor:'white'}}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            width: '100%',
-                            bgcolor:'white'
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              bgcolor: '#3f51b5',
-                              p: 0.6,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 48,
-                            }}
-                          >
-                            <PublicIcon sx={{ color: 'white', fontSize: 20 }} />
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" fontWeight="500">
-                              HTTP(S)
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Web sitelerini ve web api servislerini izleyin
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        disabled={update.update ? true : false}
-                        value="ping"
-                        sx={{bgcolor:'white'}}
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          width: '100%',
+                        }}
                       >
                         <Box
                           sx={{
+                            bgcolor: '#4caf50',
+                            p: 0.6,
+                            borderRadius: 1,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 2,
-                            width: '100%',
-                            bgcolor: 'white'
+                            justifyContent: 'center',
+                            minWidth: 48,
                           }}
                         >
-                          <Box
-                            sx={{
-                              bgcolor: '#4caf50',
-                              p: 0.6,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 48,
-                            }}
-                          >
-                            <ComputerIcon
-                              sx={{ color: 'white', fontSize: 20 }}
-                            />
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" fontWeight="500">
-                              PING
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Ağ bağlantısından ICMP protokolünden izleyin
-                            </Typography>
-                          </Box>
+                          <ComputerIcon sx={{ color: 'white', fontSize: 20 }} />
                         </Box>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        disabled={update.update ? true : false}
-                        value="port"
-                        sx={{bgcolor:'white'}}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            width: '100%',
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              bgcolor: '#ff9800',
-                              p: 0.6,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 48,
-                            }}
-                          >
-                            <DeveloperBoardIcon
-                              sx={{ color: 'white', fontSize: 20 }}
-                            />
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" fontWeight="500">
-                              PORT
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Belirli bağlantı portları izleyin
-                            </Typography>
-                          </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" fontWeight="500">
+                            PING
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Ağ bağlantısından ICMP protokolünden izleyin
+                          </Typography>
                         </Box>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        disabled={update.update ? true : false}
-                        value="keyword"
-                        sx={{bgcolor:'white'}}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            width: '100%',
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              bgcolor: '#e91e63',
-                              p: 0.6,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 48,
-                            }}
-                          >
-                            <CodeIcon sx={{ color: 'white', fontSize: 20 }} />
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle2" fontWeight="500">
-                              KEYWORD
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Web servislerdeki belirli anahtar kelimeleri
-                              izleyin
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                      <Divider />
-                      <MenuItem
-                        disabled={update.update ? true : false}
-                        value="cronjob"
-                        sx={{bgcolor:'white'}}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            width: '100%',
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              bgcolor: '#3f51b5',
-                              p: 0.6,
-                              borderRadius: 1,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: 48,
-                            }}
-                          >
-                            <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
-                          </Box>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle1" fontWeight="500">
-                              CRON JOB
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Tekrarlanan işleri izleyin
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </MenuItem>
-                      <Divider />
-                    </Select>
-                    <FormHelperText
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                      disabled={update.update ? true : false}
+                      value="port"
                       sx={{
-                        justifyContent: 'start',
-                        alignItems: 'center',
-                        //bgcolor: '#99a7fa',
+                        bgcolor: 'white',
+                        ':hover': { bgcolor: '#b1d1f1c5' },
                       }}
-                    ></FormHelperText>
-                  </FormControl>
-              </Grid>
-            </Grid>
-            <Grid item md={6} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
-              <Grid item md={12} alignContent={'end'}>
-                <Typography variant="subtitle1" gutterBottom></Typography>
-              </Grid>
-              <Grid item md={12}>
-                <Box
-                    sx={{ display: 'flex', alignItems: 'center', mt: 1, mb: 1 }}
-                  >
-                    <InfoIcon
-                      sx={{ fontSize: 20, mr: 0.5, color: 'primary.main' }}
-                    />
-                    <Typography variant="p" color="text.secondary">
-                      {monitorType === 'http'
-                        ? 'Web sitenizi, API uç noktanızı veya HTTP üzerinde çalışan herhangi bir şeyi izlemek için HTTP(S) izleyicisini kullanın.'
-                        : monitorType === 'ping'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/ping')
-                          : navigate('/admin/monitors/new/ping', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'port'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/port')
-                          : navigate('/admin/monitors/new/port', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'keyword'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/keyword')
-                          : navigate('/admin/monitors/new/keyword', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'cronjob'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/cronjob')
-                          : navigate('/admin/monitors/new/cronjob', {
-                              state: { userInfo },
-                            })
-                        : 'Select a monitor type to get started.'}
-                    </Typography>
-                  </Box>
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          width: '100%',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            bgcolor: '#ff9800',
+                            p: 0.6,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 48,
+                          }}
+                        >
+                          <DeveloperBoardIcon
+                            sx={{ color: 'white', fontSize: 20 }}
+                          />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" fontWeight="500">
+                            PORT
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Belirli bağlantı portları izleyin
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                      disabled={update.update ? true : false}
+                      value="keyword"
+                      sx={{
+                        bgcolor: 'white',
+                        ':hover': { bgcolor: '#b1d1f1c5' },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          width: '100%',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            bgcolor: '#e91e63',
+                            p: 0.6,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 48,
+                          }}
+                        >
+                          <CodeIcon sx={{ color: 'white', fontSize: 20 }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle2" fontWeight="500">
+                            KEYWORD
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Web servislerdeki belirli anahtar kelimeleri izleyin
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                    <MenuItem
+                      disabled={update.update ? true : false}
+                      value="cronjob"
+                      sx={{
+                        bgcolor: 'white',
+                        ':hover': { bgcolor: '#b1d1f1c5' },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          width: '100%',
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            bgcolor: '#3f51b5',
+                            p: 0.6,
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minWidth: 48,
+                          }}
+                        >
+                          <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="500">
+                            CRON JOB
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Tekrarlanan işleri izleyin
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </MenuItem>
+                    <Divider />
+                  </Select>
+                  <FormHelperText
+                    sx={{
+                      justifyContent: 'start',
+                      alignItems: 'center',
+                      //bgcolor: '#99a7fa',
+                    }}
+                  ></FormHelperText>
+                </FormControl>
               </Grid>
             </Grid>
           </Grid>
-          
+          <Divider />
           {/*İkincii satır*/}
-          <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
-              <Grid item  md={12} alignContent={'end'}>
+          <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Ad</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
+                  id='name'
                   required
                   fullWidth
                   InputProps={{
                     sx: {
-                      height: 30,
+                      height: 35,
                       padding: 0,
-                      fontSize: '0.7rem',
-                      '& input': {
-                        padding: '0 8px', // input için padding
-                        height: '100%', // input yüksekliğini tam yap
-                        display: 'flex',
-                        alignItems: 'center', // input içeriğini ortala
-                      },
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.7rem',
-                      // Label pozisyonunu ayarla
-                      transform: 'translate(8px, -15px) scale(1)', // normal pozisyon
-                      '&.Mui-focused, &.MuiFormLabel-filled': {
-                        transform: 'translate(10px, -30px) scale(0.75)', // focus/filled pozisyon
-                      },
-                      // Label'ı input alanına göre ortala
-                      top: '50%',
-                      transformOrigin: 'left center',
-                      marginTop: '-0.5em',
+                      fontSize: '0.8rem',
                     },
                   }}
                   label="Tanımlayıcı ad"
-                  value={friendlyName}
-                  onChange={(e) => setFriendlyName(e.target.value)}
-                  helperText="İzleme için tanımlayıcı bir ad belirleyin"
+                  value={values.name}
+                  onChange={handleChange}
+                  helperText={errors.name?(<Typography variant='p' style={{color:'red'}}>{errors.name}</Typography>):(<Typography variant='p' style={{color:'blue'}}></Typography>)}
                 />
               </Grid>
             </Grid>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Url</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
+                  id='host'
                   required
                   fullWidth
                   InputProps={{
                     sx: {
-                      height: 30,
-                      padding: 0,
-                      fontSize: '0.7rem',
-                      '& input': {
-                        padding: '0 8px', // input için padding
-                        height: '100%', // input yüksekliğini tam yap
-                        display: 'flex',
-                        alignItems: 'center', // input içeriğini ortala
-                      },
+                      height: 35,
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: '0.7rem',
-                      // Label pozisyonunu ayarla
-                      transform: 'translate(8px, -15px) scale(1)', // normal pozisyon
-                      '&.Mui-focused, &.MuiFormLabel-filled': {
-                        transform: 'translate(10px, -30px) scale(0.75)', // focus/filled pozisyon
-                      },
-                      // Label'ı input alanına göre ortala
-                      top: '50%',
-                      transformOrigin: 'left center',
-                      marginTop: '-0.5em',
+                      fontSize: '0.8rem',
                     },
                   }}
                   label={'URL (veya IP)'}
-                  value={host}
-                  onChange={(e) => setHost(e.target.value)}
+                  value={values.host}
+                  onChange={handleChange}
                   placeholder={'https://rahatup.com'}
                   helperText={
-                    'İzlenecek URL http:// veya https:// protokolünde olmalı'
+                    (<Typography variant='p' color={'red'}>{errors.host}</Typography>)
                   }
                 />
               </Grid>
             </Grid>
           </Grid>
+          <Divider />
           {/*Üçüncü satır*/}
-          <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
-              <Grid item md={12}  /*alignContent={'end'}*/>
-                <Typography gutterBottom>İstek Zaman Aralığı</Typography>
+          <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
+              <Grid item md={12} alignContent={'end'}>
+                <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
               </Grid>
               <Grid item md={12} gap={3} display={'flex'}>
                 <Grid item md={9}>
-                  <FormControl fullWidth>
-                            <Slider
-                              sx={{
-                                color: '#1976d2',
-                                height: 4, // Track kalınlığı
-                                '& .MuiSlider-thumb': {
-                                  width: 10,
-                                  height: 10,
-                                },
-                                '& .MuiSlider-track': {
-                                  border: 'none', // varsa kalın kenar çizgilerini kapatır
-                                },
-                                '& .MuiSlider-rail': {
-                                  opacity: 0.5,
-                                  height: 4,
-                                },
-                              }}
-                              name="interval"
-                              value={interval}
-                              onChange={(e) => setInterval(e.target.value)}
-                              min={min}
-                              max={max}
-                              step={1}
-                              valueLabelDisplay="auto" // Değeri üzerinde gösterir
-                              marks={[
-                                { value: min, label: `${min}` }, // Min değeri etiketliyor
-                                { value: max, label: `${max}` }, // Max değeri etiketliyor
-                              ]}
-                            />
-                </FormControl>
+                  <FormControl  fullWidth>
+                    <Slider
+                      sx={{
+                        color: '#1976d2',
+                        height: 4, // Track kalınlığı
+                        '& .MuiSlider-thumb': {
+                          width: 10,
+                          height: 10,
+                        },
+                        '& .MuiSlider-track': {
+                          border: 'none', // varsa kalın kenar çizgilerini kapatır
+                        },
+                        '& .MuiSlider-rail': {
+                          opacity: 0.5,
+                          height: 4,
+                        },
+                      }}
+                      id='interval' 
+                      name="interval"
+                      value={values.interval}
+                      onChange={handleChange}
+                      min={min}
+                      max={max}
+                      step={1}
+                      valueLabelDisplay="auto" // Değeri üzerinde gösterir
+                      marks={[
+                        { value: min, label: `${min}` }, // Min değeri etiketliyor
+                        { value: max, label: `${max}` }, // Max değeri etiketliyor
+                      ]}
+                    />
+                    <FormHelperText><Typography variant='p' color={'red'}>{errors.interval}</Typography></FormHelperText>
+                  </FormControl>
                 </Grid>
                 <Grid item md={3}>
                   <FormControl fullWidth>
-                            <Select
-                              name="intervalUnit"
-                              value={intervalUnit || 'dakika'}
-                              // label="Birim"
-                              onChange={(e) => {
-                                setIntervalUnit(e.target.value)
-                              }}
-                              variant="outlined"
-                              sx={{
-                                fontSize: '0.8rem',
-                              }}
-                            >
-                              {INTERVAL_UNITS.map((unit) => (
-                                <MenuItem
-                                  sx={{ fontSize: '0.8rem' }}
-                                  key={unit.value}
-                                  value={unit.value}
-                                >
-                                  {unit.label}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                    <Select
+                      id='intervalUnit'
+                      name="intervalUnit"
+                      value={values.intervalUnit || 'dakika'}
+                      onChange={handleChange}
+                      variant="outlined"
+                      sx={{
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      {INTERVAL_UNITS.map((unit) => (
+                        <MenuItem
+                          sx={{ fontSize: '0.8rem' }}
+                          key={unit.value}
+                          value={unit.value}
+                        >
+                          {unit.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Grid>
-                
               </Grid>
             </Grid>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2}  display={'flex'} flexDirection={'column'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Method</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                            fullWidth
-                            label="HTTP Metot"
-                            select
-                            defaultValue={update.update ? method : 'GET'}
-                            onChange={(e) => setMethod(e.target.value)}
-                            InputProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                              },
-                            }}
-                            InputLabelProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                              },
-                            }}
-                          >
-                            <MenuItem sx={{ fontSize: '0.8rem', bgcolor:'white' }} value="GET">
-                              GET
-                            </MenuItem>
-                            <MenuItem sx={{ fontSize: '0.8rem', bgcolor:'white' }} value="POST">
-                              POST
-                            </MenuItem>
-                            <MenuItem sx={{ fontSize: '0.8rem', bgcolor:'white' }} value="PUT">
-                              PUT
-                            </MenuItem>
-                            <MenuItem
-                              sx={{ fontSize: '0.8rem', bgcolor:'white' }}
-                              value="DELETE"
-                            >
-                              DELETE
-                            </MenuItem>
-                            <MenuItem sx={{ fontSize: '0.8rem', bgcolor:'white' }} value="PATCH">
-                              PATCH
-                            </MenuItem>
-                            <MenuItem sx={{ fontSize: '0.8rem', bgcolor:'white' }} value="HEAD">
-                              HEAD
-                            </MenuItem>
-                          </TextField>
+                  id='method'
+                  fullWidth
+                  label="HTTP Metot"
+                  select
+                  defaultValue={update.update ? values.method : values.method}
+                  onChange={handleChange}
+                  helperText={(<Typography variant='p' color={'red'}>{errors.method}</Typography>)}
+                  InputProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                >
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="GET"
+                  >
+                    GET
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="POST"
+                  >
+                    POST
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="PUT"
+                  >
+                    PUT
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="DELETE"
+                  >
+                    DELETE
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="PATCH"
+                  >
+                    PATCH
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="HEAD"
+                  >
+                    HEAD
+                  </MenuItem>
+                </TextField>
               </Grid>
             </Grid>
           </Grid>
+          <Divider />
           {/*Dördüncü satır*/}
-          <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
+          <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Başlık</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                            fullWidth
-                            label="Özel HTTP Başlıkları (JSON)"
-                            multiline
-                            rows={7}
-                            sx={{
-                              mb: 2,
-                            }}
-                            name="headers"
-                            value={
-                              typeof headers === 'object'
-                                ? JSON.stringify(headers)
-                                : headers
-                            }
-                            onChange={(e) => setHeaders(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            InputProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                                '& textarea': {
-                                  maxHeight: '200px', // yüksekliği sınırla
-                                  overflowY: 'auto', // dikey scroll bar
-                                },
-                              },
-                              startAdornment: (
-                                <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                              ),
-                            }}
-                            InputLabelProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                              },
-                            }}
-                          />
+                  id='headers'
+                  fullWidth
+                  label="Özel HTTP Başlıkları (JSON)"
+                  multiline
+                  rows={7}
+                  helperText={(<Typography variant='p' color={'red'}>{errors.headers}</Typography>)}
+                  sx={{
+                    mb: 2,
+                  }}
+                  name="headers"
+                  value={values.headers
+                    /*typeof headers === 'object'
+                      ? JSON.stringify(headers)
+                      : headers*/
+                  }
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                      '& textarea': {
+                        maxHeight: '200px', // yüksekliği sınırla
+                        overflowY: 'auto', // dikey scroll bar
+                      },
+                    },
+                    startAdornment: (
+                      <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
+                    ),
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                />
               </Grid>
             </Grid>
-            <Grid item md={6} height={'50%'} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
-              <Grid item md={12} /*alignContent={'end'}*/>
-                <Typography  gutterBottom>Gövde</Typography>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
+              <Grid item md={12} alignContent={'end'}>
+                <Typography gutterBottom>Gövde</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                            fullWidth
-                            label="Özel HTTP Gövdesi (JSON)"
-                            multiline
-                            rows={7}
-                            sx={{ mb: 2 }}
-                            name="body"
-                            value={
-                              typeof body === 'object'
-                                ? JSON.stringify(body)
-                                : body
-                            }
-                            onChange={(e) => setBody(e.target.value)}
-                            variant="outlined"
-                            size="small"
-                            // helperText="POST, PUT veya PATCH istekleri için gönderilecek veri"
-                            InputProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                                '& textarea': {
-                                  maxHeight: '200px', // yüksekliği sınırla
-                                  overflowY: 'auto', // dikey scroll bar
-                                },
-                              },
-                              startAdornment: (
-                                <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                              ),
-                            }}
-                            InputLabelProps={{
-                              sx: {
-                                fontSize: '0.8rem',
-                              },
-                            }}
-                          />
+                  id='body'
+                  fullWidth
+                  label="Özel HTTP Gövdesi (JSON)"
+                  multiline
+                  rows={7}
+                  helperText={
+                    (<Typography variant='p' color={'red'}>{errors.body}</Typography>)
+                  }
+                  sx={{ mb: 2 }}
+                  name="body"
+                  value={values.body/*typeof body === 'object' ? JSON.stringify(body) : body*/}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                      '& textarea': {
+                        maxHeight: '200px', // yüksekliği sınırla
+                        overflowY: 'auto', // dikey scroll bar
+                      },
+                    },
+                    startAdornment: (
+                      <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
+                    ),
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                />
               </Grid>
             </Grid>
           </Grid>
+          <Divider />
           {/*Beşinci satır*/}
-          <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
+          <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} alignContent={'end'}>
-                <Typography variant="subtitle1" gutterBottom>İstek Zaman Aşımı</Typography>
+                <Typography gutterBottom>
+                  İstek Zaman Aşımı
+                </Typography>
               </Grid>
               <Grid item md={12}>
                 <FormControl fullWidth>
-                    <Select
-                      value={timeout}
-                      onChange={(e) => setTimeout(e.target.value)}
-                      // label='Timeout'
-                      sx={{
-                        fontSize: '0.8rem',
-                      }}
-                    >
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
-                        10 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
-                        20 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
-                        30 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
-                        40 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
-                        50 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
-                        60 saniye
-                      </MenuItem>
-                    </Select>
-                  </FormControl>
+                  <Select
+                    id='timeOut'
+                    value={values.timeOut}
+                    onChange={handleChange}
+                    // label='Timeout'
+                    sx={{
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
+                      10 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
+                      20 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
+                      30 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
+                      40 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
+                      50 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
+                      60 saniye
+                    </MenuItem>
+                  </Select>
+                  <FormHelperText><Typography variant='p' color={'red'}>{errors.timeOut}</Typography></FormHelperText>
+                </FormControl>
               </Grid>
             </Grid>
-            <Grid item md={6} bgcolor={'white'} border={'solid 1px gray'}  padding={2} display={'flex'} flexDirection={'column'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid item md={12} alignContent={'end'}>
-                <Typography variant="subtitle1" gutterBottom>İzin Verilen Durum Kodlar</Typography>
+                <Typography gutterBottom>
+                  İzin Verilen Durum Kodlar
+                </Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                            required
-                            fullWidth
-                            InputProps={{
-                              sx: {
-                                height: 30,
-                                padding: 0,
-                                fontSize: '0.7rem',
-                                '& input': {
-                                  padding: '0 8px', // input için padding
-                                  height: '100%', // input yüksekliğini tam yap
-                                  display: 'flex',
-                                  alignItems: 'center', // input içeriğini ortala
-                                },
-                              },
-                            }}
-                            InputLabelProps={{
-                              sx: {
-                                fontSize: '0.7rem',
-                                // Label pozisyonunu ayarla
-                                transform: 'translate(8px, -15px) scale(1)', // normal pozisyon
-                                '&.Mui-focused, &.MuiFormLabel-filled': {
-                                  transform:
-                                    'translate(10px, -30px) scale(0.75)', // focus/filled pozisyon
-                                },
-                                // Label'ı input alanına göre ortala
-                                top: '50%',
-                                transformOrigin: 'left center',
-                                marginTop: '-0.5em',
-                              },
-                            }}
-                            label="İzin Verilen Status Kodları"
-                            name="allowedStatusCodes"
-                            value={
-                              Array.isArray(allowedStatusCodes)
-                                ? allowedStatusCodes.join(',')
-                                : allowedStatusCodes
-                            }
-                            onChange={(e) =>
-                              setAllowedStatusCodes(e.target.value)
-                            }
-                            variant="outlined"
-                            size="small"
-                            helperText="Virgülle ayırarak yazın (örn: 200,201,409)"
-                          />
+                  id='allowedStatusCodes'
+                  required
+                  fullWidth
+                  InputProps={{
+                    sx: {
+                      height: 35,
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  label="İzin Verilen Status Kodları"
+                  name="allowedStatusCodes"
+                  value={values.allowedStatusCodes
+                    // Array.isArray(allowedStatusCodes)
+                    //   ? allowedStatusCodes.join(',')
+                    //   : allowedStatusCodes
+                  }
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  helperText={(<Typography variant='p' color={'red'}>{errors.allowedStatusCodes}</Typography>)}
+                />
               </Grid>
             </Grid>
           </Grid>
+          <Divider />
           {/*Altıncı satır*/}
-          <Grid item md={12} gap={1} display={'flex'}>
-            <Grid item md={6} display={'flex'} flexDirection={'column'}>
-              {/* <Grid item md={12} alignContent={'end'}>
+          <Grid item md={12} display={'flex'} mt={2} mb={2}>
+            {/* <Grid item md={6} display={'flex'} flexDirection={'column'}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography variant="subtitle1" gutterBottom>Bildirim Atılacaklar</Typography>
                </Grid> 
                <Grid item md={12}>
@@ -1074,60 +1142,50 @@ const NewMonitorPage = (update = false) => {
                   </Typography>
                   ...
                  </Box>
-               </Grid>*/}
-            </Grid>
-            <Grid item md={6}  display={'flex'} flexDirection={'column'}>
-              <Grid item md={12} alignContent={'end'}>
-                 <Box
-                 sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}
-               >
-                <Box>
-                   <Button
-                   variant="outlined"
-                   color="inherit"
-                   sx={{
-                    fontSize: '0.8rem',
-                   }}
-                   onClick={() => turnMonitorPage()}
-                 >
-                   İptal
-                 </Button>
-                </Box>
-                 <Box>
-                   <Button
-                     variant="contained"
-                     color="primary"
-                     sx={{
+               </Grid>
+            </Grid> */}
+            
+              <Grid item md={6} display={'flex'} justifyContent={'center'} alignContent={'center'} >
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    sx={{
                       fontSize: '0.8rem',
-                     }}
-                     onClick={() => {
-                       update.update ? updateMonitor() : createMonitor()
-                     }}
-                   >
-                     {update.update ? 'İzleme Güncelle' : 'İzleme Oluştur'}
-                   </Button>
-                 </Box>
-               </Box>
-                 <Typography variant="subtitle1" gutterBottom></Typography>
-               </Grid>
-               <Grid item md={12}>
-                 
-               </Grid>
-             </Grid>
-           </Grid>
-
-           {/**Boş***** */}
-           
-         </Grid>
-
-        {/*</Paper>}
-        {/*</Container>*/}
+                      width: '7rem',
+                    }}
+                    onClick={() => turnMonitorPage()}
+                  >
+                    İptal
+                  </Button>
+                </Grid>
+                
+              </Grid>
+              <Grid item md={6} display={'flex'} alignContent={'center'} justifyContent={'center'}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    fontSize: '0.8rem',
+                    width: '10rem'
+                  }}
+                  onClick={() => {
+                    update.update ? updateMonitor() : handleSubmit()
+                  }}
+                >
+                  {update.update ? 'İzleme Güncelle' : 'İzleme Oluştur'}
+                </Button>
+              </Grid>
+            
+          </Grid>
+        </Grid>
       </Box>
     </Box>
   )
 }
 
-{/*activeTab === 2 && (
+{
+  /*activeTab === 2 && (
                     <Grid container spacing={3}>
                       <Grid item xs={12}>
                         <FormControl fullWidth>
@@ -1155,5 +1213,6 @@ const NewMonitorPage = (update = false) => {
                         />
                       </Grid>
                     </Grid>
-                  )*/}
+                  )*/
+}
 export default NewMonitorPage
