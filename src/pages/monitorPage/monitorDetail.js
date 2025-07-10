@@ -16,7 +16,6 @@ import {
   TableHead,
   TableRow,
   LinearProgress,
-  Avatar,
 } from '@mui/material'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -26,7 +25,6 @@ import ReportTable from '../../components/reportTable'
 import api from '../../api/auth/axiosInstance'
 import {
   AccessTime,
-  Speed,
   CheckCircle,
   Error,
   Warning,
@@ -52,7 +50,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import IconButton from '@mui/material/IconButton'
-import CloseIcon from '@mui/icons-material/Close'
 import ResponseTimeLineChart from '../../components/reportTable/lineChart'
 import { CodeIcon, TimerIcon } from 'lucide-react'
 import Swal from 'sweetalert2'

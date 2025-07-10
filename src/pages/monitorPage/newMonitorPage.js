@@ -45,7 +45,6 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import {
   HTTP_METHODS,
   INTERVAL_UNITS,
-  REPORT_TIME_UNITS,
 } from './constants/monitorConstants'
 import { cookies } from '../../utils/cookie'
 import { jwtDecode } from 'jwt-decode'
@@ -56,60 +55,46 @@ import { newHttpMonitorFormShhema } from '../../utils/formSchema/formSchemas'
 const NewMonitorPage = (update = false) => {
   const [params, setParams] = useState(useParams())
   const [monitorType, setMonitorType] = useState('http')
-  const [friendlyName, setFriendlyName] = useState('')
-  const [intervalUnit, setIntervalUnit] = useState('minutes')
-  const [method, setMethod] = useState('GET')
-  const [body, setBody] = useState()
-  const [headers, setHeaders] = useState()
-  const [allowedStatusCodes, setAllowedStatusCodes] = useState([])
-  const [host, setHost] = useState('')
-  const [interval, setInterval] = useState(5)
-  const [timeout, setTimeout] = useState(30)
   const [alertContacts, setAlertContacts] = useState([])
   const [activeTab, setActiveTab] = useState(0)
   const [isOpen, setIsOpen] = useState(true)
   const [min, setMin] = useState()
   const [max, setMax] = useState()
   const [emailInput, setEmailInput] = useState('')
-  const [emailList, setEmailList] = useState([])
+  const [emailList, setEmailList] = useState('')
   const [anchorEl, setAnchorEl] = useState(null)
   const [role, setRole] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const theme = useTheme()
   const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
-  useEffect(() => {
-    console.log('Interval Unit:', intervalUnit)
-    console.log('Interval Value:', interval)
-    getIntervalLimits(intervalUnit)
-  }, [intervalUnit])
+
+
 
   useEffect(() => {
     const fetchMonitorData = async () => {
       try {
         const jwtToken = cookies.get('jwt-access')
-        console.log('JWT Token:', jwtToken)
         if (jwtToken) {
           const decodedToken = jwtDecode(jwtToken)
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/http/${params.id}`)
-        console.log(response.data)
-        setFriendlyName(response.data.monitor.name)
-        setHost(response.data.host)
-        setMethod(response.data.method)
-        setBody(response.data.body ? JSON.stringify(response.data.body) : '')
-        setHeaders(
-          response.data.headers ? JSON.stringify(response.data.headers) : ''
-        )
-        setAllowedStatusCodes(
-          response.data.allowedStatusCodes
+        values.name=response.data.monitor.name;
+        values.host= response.data.host;
+        values.method= response.data.method;
+        values.headers= response.data.headers.length > 0
+            ? JSON.stringify(response.data.headers)
+            : '';
+        values.body= response.data.body.length > 0
+            ? JSON.stringify(response.data.body)
+            : '';
+        values.allowedStatusCodes= response.data.allowedStatusCodes
             ? response.data.allowedStatusCodes.join(',')
-            : ''
-        )
-        setInterval(response.data.monitor.interval)
-        setIntervalUnit(response.data.monitor.intervalUnit)
-        setTimeout(response.data.timeOut)
+            : '';
+        values.interval= response.data.monitor.interval;
+        values.intervalUnit= response.data.monitor.intervalUnit;
+        values.timeOut = response.data.timeOut;
         setEmailList(response.data.monitor.alertContacts || [])
       } catch (error) {
         Swal.fire({
@@ -129,7 +114,6 @@ const NewMonitorPage = (update = false) => {
       console.log('JWT Token:', jwtToken)
       if (jwtToken) {
         const decodedToken = jwtDecode(jwtToken)
-        console.log('Decoded Token:', decodedToken)
         setRole(decodedToken.role)
       }
     }
@@ -137,17 +121,17 @@ const NewMonitorPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(interval >= 20 && interval < 60 ? interval : 20)
+        setInterval(values.interval >= 20 && values.interval < 60 ? values.interval : 20)
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(interval > 0 && interval < 60 ? interval : 0)
+        setInterval(values.interval > 0 && values.interval < 60 ? values.interval : 0)
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(interval > 0 && interval < 24 ? interval : 1)
+        setInterval(values.interval > 0 && values.interval < 24 ? values.interval : 1)
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -156,42 +140,20 @@ const NewMonitorPage = (update = false) => {
     }
   }
 
-  const createMonitor = async (values,actions) => {
+  const createMonitor = async (values, actions) => {
     try {
-      // const formattedData = {
-      //   name: friendlyName,
-      //   httpMonitor: {
-      //     host: host,
-      //     method: method,
-      //     body: body
-      //       ? typeof body === 'string'
-      //         ? JSON.parse(body)  
-      //         : body
-      //       : {},
-      //     headers: headers
-      //       ? typeof headers === 'string'
-      //         ? JSON.parse(headers)
-      //         : headers
-      //       : {},
-      //     allowedStatusCodes:
-      //       allowedStatusCodes.length > 0
-      //         ? [] //allowedStatusCodes.split(',').map((code) => code.trim())
-      //         : [],
-      //     timeOut: timeout,
-      //   },
-      //   interval: interval,
-      //   intervalUnit: intervalUnit,
-      // }
+      console.log(values.allowedStatusCodes.length)
+      console.log(values.allowedStatusCodes)
       const formattedData = {
         name: values.name,
         httpMonitor: {
           host: values.host,
           method: values.method,
-          body: JSON.parse(values.body),
-          headers: JSON.parse(values.headers),
+          body: values.body.length > 0 ? JSON.parse(values.body) : {},
+          headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
           allowedStatusCodes:
-            allowedStatusCodes.length > 0
-              ? allowedStatusCodes.split(',').map((code) => code.trim())
+            values.allowedStatusCodes.length > 0
+              ? values.allowedStatusCodes.split(",").map((code) => code.trim())
               : [],
           timeOut: values.timeOut,
         },
@@ -199,12 +161,10 @@ const NewMonitorPage = (update = false) => {
         intervalUnit: values.intervalUnit,
       }
       console.log(formattedData)
-      console.log('Role:', role)
       const response = await api.post(
         role === 'admin' ? `monitors/http/${userInfo.id}` : `monitors/http/`,
         formattedData
       )
-      console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
           title: 'İzleme Başarılı Şekilde Oluşturuldu',
@@ -226,35 +186,26 @@ const NewMonitorPage = (update = false) => {
   const updateMonitor = async (e) => {
     try {
       const formattedData = {
-        name: friendlyName,
+        name: values.name,
         httpMonitor: {
-          host: host,
-          method: method,
-          body: body
-            ? typeof body === 'string'
-              ? JSON.parse(body)
-              : body
-            : {},
-          headers: headers
-            ? typeof headers === 'string'
-              ? JSON.parse(headers)
-              : headers
-            : {},
+          host: values.host,
+          method: values.method,
+          body: values.body.length > 0 ? JSON.parse(values.body) : {},
+          headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
           allowedStatusCodes:
-            allowedStatusCodes.length > 0
-              ? allowedStatusCodes.split(',').map((code) => code.trim())
+            values.allowedStatusCodes.length > 0
+              ? values.allowedStatusCodes.split(',').map((code) => code.trim())
               : [],
-          timeOut: timeout,
+          timeOut: values.timeOut,
         },
-        interval: interval,
-        intervalUnit: intervalUnit,
+        interval: values.interval,
+        intervalUnit: values.intervalUnit,
       }
       console.log(formattedData)
       const response = await api.put(
         `monitors/http/${params.id}`,
         formattedData
       )
-      console.log('Response:', response.data)
       if (response.data) {
         Swal.fire({
           title: 'İzleme Başarılı Şekilde Güncellendi',
@@ -319,21 +270,28 @@ const NewMonitorPage = (update = false) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  const {values,errors,handleChange,handleSubmit}= useFormik({
-    initialValues:{
+  const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
+    isInitialValid: false,
+    initialValues: {
       name: '',
       host: '',
       method: 'GET',
       body: '',
       headers: '',
-      allowedStatusCodes:'',
+      allowedStatusCodes: '',
       timeOut: 30,
       interval: 5,
-      intervalUnit: 'minutes'
+      intervalUnit: 'minutes',
     },
     validationSchema: newHttpMonitorFormShhema,
-    onSubmit: createMonitor
-  });
+    onSubmit: update.update? updateMonitor: createMonitor,
+  })
+
+    useEffect(() => {
+    console.log('Interval Unit:', values.intervalUnit)
+    console.log('Interval Value:', values.interval)
+    getIntervalLimits(values.intervalUnit)
+  }, [values.intervalUnit])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -404,7 +362,7 @@ const NewMonitorPage = (update = false) => {
               },
             }}
           >
-            {update.update ? 'Monitoring Güncelle' : 'Monitoring ekle'}
+            {update.update ? 'Http(s) Monitor Güncelle' : 'Http(s) Monitor Ekle'}
           </Typography>
           <IconButton
             onClick={toggleSidebar}
@@ -446,7 +404,7 @@ const NewMonitorPage = (update = false) => {
             <Grid item md={12}>
               <Alert severity="info">
                 {monitorType === 'http'
-                  ? 'Web sitenizi, API uç noktanızı veya HTTP üzerinde çalışan herhangi bir şeyi izlemek için HTTP(S) izleyicisini kullanın.'
+                  ? "HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.rahatup.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar."
                   : monitorType === 'ping'
                   ? role === 'user'
                     ? navigate('/user/monitors/new/ping')
@@ -733,13 +691,12 @@ const NewMonitorPage = (update = false) => {
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='name'
+                  id="name"
                   required
                   fullWidth
                   InputProps={{
                     sx: {
                       height: 35,
-                      padding: 0,
                       fontSize: '0.8rem',
                     },
                   }}
@@ -751,7 +708,14 @@ const NewMonitorPage = (update = false) => {
                   label="Tanımlayıcı ad"
                   value={values.name}
                   onChange={handleChange}
-                  helperText={errors.name?(<Typography variant='p' style={{color:'red'}}>{errors.name}</Typography>):(<Typography variant='p' style={{color:'blue'}}></Typography>)}
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.name || ' '}
+                    </Typography>
+                  }
                 />
               </Grid>
             </Grid>
@@ -767,7 +731,7 @@ const NewMonitorPage = (update = false) => {
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='host'
+                  id="host"
                   required
                   fullWidth
                   InputProps={{
@@ -786,7 +750,12 @@ const NewMonitorPage = (update = false) => {
                   onChange={handleChange}
                   placeholder={'https://rahatup.com'}
                   helperText={
-                    (<Typography variant='p' color={'red'}>{errors.host}</Typography>)
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.host || ' '}
+                    </Typography>
                   }
                 />
               </Grid>
@@ -801,13 +770,14 @@ const NewMonitorPage = (update = false) => {
               padding={2}
               display={'flex'}
               flexDirection={'column'}
+              gap={1}
             >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
               </Grid>
               <Grid item md={12} gap={3} display={'flex'}>
                 <Grid item md={9}>
-                  <FormControl  fullWidth>
+                  <FormControl fullWidth>
                     <Slider
                       sx={{
                         color: '#1976d2',
@@ -824,7 +794,7 @@ const NewMonitorPage = (update = false) => {
                           height: 4,
                         },
                       }}
-                      id='interval' 
+                      id="interval"
                       name="interval"
                       value={values.interval}
                       onChange={handleChange}
@@ -837,13 +807,20 @@ const NewMonitorPage = (update = false) => {
                         { value: max, label: `${max}` }, // Max değeri etiketliyor
                       ]}
                     />
-                    <FormHelperText><Typography variant='p' color={'red'}>{errors.interval}</Typography></FormHelperText>
+                    <FormHelperText>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: 'red', minHeight: '1.5em' }}
+                      >
+                        {errors.interval}
+                      </Typography>
+                    </FormHelperText>
                   </FormControl>
                 </Grid>
                 <Grid item md={3}>
                   <FormControl fullWidth>
                     <Select
-                      id='intervalUnit'
+                      id="intervalUnit"
                       name="intervalUnit"
                       value={values.intervalUnit || 'dakika'}
                       onChange={handleChange}
@@ -872,19 +849,27 @@ const NewMonitorPage = (update = false) => {
               padding={2}
               display={'flex'}
               flexDirection={'column'}
+              gap={1}
             >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Method</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='method'
+                  id="method"
                   fullWidth
                   label="HTTP Metot"
                   select
                   defaultValue={update.update ? values.method : values.method}
                   onChange={handleChange}
-                  helperText={(<Typography variant='p' color={'red'}>{errors.method}</Typography>)}
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '2rem' }}
+                    >
+                      {errors.method}
+                    </Typography>
+                  }
                   InputProps={{
                     sx: {
                       fontSize: '0.8rem',
@@ -945,23 +930,32 @@ const NewMonitorPage = (update = false) => {
               padding={2}
               display={'flex'}
               flexDirection={'column'}
+              gap={1}
             >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Başlık</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='headers'
+                  id="headers"
                   fullWidth
                   label="Özel HTTP Başlıkları (JSON)"
                   multiline
                   rows={7}
-                  helperText={(<Typography variant='p' color={'red'}>{errors.headers}</Typography>)}
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.headers}
+                    </Typography>
+                  }
                   sx={{
                     mb: 2,
                   }}
                   name="headers"
-                  value={values.headers
+                  value={
+                    values.headers
                     /*typeof headers === 'object'
                       ? JSON.stringify(headers)
                       : headers*/
@@ -995,23 +989,31 @@ const NewMonitorPage = (update = false) => {
               padding={2}
               display={'flex'}
               flexDirection={'column'}
+              gap={1}
             >
               <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Gövde</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='body'
+                  id="body"
                   fullWidth
                   label="Özel HTTP Gövdesi (JSON)"
                   multiline
                   rows={7}
                   helperText={
-                    (<Typography variant='p' color={'red'}>{errors.body}</Typography>)
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.body}
+                    </Typography>
                   }
                   sx={{ mb: 2 }}
                   name="body"
-                  value={values.body/*typeof body === 'object' ? JSON.stringify(body) : body*/}
+                  value={
+                    values.body /*typeof body === 'object' ? JSON.stringify(body) : body*/
+                  }
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
@@ -1047,17 +1049,14 @@ const NewMonitorPage = (update = false) => {
               flexDirection={'column'}
             >
               <Grid item md={12} alignContent={'end'}>
-                <Typography gutterBottom>
-                  İstek Zaman Aşımı
-                </Typography>
+                <Typography gutterBottom>İstek Zaman Aşımı</Typography>
               </Grid>
               <Grid item md={12}>
                 <FormControl fullWidth>
                   <Select
-                    id='timeOut'
+                    id="timeOut"
                     value={values.timeOut}
                     onChange={handleChange}
-                    // label='Timeout'
                     sx={{
                       fontSize: '0.8rem',
                     }}
@@ -1081,7 +1080,14 @@ const NewMonitorPage = (update = false) => {
                       60 saniye
                     </MenuItem>
                   </Select>
-                  <FormHelperText><Typography variant='p' color={'red'}>{errors.timeOut}</Typography></FormHelperText>
+                  <FormHelperText>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.timeOut}
+                    </Typography>
+                  </FormHelperText>
                 </FormControl>
               </Grid>
             </Grid>
@@ -1093,13 +1099,11 @@ const NewMonitorPage = (update = false) => {
               flexDirection={'column'}
             >
               <Grid item md={12} alignContent={'end'}>
-                <Typography gutterBottom>
-                  İzin Verilen Durum Kodlar
-                </Typography>
+                <Typography gutterBottom>İzin Verilen Durum Kodlar</Typography>
               </Grid>
               <Grid item md={12}>
                 <TextField
-                  id='allowedStatusCodes'
+                  id="allowedStatusCodes"
                   required
                   fullWidth
                   InputProps={{
@@ -1115,15 +1119,20 @@ const NewMonitorPage = (update = false) => {
                   }}
                   label="İzin Verilen Status Kodları"
                   name="allowedStatusCodes"
-                  value={values.allowedStatusCodes
-                    // Array.isArray(allowedStatusCodes)
-                    //   ? allowedStatusCodes.join(',')
-                    //   : allowedStatusCodes
+                  value={
+                    values.allowedStatusCodes
                   }
                   onChange={handleChange}
                   variant="outlined"
                   size="small"
-                  helperText={(<Typography variant='p' color={'red'}>{errors.allowedStatusCodes}</Typography>)}
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.allowedStatusCodes || ' '}
+                    </Typography>
+                  }
                 />
               </Grid>
             </Grid>
@@ -1144,39 +1153,66 @@ const NewMonitorPage = (update = false) => {
                  </Box>
                </Grid>
             </Grid> */}
-            
-              <Grid item md={6} display={'flex'} justifyContent={'center'} alignContent={'center'} >
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    sx={{
-                      fontSize: '0.8rem',
-                      width: '7rem',
-                    }}
-                    onClick={() => turnMonitorPage()}
-                  >
-                    İptal
-                  </Button>
-                </Grid>
-                
-              </Grid>
-              <Grid item md={6} display={'flex'} alignContent={'center'} justifyContent={'center'}>
+
+            <Grid
+              item
+              md={6}
+              display={'flex'}
+              justifyContent={'center'}
+              alignContent={'center'}
+            >
+              <Grid item>
                 <Button
                   variant="contained"
-                  color="primary"
+                  color="secondary"
                   sx={{
                     fontSize: '0.8rem',
-                    width: '10rem'
+                    width: '8rem',
                   }}
-                  onClick={() => {
-                    update.update ? updateMonitor() : handleSubmit()
-                  }}
+                  onClick={() => turnMonitorPage()}
                 >
-                  {update.update ? 'İzleme Güncelle' : 'İzleme Oluştur'}
+                  İptal
                 </Button>
               </Grid>
-            
+            </Grid>
+            <Grid
+              item
+              md={6}
+              display={'flex'}
+              alignContent={'center'}
+              justifyContent={'center'}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  fontSize: '0.8rem',
+                  width: '12rem',
+                }}
+                onClick={() => {
+                  if(isValid){
+                    if (update.update) {
+                      handleSubmit()
+                    }
+                    else{
+                      handleSubmit()
+                    }
+                  }
+                  else{
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Hata',
+                      text: 'Lütfen Formu Tekrar Gözden Geçirin',
+                      confirmButtonText: 'Tamam'
+                    });
+                    handleSubmit()
+                  }
+                  
+                }}
+              >
+                {update.update ? 'Monitoring Güncelle' : 'Monitoring Oluştur'}
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
       </Box>
