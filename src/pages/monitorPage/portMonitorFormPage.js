@@ -251,7 +251,7 @@ const portMonitorFormPage = (update = false) => {
   }
  
 
-  const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
+  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue  } = useFormik({
       isInitialValid: false,
       initialValues: {
         name: '',
@@ -760,8 +760,9 @@ const portMonitorFormPage = (update = false) => {
                   <FormControl fullWidth>
                     <Select
                       id="timeOut"
+                      name="timeOut"
                       value={values.timeOut}
-                      onChange={handleChange}
+                      onChange={(e)=>setFieldValue('timeOut',e.target.value)}
                       sx={{
                         fontSize: '0.8rem',
                       }}

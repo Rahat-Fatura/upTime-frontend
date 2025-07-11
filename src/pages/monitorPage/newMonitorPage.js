@@ -80,15 +80,12 @@ const NewMonitorPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/http/${params.id}`)
+        console.log("body:",JSON.stringify(response.data.body))
         values.name=response.data.monitor.name;
         values.host= response.data.host;
         values.method= response.data.method;
-        values.headers= response.data.headers.length > 0
-            ? JSON.stringify(response.data.headers)
-            : '';
-        values.body= response.data.body.length > 0
-            ? JSON.stringify(response.data.body)
-            : '';
+        values.headers= JSON.stringify(response.data.headers);
+        values.body= JSON.stringify(response.data.body)
         values.allowedStatusCodes= response.data.allowedStatusCodes
             ? response.data.allowedStatusCodes.join(',')
             : '';
@@ -121,17 +118,17 @@ const NewMonitorPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(values.interval >= 20 && values.interval < 60 ? values.interval : 20)
+        values.interval = values.interval >= 20 && values.interval < 60 ? values.interval : 20;
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(values.interval > 0 && values.interval < 60 ? values.interval : 0)
+        values.interval = values.interval > 0 && values.interval < 60 ? values.interval : 1;
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(values.interval > 0 && values.interval < 24 ? values.interval : 1)
+        values.interval = values.interval > 0 && values.interval < 24 ? values.interval : 1;
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -270,7 +267,7 @@ const NewMonitorPage = (update = false) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
+  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } = useFormik({
     isInitialValid: false,
     initialValues: {
       name: '',
@@ -291,7 +288,7 @@ const NewMonitorPage = (update = false) => {
     console.log('Interval Unit:', values.intervalUnit)
     console.log('Interval Value:', values.interval)
     getIntervalLimits(values.intervalUnit)
-  }, [values.intervalUnit])
+    }, [values.intervalUnit])
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -404,7 +401,7 @@ const NewMonitorPage = (update = false) => {
             <Grid item md={12}>
               <Alert severity="info">
                 {monitorType === 'http'
-                  ? "HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.rahatup.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar."
+                  ? "HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.ornek.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar."
                   : monitorType === 'ping'
                   ? role === 'user'
                     ? navigate('/user/monitors/new/ping')
@@ -857,11 +854,12 @@ const NewMonitorPage = (update = false) => {
               <Grid item md={12}>
                 <TextField
                   id="method"
+                  name="method"
                   fullWidth
                   label="HTTP Metot"
                   select
-                  defaultValue={update.update ? values.method : values.method}
-                  onChange={handleChange}
+                  value={values.method}
+                  onChange={(e) => setFieldValue('method', e.target.value)}
                   helperText={
                     <Typography
                       variant="body2"
@@ -956,9 +954,6 @@ const NewMonitorPage = (update = false) => {
                   name="headers"
                   value={
                     values.headers
-                    /*typeof headers === 'object'
-                      ? JSON.stringify(headers)
-                      : headers*/
                   }
                   onChange={handleChange}
                   variant="outlined"
@@ -997,6 +992,7 @@ const NewMonitorPage = (update = false) => {
               <Grid item md={12}>
                 <TextField
                   id="body"
+                  name="body"
                   fullWidth
                   label="Özel HTTP Gövdesi (JSON)"
                   multiline
@@ -1010,11 +1006,10 @@ const NewMonitorPage = (update = false) => {
                     </Typography>
                   }
                   sx={{ mb: 2 }}
-                  name="body"
                   value={
-                    values.body /*typeof body === 'object' ? JSON.stringify(body) : body*/
+                    values.body
                   }
-                  onChange={handleChange}
+                  onChange={(e) => setFieldValue('body', e.target.value)}
                   variant="outlined"
                   size="small"
                   InputProps={{
@@ -1055,8 +1050,9 @@ const NewMonitorPage = (update = false) => {
                 <FormControl fullWidth>
                   <Select
                     id="timeOut"
+                    name="timeOut"
                     value={values.timeOut}
-                    onChange={handleChange}
+                    onChange={(e)=>setFieldValue('timeOut',e.target.value)}
                     sx={{
                       fontSize: '0.8rem',
                     }}

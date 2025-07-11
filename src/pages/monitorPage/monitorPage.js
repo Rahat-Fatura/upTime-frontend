@@ -86,7 +86,7 @@ export default function Dashboard() {
       { title: 'Belirsiz', value: uncertain.toString(), color: '#f5f102' },
       {
         title: 'Çalışan Yüzdesi',
-        value: avgActive ? avgActive.toString() + '%' : '0%',
+        value: avgActive ? avgActive.toString().substring(0,5) + '%' : '0%',
         color: '#ed6c02',
       },
     ]
@@ -337,7 +337,9 @@ export default function Dashboard() {
       headerName: 'Başarı Oranı',
       flex: 2,
       renderCell: (params) => {
-        const logs = params.row.logs.slice(-25) || []
+        let logs = params.row.logs.sort(function(a,b){return a.id-b.id})
+        console.log(logs)
+        logs = logs.slice(-25) || []
         const size = logs.length
         for (let i = size; i < 25; i++) {
           logs[i] = {
@@ -629,7 +631,7 @@ export default function Dashboard() {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
-                  borderRadius: '0.1%',
+                  borderRadius: '6%',
                   backgroundColor: '#ffff',
                 }}
               >
@@ -692,7 +694,7 @@ export default function Dashboard() {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
-                  borderRadius: '0.1%',
+                  borderRadius: '6%',
                   backgroundColor: '#ffff',
                 }}
               >
@@ -755,7 +757,7 @@ export default function Dashboard() {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
-                  borderRadius: '0.1%',
+                  borderRadius: '6%',
                   backgroundColor: '#ffff',
                 }}
               >
@@ -817,7 +819,7 @@ export default function Dashboard() {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
-                  borderRadius: '0.1%',
+                  borderRadius: '6%',
                   backgroundColor: '#ffff',
                 }}
               >
@@ -880,7 +882,7 @@ export default function Dashboard() {
                     transform: 'translateY(-5px)',
                   },
                   alignItems: 'center',
-                  borderRadius: '0.1%',
+                  borderRadius: '6%',
                   backgroundColor: '#ffff',
                 }}
               >

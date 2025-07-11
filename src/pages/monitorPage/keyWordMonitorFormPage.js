@@ -117,17 +117,17 @@ const keyWordMonitorPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(values.interval >= 20 && values.interval < 60 ? values.interval : 20)
+        values.interval=values.interval >= 20 && values.interval < 60 ? values.interval : 20
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(values.interval > 0 && values.interval < 60 ? values.interval : 0)
+        values.interval=values.interval > 0 && values.interval < 60 ? values.interval : 0
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(values.interval > 0 && values.interval < 24 ? values.interval : 1)
+        values.interval=values.interval > 0 && values.interval < 24 ? values.interval : 1;
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -294,7 +294,7 @@ const keyWordMonitorPage = (update = false) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-    const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
+    const { values, errors, isValid, handleChange, handleSubmit, setFieldValue  } = useFormik({
       isInitialValid: false,
       initialValues: {
         name: '',
@@ -891,7 +891,7 @@ const keyWordMonitorPage = (update = false) => {
                   label="HTTP Metot"
                   select
                   defaultValue={update.update ? values.method : values.method}
-                  onChange={handleChange}
+                  onChange={(e)=>setFieldValue("method",e.target.value)}
                   helperText={
                     <Typography
                       variant="body2"
@@ -1147,8 +1147,9 @@ const keyWordMonitorPage = (update = false) => {
                 <FormControl fullWidth>
                   <Select
                     id="timeOut"
+                    name="timeOut"
                     value={values.timeOut}
-                    onChange={handleChange}
+                    onChange={(e)=>setFieldValue('timeOut',e.target.value)}
                     sx={{
                       fontSize: '0.8rem',
                     }}

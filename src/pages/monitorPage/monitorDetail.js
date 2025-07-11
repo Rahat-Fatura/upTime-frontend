@@ -338,13 +338,13 @@ export default function MonitorDetail() {
   // İstatistik hesaplamaları
   const calculateStats = () => {
     if (!monitor?.logs) return {}
-
+    let logs = monitor.logs.sort(function(a,b){return a.id-b.id});
     const totalLogs = monitor.logs.length
     const upLogs = monitor.logs.filter((log) => log.status === 'up').length
     const downLogs = monitor.logs.filter((log) => log.status === 'down').length
     const uptime = totalLogs > 0 ? ((upLogs / totalLogs) * 100).toFixed(2) : 0
     const lastLogs =
-      monitor.logs.length > 250 ? monitor.logs.slice(-250) : monitor.logs
+      logs.length > 250 ? logs.slice(-250) : monitor.logs
     const avgResponseTime =
       lastLogs.reduce((sum, log) => sum + log.responseTime, 0) / lastLogs.length
     const maxResponseTime = Math.max(...lastLogs.map((log) => log.responseTime))
@@ -1547,7 +1547,7 @@ export default function MonitorDetail() {
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {monitor?.logs?.slice(0, 10).map((log) => (
+                          {monitor?.logs?.sort(function(a,b){return a.id-b.id})?.slice(-10).map((log) => (
                             <TableRow key={log.id} hover>
                               <TableCell sx={{ fontSize: '0.8rem' }}>
                                 {formatDate(log.createdAt)}

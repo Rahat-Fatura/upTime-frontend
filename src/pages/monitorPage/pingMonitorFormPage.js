@@ -468,7 +468,7 @@ const pingMonitorFormPage = (update = false) => {
                             width: '100%',
                             //bgcolor: 'white',
                           }}
-                        >
+                        > 
                           <Box
                             sx={{
                               bgcolor: '#3f51b5',

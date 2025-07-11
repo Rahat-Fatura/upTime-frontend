@@ -298,7 +298,7 @@ export const newPortMonitorFormShhema = yup.object().shape({
       const hostnameRegex = /^(?=.{1,253}$)(?!\-)([a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/;
       const ipRegex =
         /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
-      return ipRegex.test(value) || hostnameRegex.test(value)
+      return (ipRegex.test(value) || hostnameRegex.test(value))
     })
     .required('Host alanı zorunludur !'),
   port: yup
