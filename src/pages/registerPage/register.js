@@ -38,7 +38,7 @@ const Register = () => {
         Swal.fire({
           title: 'Kayıt İşlemi',
           icon: 'success',
-          text: 'Başarıyla kayıt oldunuz.',
+          text: 'Başarıyla kayıt oldunuz. Lütfen mail hesabınıza gelecek olan doğrulama bağlantısına tıklayarak mailnizi doğrulayın !',
           confirmButtonText: 'Tamam',
         })
         navigate('/login')

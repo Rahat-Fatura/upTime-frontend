@@ -233,7 +233,68 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
         return true
       }
     }),
-  keyWord: yup.string().required('Anahtar Kelime Alanı Boş Olamaz !'),
+  keyWordType: yup
+    .string()
+    .oneOf(['txt', 'html', 'json'], 'Geçersiz Tip !')
+    .required('Anahtar tip alanı zorunludur !'),
+  keyWord: yup
+    .string()
+    .when('keyWordType', (type, schema) => {
+      console.log("Type ",type[0])
+      switch (type[0]) {
+        case 'txt': {
+          console.log('Txt a geldi:',schema)
+          return schema
+            .min(1, 'Anahtar Kelime Alanı Boş Olamaz !')
+            .required('Anahtar Kelime Alanı Boş Olamaz !')
+        }
+        case 'html': {
+          console.log('Html a geldi:',schema)
+          return schema.test(
+            'is-html',
+            'HTML tipi için geçerli bir HTML etiketi girin',
+            (value) => {
+              
+                if (value) {
+                  const regex = /^<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*>[\s\S]*<\/\1>$/;
+                  return regex.test(value.trim());
+                } else {
+                  return true
+                }
+            }
+          ).required('Anahtar Kelime Alanı Boş Olamaz !')
+        }
+        case 'json': {
+          console.log('Json a geldi:',schema)
+          return schema.test(
+            'is-json',
+            'Anahtar Kelime Json Formatında Değil !',
+            (value) => {
+              try {
+                if (value.length > 0) {
+                  try {
+                    let duzeltilmis = value.replace( 
+                      /([{,]\s*)(\w+)\s*:/g,
+                      '$1"$2":'
+                    )
+                    JSON.parse(duzeltilmis)
+                    return true
+                  } catch (error) {
+                    return false
+                  }
+                }
+              } catch (error) {
+                console.log(error)
+                return true
+              }
+            }
+          ).required('Anahtar Kelime Alanı Boş Olamaz !')
+        }
+        default: {
+          return schema
+        }
+      }
+    }),
   timeOut: yup
     .number()
     .test('check-timeoutvalue', 'Hatalı Değer', (value) =>
@@ -272,7 +333,8 @@ export const newPingMonitorFormShhema = yup.object().shape({
   host: yup
     .string()
     .test('', 'Geçerli bir IP veya URL adresi girin.', (value) => {
-      const hostnameRegex = /^(?=.{1,253}$)(?!\-)([a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/;
+      const hostnameRegex =
+        /^(?=.{1,253}$)(?!\-)([a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/
       const ipRegex =
         /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
       return ipRegex.test(value) || hostnameRegex.test(value)
@@ -291,23 +353,27 @@ export const newPortMonitorFormShhema = yup.object().shape({
     .string()
     .test('', 'Geçerli bir IP veya URL adresi girin.', (value) => {
       try {
-        new URL(value);
-        return true;
-      } catch (e) {
-      }
-      const hostnameRegex = /^(?=.{1,253}$)(?!\-)([a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/;
+        new URL(value)
+        return true
+      } catch (e) {}
+      const hostnameRegex =
+        /^(?=.{1,253}$)(?!\-)([a-zA-Z0-9\-]{1,63}\.)+[a-zA-Z]{2,}$/
       const ipRegex =
         /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
-      return (ipRegex.test(value) || hostnameRegex.test(value))
+      return ipRegex.test(value) || hostnameRegex.test(value)
     })
     .required('Host alanı zorunludur !'),
   port: yup
-  .string()
-  .required("Port girilmelidir.")
-  .test("is-valid-port", "Geçerli bir port numarası girin (0-65535).", value => {
-    const port = Number(value);
-    return Number.isInteger(port) && port >= 0 && port <= 65535;
-  }),
+    .string()
+    .required('Port girilmelidir.')
+    .test(
+      'is-valid-port',
+      'Geçerli bir port numarası girin (0-65535).',
+      (value) => {
+        const port = Number(value)
+        return Number.isInteger(port) && port >= 0 && port <= 65535
+      }
+    ),
   interval: yup.number().required('İstek zaman birimi zorunludur!'),
   intervalUnit: yup
     .string()
@@ -318,12 +384,16 @@ export const newPortMonitorFormShhema = yup.object().shape({
 export const newCronJobMonitorFormShhema = yup.object().shape({
   name: yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
   divitionTime: yup
-  .string()
-  .required("Sapma zamanı girilmelidir.")
-  .test("is-valid-divition-time", "Sapma zamanı dakika cinsinden girin (0-59).", value => {
-    const time = Number(value);
-    return Number.isInteger(time) && time >= 0 && time <= 59;
-  }),
+    .string()
+    .required('Sapma zamanı girilmelidir.')
+    .test(
+      'is-valid-divition-time',
+      'Sapma zamanı dakika cinsinden girin (0-59).',
+      (value) => {
+        const time = Number(value)
+        return Number.isInteger(time) && time >= 0 && time <= 59
+      }
+    ),
   interval: yup.number().required('İstek zaman birimi zorunludur!'),
   intervalUnit: yup
     .string()

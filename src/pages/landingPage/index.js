@@ -157,7 +157,6 @@ const LandingPage = () => {
   }
 
   const handlContactUser = async(values,action) =>{
-    console.log('Hello0000 ')
      try{
       console.log("Burdaaaa")
         const response = await api.post('users/landing',{
@@ -370,6 +369,9 @@ const LandingPage = () => {
                 />
               </motion.div>
 
+              
+            </Grid>
+            {/* <Grid display={'flex'} justifyContent={'center'}>
               <motion.div
                 initial={{ y: 0 }}
                 animate={{ y: [0, 15, 0] }} // yukarı → aşağı → yukarı
@@ -387,16 +389,17 @@ const LandingPage = () => {
                   sx={{
                     width: { xs: 40, sm: 40, md: 50, lg: 70 , xl: 80 },
                     height: { xs: 40, sm: 40, md: 50, lg: 70 , xl: 80 },
-                    ml:{ xs: '50%', sm: '50%', md: '0', lg: '0', xl: '0' },
-                    mr:{xs: 0, sm: 0, md: 5, lg: 10, xl: 5 },
-                    mb: { xs: 3, sm: 3, md: 5, lg: 7},
+                    //ml:{ xs: '50%', sm: '50%', md: '0', lg: '0', xl: '0' },
+                   // mr:{xs: 0, sm: 0, md: 5, lg:'50%', xl: 15 },
+                    mb: { xs: 3, sm: 3, md: 5},
                     borderRadius: '50%',
                     background: '#e8e9ff',
                     mx: 'auto',
                   }}
                 />
-              </motion.div>
-            </Grid>
+            </motion.div>
+            </Grid> */}
+            
           </Grid>
         </Container>
       </Box>
@@ -700,7 +703,7 @@ const LandingPage = () => {
             </IconButton>
           </Box>
           <List>
-            {['features', 'pricing', 'contact'].map((item) => (
+            {['özellikler', 'fiyatlandırma', 'iletişim'].map((item) => (
               <ListItem key={item} button onClick={() => scrollToSection(item)}>
                 <ListItemText
                   primary={item.charAt(0).toUpperCase() + item.slice(1)}

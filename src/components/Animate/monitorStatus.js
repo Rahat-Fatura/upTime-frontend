@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Typography, Box } from '@mui/material'
 
 const MonitorStatus = ({ sx, status }) => {
-    console.log("Status",status)
   let color;
   let pulseColor;
   let text;

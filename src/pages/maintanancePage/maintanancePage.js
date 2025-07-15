@@ -461,7 +461,7 @@ export default function MaintanancePage() {
                         xlg: '1rem',
                       },
                       ':hover': {
-                        color: 'primary.main',
+                        bgcolor: 'primary.dark',
                       },
                     }}
                     onClick={() => navigate('/user/monitors/new/http')}

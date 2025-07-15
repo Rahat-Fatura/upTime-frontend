@@ -1064,7 +1064,7 @@ export default function MonitorDetail() {
                                 sx={{ m: 0, p: 2 }}
                                 id="customized-dialog-title"
                               >
-                                Kontrol Edilen Obje
+                                Kontrol Edilen Kelime
                               </DialogTitle>
 
                               <DialogContent dividers>
@@ -1277,7 +1277,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.9rem' }}
                             >
-                              {monitor.cronJobMonitor.lastRequestTime.split("T")[0]}
+                              {monitor.cronJobMonitor.lastRequestTime?.split("T")[0]  }
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
@@ -1293,7 +1293,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.9rem' }}
                             >
-                              {monitor.cronJobMonitor.lastRequestTime.split("T")[1].split(".")[0]}
+                              {monitor.cronJobMonitor.lastRequestTime?.split("T")[1].split(".")[0]}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -1304,7 +1304,7 @@ export default function MonitorDetail() {
               )}
 
               {/* Response Time İstatistikleri */}
-              <Grid item md={12}>
+              {!monitor.cronJobMonitor && (<Grid item md={12}>
                 <Card sx={{bgcolor: 'white'}}>
                   <CardContent>
                     <Typography
@@ -1401,7 +1401,7 @@ export default function MonitorDetail() {
                     <ResponseTimeLineChart logs={monitor?.logs} />
                   </CardContent>
                 </Card>
-              </Grid>
+              </Grid>)}
 
               {/* İstatistikler */}
               <Grid item md={12}>

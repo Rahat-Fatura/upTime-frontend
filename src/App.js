@@ -71,12 +71,21 @@ function AppRoutes() {
   useEffect(() => {
     const checkAuth = async () => {
       const jwtToken = cookies.get("jwt-access");
-      if (jwtToken) {
+      if (jwtToken && !location.pathname.includes("/verify-email")) {
         const decodedToken = jwtDecode(jwtToken);
         const userRole = decodedToken.role;
-        if (userRole === "admin" && !location.pathname.startsWith("/admin")) {
+        if (
+          userRole === "admin" && !location.pathname.startsWith("/admin")
+        ) {
           navigate("/admin");
-        } else if (
+        }
+        else if (
+          userRole === "user" &&
+          !location.pathname.startsWith("/user")
+        ) {
+          navigate("/user");
+        }
+        else if (
           userRole === "user" &&
           location.pathname.startsWith("/admin")
         ) {
@@ -84,7 +93,7 @@ function AppRoutes() {
         }
       } else if (!jwtToken) {
         if (
-          !["/register", "/forgot-password", "/reset-password", "/login", "/"].includes(
+          !["/register", "/forgot-password", "/reset-password", "/login","/verify-email", "/"].includes(
             location.pathname
           ) 
         ) {
@@ -102,7 +111,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/">
         <Route
           index
           element={
@@ -116,7 +124,7 @@ function AppRoutes() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/user/profile" element={<ProfilePage />} />
-
+        <Route path="/user/verify-email" element={<VerifyEmailPage />} />
         <Route path="/user/gridPage" element={<GridPage />} />
 
         <Route path="/admin" element={<AdminUsers />} />
@@ -176,7 +184,7 @@ function AppRoutes() {
 
 
 
-
+        <Route path="/user/" element={<Dashboard />} />
         <Route path="/user/monitors" element={<Dashboard />} />
         <Route path="/user/monitors/:id/detail" element={<MonitorDetail/>} />
         <Route path="/user/monitors/new/http" element={<NewMonitorPage />} />
@@ -229,7 +237,7 @@ function AppRoutes() {
         <Route path="/user/teamMembers" element={<TeamMembersPage />} />
         <Route path="/user/integrationsApi" element={<IntegrationsPage />} />
         <Route path="*" element={<NotFound />} />
-      </Route>
+      
     </Routes>
   )
 }

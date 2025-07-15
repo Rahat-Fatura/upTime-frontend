@@ -83,6 +83,7 @@ const keyWordMonitorPage = (update = false) => {
         values.body= response.data.body.length > 0
             ? JSON.stringify(response.data.body)
             : '';
+        values.keyWordType = response.data.keyWordType || 'txt';
         values.keyWord = response.data.keyWord;
         values.allowedStatusCodes= response.data.allowedStatusCodes
             ? response.data.allowedStatusCodes.join(',')
@@ -136,7 +137,7 @@ const keyWordMonitorPage = (update = false) => {
     }
   }
 
-  const createMonitor = async (e) => {
+  const createMonitor = async (values, actions) => {
     try {
       const formattedData = {
         name: values.name,
@@ -145,6 +146,7 @@ const keyWordMonitorPage = (update = false) => {
           method: values.method,
           body: values.body.length > 0 ? JSON.parse(values.body) : {},
           headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
+          keyWordType: values.keyWordType,
           keyWord: values.keyWord,
           allowedStatusCodes:
             values.allowedStatusCodes.length > 0
@@ -181,7 +183,7 @@ const keyWordMonitorPage = (update = false) => {
     }
   }
 
-  const updateMonitor = async (e) => {
+  const updateMonitor = async (values, actions) => {
     try {
       // const formattedData = {
       //   name: friendlyName,
@@ -215,6 +217,7 @@ const keyWordMonitorPage = (update = false) => {
           method: values.method,
           body: values.body.length > 0 ? JSON.parse(values.body) : {},
           headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
+          keyWordType: values.keyWordType,
           keyWord: values.keyWord,
           allowedStatusCodes:
             values.allowedStatusCodes.length > 0
@@ -303,6 +306,7 @@ const keyWordMonitorPage = (update = false) => {
         body: '',
         headers: '',
         keyWord: '',
+        keyWordType: 'txt',
         allowedStatusCodes: '',
         timeOut: 30,
         interval: 5,
@@ -684,7 +688,7 @@ const keyWordMonitorPage = (update = false) => {
                           <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle1" fontWeight="500">
+                          <Typography variant="subtitle2" fontWeight="500">
                             CRON JOB
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -887,10 +891,11 @@ const keyWordMonitorPage = (update = false) => {
               <Grid item md={12}>
                 <TextField
                   id="method"
+                  name="method"
                   fullWidth
                   label="HTTP Metot"
                   select
-                  defaultValue={update.update ? values.method : values.method}
+                  value={values.method}
                   onChange={(e)=>setFieldValue("method",e.target.value)}
                   helperText={
                     <Typography
@@ -987,11 +992,8 @@ const keyWordMonitorPage = (update = false) => {
                   name="headers"
                   value={
                     values.headers
-                    /*typeof headers === 'object'
-                      ? JSON.stringify(headers)
-                      : headers*/
                   }
-                  onChange={handleChange}
+                  onChange={(e)=>setFieldValue('headers',e.target.value)}
                   variant="outlined"
                   size="small"
                   InputProps={{
@@ -1043,9 +1045,9 @@ const keyWordMonitorPage = (update = false) => {
                   sx={{ mb: 0 }}
                   name="body"
                   value={
-                    values.body /*typeof body === 'object' ? JSON.stringify(body) : body*/
+                    values.body
                   }
-                  onChange={handleChange}
+                  onChange={(e)=>setFieldValue('body',e.target.value)}
                   variant="outlined"
                   size="small"
                   InputProps={{
@@ -1068,14 +1070,18 @@ const keyWordMonitorPage = (update = false) => {
                 />
               </Grid>
             </Grid>
-            <Grid item md={6}>
-              <Grid
-                item
-                md={12}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-                gap={1}
+            
+          </Grid> </Grid> 
+          <Divider />
+          {/*Beşinci satır*/}
+          <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+              gap={1}
             >
               <Grid item md={12} alignContent={'end'} >
                 <Typography gutterBottom>Anahtar Kelime</Typography>
@@ -1084,9 +1090,9 @@ const keyWordMonitorPage = (update = false) => {
                 <TextField
                   id="keyWord"
                   fullWidth
-                  label="JSON VEYA HTML"
+                  label="TXT/HTML/JSON"
                   multiline
-                  rows={9}
+                  rows={3}
                   helperText={
                     <Typography
                       variant="body2"
@@ -1095,14 +1101,11 @@ const keyWordMonitorPage = (update = false) => {
                       {errors.keyWord}
                     </Typography>
                   }
-                  sx={{
-                    mb: 0,
-                  }}
                   name="keyWord"
                   value={
                     values.keyWord
                   }
-                  onChange={handleChange}
+                  onChange={(e)=>setFieldValue('keyWord',e.target.value)}
                   variant="outlined"
                   size="small"
                   InputProps={{
@@ -1124,12 +1127,68 @@ const keyWordMonitorPage = (update = false) => {
                   }}
                 />
               </Grid>
-          </Grid>
             </Grid>
-          </Grid> 
-          {/*Beşinci satır*/}
-          
-          </Grid>   
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
+              <Grid item md={12} alignContent={'start'}>
+                <Typography gutterBottom>Anahtar Kelime Tipi</Typography>
+              </Grid>
+              <Grid item md={12}>
+                <TextField
+                  id="keyWordType"
+                  name="keyWordType"
+                  fullWidth
+                  select
+                  label="Anahtar Tipi"
+                  sx={{pb:3.1}}
+                  value={values.keyWordType}
+                  onChange={(e)=>setFieldValue("keyWordType",e.target.value)}
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '2rem' }}
+                    >
+                      {errors.keyWordType}
+                    </Typography>
+                  }
+                  InputProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                >
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="txt"
+                  >
+                    TXT
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="html"
+                  >
+                    HTML
+                  </MenuItem>
+                  <MenuItem
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
+                    value="json"
+                  >
+                    JSON
+                  </MenuItem>
+                </TextField>
+              </Grid>
+            </Grid>
+          </Grid>
           <Divider />
           {/*Altıncı satır*/}
           <Grid item md={12} display={'flex'}>
@@ -1230,8 +1289,7 @@ const keyWordMonitorPage = (update = false) => {
               </Grid>
             </Grid>
           </Grid>
-          <Divider />
-          
+          <Divider />    
           {/*Yedinci satır*/}
           <Grid item md={12} display={'flex'} mt={2} mb={2}>
             {/* <Grid item md={6} display={'flex'} flexDirection={'column'}>

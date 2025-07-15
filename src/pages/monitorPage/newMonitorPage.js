@@ -651,7 +651,7 @@ const NewMonitorPage = (update = false) => {
                           <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="subtitle1" fontWeight="500">
+                          <Typography variant="subtitle2" fontWeight="500">
                             CRON JOB
                           </Typography>
                           <Typography variant="body2" color="text.secondary">

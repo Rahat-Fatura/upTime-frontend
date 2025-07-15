@@ -4,6 +4,8 @@ import api from '../../api/auth/axiosInstance'
 import BuildIcon from '@mui/icons-material/Build'
 import Swal from 'sweetalert2'
 import MenuButton from '../../components/menuButton/index.js'
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import {
   Typography,
   IconButton,
@@ -19,6 +21,8 @@ import {
   TextField,
   InputAdornment,
   useTheme,
+  Checkbox,
+  Icon,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -31,6 +35,7 @@ import {
   Search as SearchIcon,
   Menu as MenuIcon,
   Visibility,
+  AttractionsOutlined,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit } from 'tabler-icons-react'
@@ -40,6 +45,8 @@ import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
 import MonitorStatus from '../../components/Animate/monitorStatus.js'
 import localStorage from 'local-storage'
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -54,6 +61,11 @@ const initialFormData = {
   isActiveByOwner: true,
 }
 
+
+
+
+
+
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(false)
   const [monitors, setMonitors] = useState([])
@@ -61,9 +73,100 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
+  const [selectMonitors, setSelectMonitors] = useState([]);
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
+
+  function PositionedMenu() {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <div>
+      <Button
+        id="demo-positioned-button"
+        aria-controls={open ? 'demo-positioned-menu' : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? 'true' : undefined}
+        onClick={handleClick}
+        startIcon={<AttractionsOutlined fontSize='small'/>}
+        sx={{
+          height: '1.8rem',
+          border: 'solid 0.1px gray',
+          color: 'black',
+          fontSize: '0.8rem',
+          borderRadius: '7%',
+          paddingBottom: 1
+        }}
+      >
+        Toplu işlemler
+      </Button>
+      <Menu
+        id="demo-positioned-menu"
+        aria-labelledby="demo-positioned-button"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+       sx={{
+        width: '50rem',
+        marginTop:4,
+        padding:0,
+        '& .MuiTypography-root':{fontSize: '0.8rem'}
+      }}
+      >
+        <MenuItem  sx={{
+          
+          borderBottom:'solid 0.1px gray',
+          height: '1.8rem',
+        }} onClick={handleClose}>
+          <ListItemIcon>
+            <PauseIcon fontSize='small'/>
+          </ListItemIcon>
+          <ListItemText sx={{'& .MuiTypography-root':{color:'secondary'}}}>
+              Durdur
+          </ListItemText>
+        </MenuItem>
+        
+        <MenuItem  sx={{
+          height: '1.8rem',
+          fontSize: '0.8rem',
+          borderBottom:'solid 0.1px gray'
+        }} onClick={handleClose}><ListItemIcon>
+            <PlayArrowIcon fontSize='small'/>
+          </ListItemIcon>
+          <ListItemText sx={{'& .MuiTypography-root':{color:'primary'}}}>
+              Çalıştır
+          </ListItemText></MenuItem>
+        
+        <MenuItem  sx={{
+          height: '1.8rem',
+          fontSize: '0.8rem'
+        }} onClick={handleClose}><ListItemIcon>
+            <DeleteIcon fontSize='small'/>
+          </ListItemIcon>
+          <ListItemText sx={{'& .MuiTypography-root':{color:'error'}}}>
+              Sil
+          </ListItemText></MenuItem>
+        
+      </Menu>
+    </div>
+  );
+}
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
@@ -83,11 +186,11 @@ export default function Dashboard() {
       { title: 'Toplam', value: total.toString(), color: '#1976d2' },
       { title: 'Çalışan', value: active.toString(), color: '#2e7d32' },
       { title: 'Çalışmayan', value: down.toString(), color: '#d32f2f' },
-      { title: 'Belirsiz', value: uncertain.toString(), color: '#f5f102' },
+      { title: 'Belirsiz', value: uncertain.toString(), color: '#ed6c02' },
       {
         title: 'Çalışan Yüzdesi',
         value: avgActive ? avgActive.toString().substring(0,5) + '%' : '0%',
-        color: '#ed6c02',
+        color: '#1976d2',
       },
     ]
   }
@@ -102,7 +205,6 @@ export default function Dashboard() {
         const response = await api.get(`monitors/`)
         if (response.data) {
           setMonitors(response.data)
-          console.log(response.data)
         }
       } catch (error) {
         console.error('Monitör verileri alınırken hata oluştu:', error)
@@ -110,10 +212,22 @@ export default function Dashboard() {
       }
     }
 
-    const interval = setInterval(fetchMonitors, 20000)
+    const interval = setInterval(fetchMonitors, 100000)
     fetchMonitors()
     return () => clearInterval(interval)
   }, [])
+
+  
+  const handleSelectMonitors = (id) =>{
+    let tempMonitors= selectMonitors;
+    if(!selectMonitors.includes(id)){
+      tempMonitors.push(id);
+    }
+    else{
+      tempMonitors = selectMonitors.filter(item => id!==item )
+    }
+    setSelectMonitors(tempMonitors);
+  }
 
   useEffect(() => {
     if (!monitors || monitors.length === 0) {
@@ -177,8 +291,22 @@ export default function Dashboard() {
 
   const columns = [
     {
+      field: 'select',
+      headerName: '',
+      disableColumnFilter: true,
+      sortable: true,
+      flex: 0.5,
+      renderCell: (params)=>{
+        return(
+          <Checkbox size='small' onChange={()=>handleSelectMonitors(params.id)}/>
+        )
+      }
+    },
+    {
       field: 'status',
       headerName: '',
+      disableColumnMenu: true,
+      sortable: false,
       flex: 0.5,
       renderCell: (params) => {
         return (
@@ -189,16 +317,16 @@ export default function Dashboard() {
         )
       },
     },
-    /* {
+     {
       field: 'name',
       headerName: 'Adı',
-      flex: 2,
+      flex: 1.5,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1, margin: '5' }}>
           <Typography>{params.value}</Typography>
         </Box>
       ),
-    },*/
+    },
     {
       field: 'host',
       headerName: 'Host',
@@ -317,6 +445,8 @@ export default function Dashboard() {
     {
       field: 'detail',
       headerName: '',
+      disableColumnMenu: true,
+      sortable: false,
       flex: 0.5,
       renderCell: (params) => {
         return (
@@ -334,11 +464,12 @@ export default function Dashboard() {
     },
     {
       field: 'logs',
+      disableColumnMenu: true,
+      sortable: false,
       headerName: 'Başarı Oranı',
       flex: 2,
       renderCell: (params) => {
         let logs = params.row.logs.sort(function(a,b){return a.id-b.id})
-        console.log(logs)
         logs = logs.slice(-25) || []
         const size = logs.length
         for (let i = size; i < 25; i++) {
@@ -415,85 +546,87 @@ export default function Dashboard() {
         )
       },
     },
-    {
-      field: 'succesRate',
-      headerName: '',
-      flex: 0.5,
-      renderCell: (params) => {
-        const logsRate = params.row.logs || []
-        const total = logsRate.length
-        const successCount = logsRate.filter(
-          (log) => log.status === 'up'
-        ).length
-        const errorCount = logsRate.filter(
-          (log) => log.status === 'down' || log.isError
-        ).length
-        const lastLog = logsRate[logsRate.length - 1]
-        const rate = total > 0 ? Math.round((successCount / total) * 100) : 0
-        return (
-          <Tooltip
-            title={
-              <Box>
-                <Typography fontWeight={600} fontSize={15} mb={1}>
-                  Log Detayları
-                </Typography>
-                <Typography fontSize={13}>Toplam Log: {total}</Typography>
-                <Typography fontSize={13}>Başarılı: {successCount}</Typography>
-                <Typography fontSize={13}>Hatalı: {errorCount}</Typography>
-                {lastLog && (
-                  <Box mt={1}>
-                    <Typography fontSize={13} fontWeight={600}>
-                      Son Log
-                    </Typography>
-                    <Typography fontSize={12}>
-                      Durum:{' '}
-                      {lastLog.status === 'up'
-                        ? 'Başarılı'
-                        : lastLog.status === 'down'
-                        ? 'Başarısız'
-                        : 'Belirsiz'}
-                    </Typography>
-                    <Typography fontSize={12}>
-                      Yanıt Süresi: {lastLog?.responseTime} ms
-                    </Typography>
-                    <Typography fontSize={12}>
-                      Tarih: {String(lastLog?.createdAt).split('T')[0] || ''}
-                    </Typography>
-                    <Typography fontSize={12}>
-                      Saat:{' '}
-                      {String(lastLog?.createdAt).split('T')[1].split('.')[0] ||
-                        ''}
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            }
-            arrow
-            placement="top"
-          >
-            <Box sx={{ width: '100%', textAlign: 'center', cursor: 'pointer' }}>
-              <Typography
-                variant="caption"
-                color={
-                  rate >= 80
-                    ? 'success.main'
-                    : rate >= 50
-                    ? 'warning.main'
-                    : 'error.main'
-                }
-                fontWeight={600}
-                fontSize={{ xs: '0.5rem', sm: '0.8rem' }}
-              >
-                %{rate}
-              </Typography>
-            </Box>
-          </Tooltip>
-        )
-      },
-    },
+    // {
+    //   field: 'succesRate',
+    //   headerName: '',
+    //   flex: 0.5,
+    //   renderCell: (params) => {
+    //     const logsRate = params.row.logs || []
+    //     const total = logsRate.length
+    //     const successCount = logsRate.filter(
+    //       (log) => log.status === 'up'
+    //     ).length
+    //     const errorCount = logsRate.filter(
+    //       (log) => log.status === 'down' || log.isError
+    //     ).length
+    //     const lastLog = logsRate[logsRate.length - 1]
+    //     const rate = total > 0 ? Math.round((successCount / total) * 100) : 0
+    //     return (
+    //       <Tooltip
+    //         title={
+    //           <Box>
+    //             <Typography fontWeight={600} fontSize={15} mb={1}>
+    //               Log Detayları
+    //             </Typography>
+    //             <Typography fontSize={13}>Toplam Log: {total}</Typography>
+    //             <Typography fontSize={13}>Başarılı: {successCount}</Typography>
+    //             <Typography fontSize={13}>Hatalı: {errorCount}</Typography>
+    //             {lastLog && (
+    //               <Box mt={1}>
+    //                 <Typography fontSize={13} fontWeight={600}>
+    //                   Son Log
+    //                 </Typography>
+    //                 <Typography fontSize={12}>
+    //                   Durum:{' '}
+    //                   {lastLog.status === 'up'
+    //                     ? 'Başarılı'
+    //                     : lastLog.status === 'down'
+    //                     ? 'Başarısız'
+    //                     : 'Belirsiz'}
+    //                 </Typography>
+    //                 <Typography fontSize={12}>
+    //                   Yanıt Süresi: {lastLog?.responseTime} ms
+    //                 </Typography>
+    //                 <Typography fontSize={12}>
+    //                   Tarih: {String(lastLog?.createdAt).split('T')[0] || ''}
+    //                 </Typography>
+    //                 <Typography fontSize={12}>
+    //                   Saat:{' '}
+    //                   {String(lastLog?.createdAt).split('T')[1].split('.')[0] ||
+    //                     ''}
+    //                 </Typography>
+    //               </Box>
+    //             )}
+    //           </Box>
+    //         }
+    //         arrow
+    //         placement="top"
+    //       >
+    //         <Box sx={{ width: '100%', textAlign: 'center', cursor: 'pointer' }}>
+    //           <Typography
+    //             variant="caption"
+    //             color={
+    //               rate >= 80
+    //                 ? 'success.main'
+    //                 : rate >= 50
+    //                 ? 'warning.main'
+    //                 : 'error.main'
+    //             }
+    //             fontWeight={600}
+    //             fontSize={{ xs: '0.5rem', sm: '0.8rem' }}
+    //           >
+    //             %{rate}
+    //           </Typography>
+    //         </Box>
+    //       </Tooltip>
+    //     )
+    //   },
+    // },
     {
       field: 'edit',
       headerName: 'İşlemler',
+      disableColumnMenu: true,
+      sortable: false,
       flex: 1,
       renderCell: (params) => (
         <MenuButton
@@ -982,7 +1115,7 @@ export default function Dashboard() {
             </Box>
             <Divider sx={{ mb: 2 }} />
 
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
               <TextField
                 //size='small'
                 placeholder="Monitoring adı veya host ile arama yapın..."
@@ -1015,6 +1148,8 @@ export default function Dashboard() {
                   },
                 }}
               />
+
+              <PositionedMenu/>
             </Box>
 
             <DataGrid
@@ -1022,9 +1157,23 @@ export default function Dashboard() {
               columns={columns}
               pageSizeOptions={[5, 10, 25]}
               rowHeight={38}
+              
               autoHeight
               disableRowSelectionOnClick
               localeText={{
+                columnMenuSortAsc: 'Artan sırada sırala',
+                columnMenuSortDesc: 'Azalan sırada sırala',
+                columnMenuUnsort: 'Sıralamayı kaldır',
+                columnMenuHideColumn: 'Sütunu gizle',
+                columnMenuFilter: 'none',
+                columnMenuManageColumns: 'Sütunları yönet',
+                columnsManagementSearchTitle: 'Ara',
+                columnsManagementShowHideAllText: 'Göster/Hepsini Gizle',
+                columnsManagementReset: 'Yinele',
+                sortAscending: 'Artan sırala',
+                sortDescending: 'Azalan sırala',
+                noRowsLabel: 'Veri bulunamadı',
+                
                 MuiTablePagination: {
                   fontSize: {
                     xs: '0.3rem',
@@ -1088,6 +1237,7 @@ export default function Dashboard() {
                   fontWeight: 'bold',
                 },
               }}
+              disableColumnFilter
             />
           </Paper>
         </Box>

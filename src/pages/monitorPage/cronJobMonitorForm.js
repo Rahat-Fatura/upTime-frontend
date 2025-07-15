@@ -74,12 +74,10 @@ const cronJobMonitorFormPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/cronjob/${params.id}`)
-        console.log(response.data)
         values.name=response.data.monitor.name;
         values.divitionTime=response.data.devitionTime;
         values.interval=response.data.monitor.interval;
         values.intervalUnit=response.data.monitor.intervalUnit;
-        values.intervalUnit=response.data.timeOut;
         setEmailList(response.data.monitor.alertContacts || [])
       } catch (error) {
         Swal.fire({
@@ -107,17 +105,17 @@ const cronJobMonitorFormPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(values.interval >= 20 && values.interval < 60 ? values.interval : 20)
+        values.interval = values.interval >= 20 && values.interval < 60 ? values.interval : 20
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(values.interval > 0 && values.interval < 60 ? values.interval : 0)
+        values.interval = values.interval > 0 && values.interval < 60 ? values.interval : 0
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(values.interval > 0 && values.interval < 24 ? values.interval : 1)
+        values.interval = values.interval > 0 && values.interval < 24 ? values.interval : 1
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -241,7 +239,7 @@ const cronJobMonitorFormPage = (update = false) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   }
 
-  const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
+  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } = useFormik({
       isInitialValid: false,
       initialValues: {
         name: '',
@@ -397,7 +395,7 @@ const cronJobMonitorFormPage = (update = false) => {
                         ? `Cron Job Monitörü, zamanlanmış görevlerin (cron job'ların)
                            düzgün şekilde çalışıp çalışmadığını takip eder. Genellikle
                            sunucu tarafında arka planda belirli aralıklarla çalışan bu görevler,
-                           monitöre entegre edilen özel bir URL’ye her çalıştıklarında istek (ping)
+                           monitöre entegre edilen özel bir URL’ye her çalıştıklarında istek
                            gönderir. Eğer belirlenen süre içinde bu istek gelmezse, yani görev
                            çalışmazsa veya hata alırsa sizi bilgilendirir. Bu sayede otomatik yedekleme,
                            e-posta gönderimi veya veri işleme gibi kritik zamanlanmış görevlerin sorunsuz
@@ -626,7 +624,7 @@ const cronJobMonitorFormPage = (update = false) => {
                             <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
                           </Box>
                           <Box sx={{ flex: 1 }}>
-                            <Typography variant="subtitle1" fontWeight="500">
+                            <Typography variant="subtitle2" fontWeight="500">
                               CRON JOB
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -768,7 +766,7 @@ const cronJobMonitorFormPage = (update = false) => {
                         id="interval"
                         name="interval"
                         value={values.interval}
-                        onChange={handleChange}
+                        onChange={(e)=>setFieldValue('interval',e.target.value)}
                         min={min}
                         max={max}
                         step={1}
@@ -793,8 +791,8 @@ const cronJobMonitorFormPage = (update = false) => {
                       <Select
                         id="intervalUnit"
                         name="intervalUnit"
-                        value={values.intervalUnit || 'dakika'}
-                        onChange={handleChange}
+                        value={values.intervalUnit}
+                        onChange={(e)=>setFieldValue('intervalUnit',e.target.value)}
                         variant="outlined"
                         sx={{
                           fontSize: '0.8rem',
@@ -816,7 +814,7 @@ const cronJobMonitorFormPage = (update = false) => {
               </Grid>
             </Grid>
             <Divider />
-            {/*Altıncı satır*/}
+            {/*Dördüncü satır*/}
             <Grid item md={12} display={'flex'} mt={2} mb={2}>
               {/* <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'end'}>
