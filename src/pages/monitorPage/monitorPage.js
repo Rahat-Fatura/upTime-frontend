@@ -38,7 +38,7 @@ import {
   AttractionsOutlined,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
-import { Edit } from 'tabler-icons-react'
+import { Disabled, Edit } from 'tabler-icons-react'
 import { INITIAL_STATS } from './constants/monitorConstants'
 import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
@@ -47,6 +47,8 @@ import MonitorStatus from '../../components/Animate/monitorStatus.js'
 import localStorage from 'local-storage'
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { toBeEnabled } from '@testing-library/jest-dom/matchers.js'
+import { all } from 'axios'
 const initialFormData = {
   name: '',
   method: 'GET',
@@ -73,12 +75,13 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
+  const [allSelected, setAllSelected] = useState(false);
   const [selectMonitors, setSelectMonitors] = useState([]);
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
 
-  function PositionedMenu() {
+  function PositionedMenu({selectMonitors,setSelectMonitors}) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -87,7 +90,99 @@ export default function Dashboard() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  
+ const handleMultipleDeleteMonitors=async()=>{
+   Swal.fire({
+         title: 'Silmek istediğinizden emin misiniz',
+         icon: 'warning',
+         text: 'İzlemeler sistemden tamamen silinecektir',
+         showCancelButton: true,
+         showConfirmButton: true,
+         confirmButtonText: 'Evet silmek istiyorum',
+         cancelButtonText: 'Hayır',
+       })
+         .then(async (result) => {
+           if (result.isConfirmed) {
+             await api.delete(`monitors/multiple-delete`, { data: { ids: selectMonitors } })
+             Swal.fire({
+               icon: 'success',
+               title: 'İzlemeler Silindi',
+               text: 'İzlemeler başarılı şekilde silindi',
+               confirmButtonText: 'Tamam',
+             })
+             setMonitors((prevMonitors) =>
+               prevMonitors.filter((m) => !selectMonitors.includes(m.id))
+             )
+           }
+         })
+         .catch((error) => {
+           console.log(error)
+           Swal.fire({
+             icon: 'error',
+             title: 'Hatalı İşlem',
+             text: error.response.data.message,
+             confirmButtonText: 'Tamam',
+           })
+         })
+  }
 
+  const handleMultiPlayMonitors=async()=>{
+   try {
+    const response = await api.put(`/monitors/multi-play`,{
+      ids: selectMonitors
+    })
+    Swal.fire({
+              icon: 'success',
+              title: 'İzlemeler Çalıştırıldı',
+              text: 'İzlemeler başarıyla başlatıldı.',
+              confirmButtonText: 'Tamam',
+            })
+            setMonitors((prevMonitors) =>
+              prevMonitors.map((m) =>
+                selectMonitors.includes(m.id)
+                  ? { ...m, isActiveByOwner: true, status: 'uncertain' }
+                  : m
+              )
+            )
+   } catch (error) {
+    console.log(error)
+    Swal.fire({
+        icon: 'error',
+        title: 'Hata',
+        text: 'İzlemeler çalıştırılamadı. Lütfen tekrar deneyin.',
+        confirmButtonText: 'Tamam',
+    })
+   }
+  }
+
+  const handleMultiPauseMonitors=async()=>{
+   try {
+    const response = await api.put(`/monitors/multi-pause`,{
+      ids: selectMonitors
+    })
+    Swal.fire({
+              icon: 'success',
+              title: 'İzlemeler Durduruldu',
+              text: 'İzlemeler başarıyla durduruldu.',
+              confirmButtonText: 'Tamam',
+            })
+            setMonitors((prevMonitors) =>
+              prevMonitors.map((m) =>
+                selectMonitors.includes(m.id)
+                  ? { ...m, isActiveByOwner: false, status: 'uncertain' }
+                  : m
+              )
+            )
+   } catch (error) {
+    console.log(error)
+    Swal.fire({
+        icon: 'error',
+        title: 'Hata',
+        text: 'İzlemeler durdurlamadı. Lütfen tekrar deneyin.',
+        confirmButtonText: 'Tamam',
+    })
+   }
+  }
   return (
     <div>
       <Button
@@ -97,7 +192,9 @@ export default function Dashboard() {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
         startIcon={<AttractionsOutlined fontSize='small'/>}
+        disabled={selectMonitors.length>0?false:true}
         sx={{
+          width: '7rem',
           height: '1.8rem',
           border: 'solid 0.1px gray',
           color: 'black',
@@ -106,7 +203,7 @@ export default function Dashboard() {
           paddingBottom: 1
         }}
       >
-        Toplu işlemler
+        İşlemler
       </Button>
       <Menu
         id="demo-positioned-menu"
@@ -129,7 +226,7 @@ export default function Dashboard() {
         '& .MuiTypography-root':{fontSize: '0.8rem'}
       }}
       >
-        <MenuItem  sx={{
+        <MenuItem onClickCapture={handleMultiPauseMonitors} sx={{
           
           borderBottom:'solid 0.1px gray',
           height: '1.8rem',
@@ -142,7 +239,7 @@ export default function Dashboard() {
           </ListItemText>
         </MenuItem>
         
-        <MenuItem  sx={{
+        <MenuItem onClickCapture={handleMultiPlayMonitors} sx={{
           height: '1.8rem',
           fontSize: '0.8rem',
           borderBottom:'solid 0.1px gray'
@@ -153,7 +250,7 @@ export default function Dashboard() {
               Çalıştır
           </ListItemText></MenuItem>
         
-        <MenuItem  sx={{
+        <MenuItem onClickCapture={handleMultipleDeleteMonitors}  sx={{
           height: '1.8rem',
           fontSize: '0.8rem'
         }} onClick={handleClose}><ListItemIcon>
@@ -212,19 +309,19 @@ export default function Dashboard() {
       }
     }
 
-    const interval = setInterval(fetchMonitors, 100000)
+    const interval = setInterval(fetchMonitors, 20000)
     fetchMonitors()
     return () => clearInterval(interval)
   }, [])
 
   
   const handleSelectMonitors = (id) =>{
-    let tempMonitors= selectMonitors;
-    if(!selectMonitors.includes(id)){
+    let tempMonitors = [...selectMonitors];
+    if(!tempMonitors.includes(id)){
       tempMonitors.push(id);
     }
     else{
-      tempMonitors = selectMonitors.filter(item => id!==item )
+      tempMonitors = tempMonitors.filter(item => id!==item )
     }
     setSelectMonitors(tempMonitors);
   }
@@ -289,16 +386,47 @@ export default function Dashboard() {
     setFilteredMonitors(filtered)
   }, [searchQuery, monitors])
 
+useEffect(()=>{
+  console.log("SelectMonitors: ",selectMonitors)
+}, [selectMonitors])
+
+useEffect(()=>{
+ // setAllSelected(!allSelected)
+  console.log("allSelected: ",allSelected)
+}, [allSelected])
+
+const handleSelectAll = () => {
+  
+  if (allSelected) {
+    setSelectMonitors([]);
+    setAllSelected(false);
+  } else {
+    const allIds = filteredMonitors.map((row) => row.id);
+    setSelectMonitors(allIds);
+    setAllSelected(true);
+  }
+};
+
   const columns = [
     {
       field: 'select',
       headerName: '',
-      disableColumnFilter: true,
-      sortable: true,
+      disableColumnMenu: true,
+      sortable: false,
       flex: 0.5,
+      renderHeader: () => (
+        <Checkbox
+          size='small'
+          checked={allSelected}
+          indeterminate={
+            selectMonitors.length > 0 && selectMonitors.length < filteredMonitors.length
+          }
+          onChange={handleSelectAll}
+        />
+      ),
       renderCell: (params)=>{
         return(
-          <Checkbox size='small' onChange={()=>handleSelectMonitors(params.id)}/>
+          <Checkbox size='small' checked={selectMonitors.includes(params.id)} onChange={()=>handleSelectMonitors(params.id)}/>
         )
       }
     },
@@ -1149,7 +1277,7 @@ export default function Dashboard() {
                 }}
               />
 
-              <PositionedMenu/>
+              <PositionedMenu selectMonitors={selectMonitors} setSelectMonitors={setSelectMonitors}/>
             </Box>
 
             <DataGrid
