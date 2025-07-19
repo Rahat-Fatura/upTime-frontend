@@ -4,8 +4,9 @@ import api from '../../api/auth/axiosInstance'
 import BuildIcon from '@mui/icons-material/Build'
 import Swal from 'sweetalert2'
 import MenuButton from '../../components/menuButton/index.js'
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon'
+import ListItemText from '@mui/material/ListItemText'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import {
   Typography,
   IconButton,
@@ -23,6 +24,10 @@ import {
   useTheme,
   Checkbox,
   Icon,
+  ListItemSecondaryAction,
+  ListItem,
+  FormControl,
+  FormLabel,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -36,6 +41,9 @@ import {
   Menu as MenuIcon,
   Visibility,
   AttractionsOutlined,
+  Filter,
+  FilterList,
+  RestartAlt,
 } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { Disabled, Edit } from 'tabler-icons-react'
@@ -45,8 +53,8 @@ import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
 import MonitorStatus from '../../components/Animate/monitorStatus.js'
 import localStorage from 'local-storage'
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
 import { toBeEnabled } from '@testing-library/jest-dom/matchers.js'
 import { all } from 'axios'
 const initialFormData = {
@@ -63,10 +71,208 @@ const initialFormData = {
   isActiveByOwner: true,
 }
 
+function FiltredMenu({ filtreOptions, setFiltereOptions }) {
+    const [up,setUp] = useState(false);
+    const [down,setDown] = useState(false);
+    const [uncertain,setUnsertain] = useState(false);
+    const [maintanance,setMaintanance] = useState(false);
+    const [paused,setPaused] = useState(false);
+    const [anchorEl, setAnchorEl] = useState(null)
+    const open = Boolean(anchorEl)
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget)
+    }
+    const handleClose = () => {
+      setAnchorEl(null)
+    }
+    useEffect(()=>{
+      let tempArray = [...filtreOptions];
+      if(up){
+       tempArray.push('up');
+      }
+      else{
+       tempArray = tempArray.filter(item=>item!=='up')
+      }
+      setFiltereOptions(tempArray)
+    },[up])
 
+    const handleUpChange = () =>{
+      setUp(!up);
+    }
 
+    useEffect(()=>{
+      let tempArray = [...filtreOptions];
+      if(down){
+       tempArray.push('down');
+      }
+      else{
+       tempArray = tempArray.filter(item=>item!=='down')
+      }
+      setFiltereOptions(tempArray)
+    },[down])
 
+    const handleDownChange = () =>{
+      setDown(!down);
+    }
 
+    useEffect(()=>{
+      let tempArray = [...filtreOptions];
+      if(uncertain){
+       tempArray.push('uncertain');
+      }
+      else{
+       tempArray = tempArray.filter(item=>item!=='uncertain')
+      }
+      setFiltereOptions(tempArray)
+    },[uncertain])
+
+    const handleUncertainChange = () =>{
+      setUnsertain(!uncertain);
+    }
+
+    useEffect(()=>{
+      let tempArray = [...filtreOptions];
+      if(maintanance){
+       tempArray.push('maintanance');
+      }
+      else{
+       tempArray = tempArray.filter(item=>item!=='maintanance')
+      }
+      setFiltereOptions(tempArray)
+    },[maintanance])
+
+    const handleMaintananceChange = () =>{
+      setMaintanance(!maintanance);
+    }
+
+    useEffect(()=>{
+      let tempArray = [...filtreOptions];
+      if(paused){
+       tempArray.push('uncertain');
+      }
+      else{
+       tempArray = tempArray.filter(item=>item!=='uncertain')
+      }
+      setFiltereOptions(tempArray)
+    },[paused])
+
+    const handlePausedChange = () =>{
+      setPaused(!paused);
+    }
+    
+    return (
+      <div>
+        <Button
+          id="demo-filtred-button"
+          aria-controls={open ? 'demo-filtred-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+          onClick={handleClick}
+          startIcon={<FilterList fontSize="small" />}
+          sx={{
+            width: '7rem',
+            height: '1.8rem',
+            border: 'solid 0.1px gray',
+            color: 'black',
+            fontSize: '0.8rem',
+            borderRadius: '7%',
+            paddingBottom: 1,
+          }}
+        >
+          Filtrele
+        </Button>
+        <Menu
+          id="demo-filtred-menu"
+          aria-labelledby="demo-filtred-button"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          sx={{
+            width: '50rem',
+            marginTop: 4,
+            padding: 0,
+            '& .MuiTypography-root': { fontSize: '0.8rem' },
+          }}
+        >
+          <MenuItem
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+              padding: 0
+            }}
+          >
+            <FormControlLabel control={ <Checkbox checked={up} onChange={handleUpChange} size='small'/>} label="Çalışan" sx={{marginLeft:0.5}}/>
+          </MenuItem>
+
+          <MenuItem
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+              padding: 0
+            }}
+          >
+            <FormControlLabel control={ <Checkbox checked={down} onChange={handleDownChange} size='small'/>} label="Çalışmayan" sx={{marginLeft:0.5}}/>
+          </MenuItem>
+
+          <MenuItem
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+              padding: 0
+            }}
+          >
+            <FormControlLabel control={ <Checkbox checked={uncertain} onChange={handleUncertainChange} size='small'/>} label="Belirsiz" sx={{marginLeft:0.5}}/>
+          </MenuItem>
+
+          <MenuItem
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+              padding: 0
+            }}
+          >
+            <FormControlLabel control={ <Checkbox checked={paused} onChange={handlePausedChange} size='small'/>} label="Durdurlan" sx={{marginLeft:0.5}}/>
+          </MenuItem>
+
+          <MenuItem
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+              padding: 0
+            }}
+          >
+            <FormControlLabel control={ <Checkbox checked={maintanance} onChange={handleMaintananceChange} size='small'/>} label="Bakım" sx={{marginLeft:0.5}}/>
+          </MenuItem>
+
+          <MenuItem
+            sx={{
+              alignContent: 'center',
+              justifyContent: 'center',
+              height: '1.8rem',
+              paddingTop: 1
+            }}
+          >
+            <Button onClick={()=>{
+              setUp(false);
+              setDown(false);
+              setUnsertain(false);
+              setMaintanance(false);
+              setPaused(false);
+              setFiltereOptions([])
+              }} startIcon={<RestartAlt/>}>Sıfırla</Button>
+          </MenuItem>
+        </Menu>
+      </div>
+    )
+  }
 
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(false)
@@ -75,195 +281,216 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMonitor, setSelectedMonitor] = useState(null)
   const [formData, setFormData] = useState(initialFormData)
-  const [allSelected, setAllSelected] = useState(false);
-  const [selectMonitors, setSelectMonitors] = useState([]);
+  const [allSelected, setAllSelected] = useState(false)
+  const [selectMonitors, setSelectMonitors] = useState([])
+  const [filtreOptions, setFiltereOptions] = useState([]);
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
 
-  function PositionedMenu({selectMonitors,setSelectMonitors}) {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  
- const handleMultipleDeleteMonitors=async()=>{
-   Swal.fire({
-         title: 'Silmek istediğinizden emin misiniz',
-         icon: 'warning',
-         text: 'İzlemeler sistemden tamamen silinecektir',
-         showCancelButton: true,
-         showConfirmButton: true,
-         confirmButtonText: 'Evet silmek istiyorum',
-         cancelButtonText: 'Hayır',
-       })
-         .then(async (result) => {
-           if (result.isConfirmed) {
-             await api.delete(`monitors/multiple-delete`, { data: { ids: selectMonitors } })
-             Swal.fire({
-               icon: 'success',
-               title: 'İzlemeler Silindi',
-               text: 'İzlemeler başarılı şekilde silindi',
-               confirmButtonText: 'Tamam',
-             })
-             setMonitors((prevMonitors) =>
-               prevMonitors.filter((m) => !selectMonitors.includes(m.id))
-             )
-           }
-         })
-         .catch((error) => {
-           console.log(error)
-           Swal.fire({
-             icon: 'error',
-             title: 'Hatalı İşlem',
-             text: error.response.data.message,
-             confirmButtonText: 'Tamam',
-           })
-         })
-  }
+  function PositionedMenu({ selectMonitors, setSelectMonitors }) {
+    const [anchorEl, setAnchorEl] = useState(null)
+    const open = Boolean(anchorEl)
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget)
+    }
+    const handleClose = () => {
+      setAnchorEl(null)
+    }
 
-  const handleMultiPlayMonitors=async()=>{
-   try {
-    const response = await api.put(`/monitors/multi-play`,{
-      ids: selectMonitors
-    })
-    Swal.fire({
+    const handleMultipleDeleteMonitors = async () => {
+      Swal.fire({
+        title: 'Silmek istediğinizden emin misiniz',
+        icon: 'warning',
+        text: 'İzlemeler sistemden tamamen silinecektir',
+        showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'Evet silmek istiyorum',
+        cancelButtonText: 'Hayır',
+      })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            await api.delete(`monitors/multiple-delete`, {
+              data: { ids: selectMonitors },
+            })
+            Swal.fire({
               icon: 'success',
-              title: 'İzlemeler Çalıştırıldı',
-              text: 'İzlemeler başarıyla başlatıldı.',
+              title: 'İzlemeler Silindi',
+              text: 'İzlemeler başarılı şekilde silindi',
               confirmButtonText: 'Tamam',
             })
             setMonitors((prevMonitors) =>
-              prevMonitors.map((m) =>
-                selectMonitors.includes(m.id)
-                  ? { ...m, isActiveByOwner: true, status: 'uncertain' }
-                  : m
-              )
+              prevMonitors.filter((m) => !selectMonitors.includes(m.id))
             )
-   } catch (error) {
-    console.log(error)
-    Swal.fire({
-        icon: 'error',
-        title: 'Hata',
-        text: 'İzlemeler çalıştırılamadı. Lütfen tekrar deneyin.',
-        confirmButtonText: 'Tamam',
-    })
-   }
-  }
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+          Swal.fire({
+            icon: 'error',
+            title: 'Hatalı İşlem',
+            text: error.response.data.message,
+            confirmButtonText: 'Tamam',
+          })
+        })
+    }
 
-  const handleMultiPauseMonitors=async()=>{
-   try {
-    const response = await api.put(`/monitors/multi-pause`,{
-      ids: selectMonitors
-    })
-    Swal.fire({
-              icon: 'success',
-              title: 'İzlemeler Durduruldu',
-              text: 'İzlemeler başarıyla durduruldu.',
-              confirmButtonText: 'Tamam',
-            })
-            setMonitors((prevMonitors) =>
-              prevMonitors.map((m) =>
-                selectMonitors.includes(m.id)
-                  ? { ...m, isActiveByOwner: false, status: 'uncertain' }
-                  : m
-              )
-            )
-   } catch (error) {
-    console.log(error)
-    Swal.fire({
-        icon: 'error',
-        title: 'Hata',
-        text: 'İzlemeler durdurlamadı. Lütfen tekrar deneyin.',
-        confirmButtonText: 'Tamam',
-    })
-   }
-  }
-  return (
-    <div>
-      <Button
-        id="demo-positioned-button"
-        aria-controls={open ? 'demo-positioned-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}
-        startIcon={<AttractionsOutlined fontSize='small'/>}
-        disabled={selectMonitors.length>0?false:true}
-        sx={{
-          width: '7rem',
-          height: '1.8rem',
-          border: 'solid 0.1px gray',
-          color: 'black',
-          fontSize: '0.8rem',
-          borderRadius: '7%',
-          paddingBottom: 1
-        }}
-      >
-        İşlemler
-      </Button>
-      <Menu
-        id="demo-positioned-menu"
-        aria-labelledby="demo-positioned-button"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left',
-        }}
-       sx={{
-        width: '50rem',
-        marginTop:4,
-        padding:0,
-        '& .MuiTypography-root':{fontSize: '0.8rem'}
-      }}
-      >
-        <MenuItem onClickCapture={handleMultiPauseMonitors} sx={{
-          
-          borderBottom:'solid 0.1px gray',
-          height: '1.8rem',
-        }} onClick={handleClose}>
-          <ListItemIcon>
-            <PauseIcon fontSize='small'/>
-          </ListItemIcon>
-          <ListItemText sx={{'& .MuiTypography-root':{color:'secondary'}}}>
+    const handleMultiPlayMonitors = async () => {
+      try {
+        const response = await api.put(`/monitors/multi-play`, {
+          ids: selectMonitors,
+        })
+        Swal.fire({
+          icon: 'success',
+          title: 'İzlemeler Çalıştırıldı',
+          text: 'İzlemeler başarıyla başlatıldı.',
+          confirmButtonText: 'Tamam',
+        })
+        setMonitors((prevMonitors) =>
+          prevMonitors.map((m) =>
+            selectMonitors.includes(m.id)
+              ? { ...m, isActiveByOwner: true, status: 'uncertain' }
+              : m
+          )
+        )
+      } catch (error) {
+        console.log(error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Hata',
+          text: 'İzlemeler çalıştırılamadı. Lütfen tekrar deneyin.',
+          confirmButtonText: 'Tamam',
+        })
+      }
+    }
+
+    const handleMultiPauseMonitors = async () => {
+      try {
+        const response = await api.put(`/monitors/multi-pause`, {
+          ids: selectMonitors,
+        })
+        Swal.fire({
+          icon: 'success',
+          title: 'İzlemeler Durduruldu',
+          text: 'İzlemeler başarıyla durduruldu.',
+          confirmButtonText: 'Tamam',
+        })
+        setMonitors((prevMonitors) =>
+          prevMonitors.map((m) =>
+            selectMonitors.includes(m.id)
+              ? { ...m, isActiveByOwner: false, status: 'uncertain' }
+              : m
+          )
+        )
+      } catch (error) {
+        console.log(error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Hata',
+          text: 'İzlemeler durdurlamadı. Lütfen tekrar deneyin.',
+          confirmButtonText: 'Tamam',
+        })
+      }
+    }
+    return (
+      <div>
+        <Button
+          id="demo-positioned-button"
+          aria-controls={open ? 'demo-positioned-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+          onClick={handleClick}
+          startIcon={<AttractionsOutlined fontSize="small" />}
+          disabled={selectMonitors.length > 0 ? false : true}
+          sx={{
+            width: '7rem',
+            height: '1.8rem',
+            border: 'solid 0.1px gray',
+            color: 'black',
+            fontSize: '0.8rem',
+            borderRadius: '7%',
+            paddingBottom: 1,
+          }}
+        >
+          İşlemler
+        </Button>
+        <Menu
+          id="demo-positioned-menu"
+          aria-labelledby="demo-positioned-button"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+          sx={{
+            width: '50rem',
+            marginTop: 4,
+            padding: 0,
+            '& .MuiTypography-root': { fontSize: '0.8rem' },
+          }}
+        >
+          <MenuItem
+            onClickCapture={handleMultiPauseMonitors}
+            sx={{
+              borderBottom: 'solid 0.1px gray',
+              height: '1.8rem',
+            }}
+            onClick={handleClose}
+          >
+            <ListItemIcon>
+              <PauseIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              sx={{ '& .MuiTypography-root': { color: 'secondary' } }}
+            >
               Durdur
-          </ListItemText>
-        </MenuItem>
-        
-        <MenuItem onClickCapture={handleMultiPlayMonitors} sx={{
-          height: '1.8rem',
-          fontSize: '0.8rem',
-          borderBottom:'solid 0.1px gray'
-        }} onClick={handleClose}><ListItemIcon>
-            <PlayArrowIcon fontSize='small'/>
-          </ListItemIcon>
-          <ListItemText sx={{'& .MuiTypography-root':{color:'primary'}}}>
+            </ListItemText>
+          </MenuItem>
+
+          <MenuItem
+            onClickCapture={handleMultiPlayMonitors}
+            sx={{
+              height: '1.8rem',
+              fontSize: '0.8rem',
+              borderBottom: 'solid 0.1px gray',
+            }}
+            onClick={handleClose}
+          >
+            <ListItemIcon>
+              <PlayArrowIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              sx={{ '& .MuiTypography-root': { color: 'primary' } }}
+            >
               Çalıştır
-          </ListItemText></MenuItem>
-        
-        <MenuItem onClickCapture={handleMultipleDeleteMonitors}  sx={{
-          height: '1.8rem',
-          fontSize: '0.8rem'
-        }} onClick={handleClose}><ListItemIcon>
-            <DeleteIcon fontSize='small'/>
-          </ListItemIcon>
-          <ListItemText sx={{'& .MuiTypography-root':{color:'error'}}}>
+            </ListItemText>
+          </MenuItem>
+
+          <MenuItem
+            onClickCapture={handleMultipleDeleteMonitors}
+            sx={{
+              height: '1.8rem',
+              fontSize: '0.8rem',
+            }}
+            onClick={handleClose}
+          >
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText sx={{ '& .MuiTypography-root': { color: 'error' } }}>
               Sil
-          </ListItemText></MenuItem>
-        
-      </Menu>
-    </div>
-  );
-}
+            </ListItemText>
+          </MenuItem>
+        </Menu>
+      </div>
+    )
+  }
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen)
@@ -286,7 +513,7 @@ export default function Dashboard() {
       { title: 'Belirsiz', value: uncertain.toString(), color: '#ed6c02' },
       {
         title: 'Çalışan Yüzdesi',
-        value: avgActive ? avgActive.toString().substring(0,5) + '%' : '0%',
+        value: avgActive ? avgActive.toString().substring(0, 5) + '%' : '0%',
         color: '#1976d2',
       },
     ]
@@ -314,19 +541,20 @@ export default function Dashboard() {
     return () => clearInterval(interval)
   }, [])
 
-  
-  const handleSelectMonitors = (id) =>{
-    let tempMonitors = [...selectMonitors];
-    if(!tempMonitors.includes(id)){
-      tempMonitors.push(id);
+  const handleSelectMonitors = (id) => {
+    let tempMonitors = [...selectMonitors]
+    if (!tempMonitors.includes(id)) {
+      tempMonitors.push(id)
+      setAllSelected(tempMonitors.length === filteredMonitors.length)
+    } else {
+      tempMonitors = tempMonitors.filter((item) => id !== item)
+      setAllSelected(tempMonitors.length > 0)
     }
-    else{
-      tempMonitors = tempMonitors.filter(item => id!==item )
-    }
-    setSelectMonitors(tempMonitors);
+    setSelectMonitors(tempMonitors)
   }
 
   useEffect(() => {
+    
     if (!monitors || monitors.length === 0) {
       setFilteredMonitors([])
       return
@@ -335,7 +563,17 @@ export default function Dashboard() {
     const searchLower = searchQuery.toLowerCase().trim()
 
     if (searchLower === '') {
-      setFilteredMonitors(monitors)
+      if(filtreOptions.length>0){
+        let tempFilter = monitors.filter(monitor=>{
+          
+          return filtreOptions.includes(monitor.status)
+          
+        })
+        setFilteredMonitors(tempFilter)
+      }
+      else{
+        setFilteredMonitors(monitors)
+      }
       return
     }
 
@@ -382,30 +620,28 @@ export default function Dashboard() {
       const typeMatch = monitor.monitorType?.toLowerCase().includes(searchLower)
       return nameMatch || hostMatch || typeMatch
     })
+    if(filtreOptions.length>0){
+        let tempFilter = filtered.filter(monitor=>{
+          return filtreOptions.includes(monitor.status)
+        })
+        setFilteredMonitors(tempFilter)
+      }
+      else{
+        setFilteredMonitors(filtered)
+      }
+    
+  }, [searchQuery, monitors, filtreOptions])
 
-    setFilteredMonitors(filtered)
-  }, [searchQuery, monitors])
-
-useEffect(()=>{
-  console.log("SelectMonitors: ",selectMonitors)
-}, [selectMonitors])
-
-useEffect(()=>{
- // setAllSelected(!allSelected)
-  console.log("allSelected: ",allSelected)
-}, [allSelected])
-
-const handleSelectAll = () => {
-  
-  if (allSelected) {
-    setSelectMonitors([]);
-    setAllSelected(false);
-  } else {
-    const allIds = filteredMonitors.map((row) => row.id);
-    setSelectMonitors(allIds);
-    setAllSelected(true);
+  const handleSelectAll = () => {
+    if (allSelected) {
+      setSelectMonitors([])
+      setAllSelected(false)
+    } else {
+      const allIds = filteredMonitors.map((row) => row.id)
+      setSelectMonitors(allIds)
+      setAllSelected(true)
+    }
   }
-};
 
   const columns = [
     {
@@ -416,19 +652,24 @@ const handleSelectAll = () => {
       flex: 0.5,
       renderHeader: () => (
         <Checkbox
-          size='small'
+          size="small"
           checked={allSelected}
           indeterminate={
-            selectMonitors.length > 0 && selectMonitors.length < filteredMonitors.length
+            selectMonitors.length > 0 &&
+            selectMonitors.length < filteredMonitors.length
           }
           onChange={handleSelectAll}
         />
       ),
-      renderCell: (params)=>{
-        return(
-          <Checkbox size='small' checked={selectMonitors.includes(params.id)} onChange={()=>handleSelectMonitors(params.id)}/>
+      renderCell: (params) => {
+        return (
+          <Checkbox
+            size="small"
+            checked={selectMonitors.includes(params.id)}
+            onChange={() => handleSelectMonitors(params.id)}
+          />
         )
-      }
+      },
     },
     {
       field: 'status',
@@ -441,11 +682,12 @@ const handleSelectAll = () => {
           <MonitorStatus
             sx={{ width: 12, height: 12, animeWidth: 12, animeHeight: 12 }}
             status={params.value}
+            iconSize={10}
           />
         )
       },
     },
-     {
+    {
       field: 'name',
       headerName: 'Adı',
       flex: 1.5,
@@ -597,7 +839,9 @@ const handleSelectAll = () => {
       headerName: 'Başarı Oranı',
       flex: 2,
       renderCell: (params) => {
-        let logs = params.row.logs.sort(function(a,b){return a.id-b.id})
+        let logs = params.row.logs.sort(function (a, b) {
+          return a.id - b.id
+        })
         logs = logs.slice(-25) || []
         const size = logs.length
         for (let i = size; i < 25; i++) {
@@ -868,8 +1112,8 @@ const handleSelectAll = () => {
 
         <Box
           sx={{
-           // border: 'solid 0.5px gray',
-           // borderColor: '#5c5554',
+            // border: 'solid 0.5px gray',
+            // borderColor: '#5c5554',
             //backgroundColor: '#ffff',
             borderRadius: '5px',
             padding: { xs: 0.5, sm: 1, md: 1.5, lg: 2, xlg: 3 },
@@ -902,7 +1146,7 @@ const handleSelectAll = () => {
                     alignItems: 'center',
                     justifyContent: 'space-around',
                     width: '100%',
-                    height:'100%',
+                    height: '100%',
                     gap: 2,
                   }}
                 >
@@ -910,7 +1154,7 @@ const handleSelectAll = () => {
                     color="text.secondary"
                     component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -927,7 +1171,7 @@ const handleSelectAll = () => {
                     component="div"
                     sx={{
                       color: currentStats[0]?.color,
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -965,15 +1209,15 @@ const handleSelectAll = () => {
                     alignItems: 'center',
                     justifyContent: 'space-around',
                     width: '100%',
-                    height:'100%',
+                    height: '100%',
                     gap: 2,
                   }}
                 >
                   <Typography
                     color="text.secondary"
-                     component="div"
+                    component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -990,7 +1234,7 @@ const handleSelectAll = () => {
                     component="div"
                     sx={{
                       color: currentStats[1]?.color,
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1028,7 +1272,7 @@ const handleSelectAll = () => {
                     alignItems: 'center',
                     justifyContent: 'space-around',
                     width: '100%',
-                    height:'100%',
+                    height: '100%',
                     gap: 2,
                   }}
                 >
@@ -1036,7 +1280,7 @@ const handleSelectAll = () => {
                     color="text.secondary"
                     // component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1053,7 +1297,7 @@ const handleSelectAll = () => {
                     // component="div"
                     sx={{
                       color: currentStats[2]?.color,
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1090,7 +1334,7 @@ const handleSelectAll = () => {
                     alignItems: 'center',
                     justifyContent: 'space-around',
                     width: '100%',
-                    height:'100%',
+                    height: '100%',
                     gap: 2,
                   }}
                 >
@@ -1098,7 +1342,7 @@ const handleSelectAll = () => {
                     color="text.secondary"
                     // component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1114,7 +1358,7 @@ const handleSelectAll = () => {
                     variant="h4"
                     // component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       color: currentStats[3]?.color,
                       fontSize: {
                         xs: '0.8rem',
@@ -1153,14 +1397,14 @@ const handleSelectAll = () => {
                     alignItems: 'center',
                     justifyContent: 'space-around',
                     width: '100%',
-                    height:'100%'
+                    height: '100%',
                   }}
                 >
                   <Typography
                     color="text.secondary"
-                     component="div"
+                    component="div"
                     sx={{
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1174,10 +1418,10 @@ const handleSelectAll = () => {
                   </Typography>
                   <Typography
                     variant="h4"
-                     component="div"
+                    component="div"
                     sx={{
                       color: currentStats[4]?.color,
-                      lineHeight:'100%',
+                      lineHeight: '100%',
                       fontSize: {
                         xs: '0.8rem',
                         sm: '0.8rem',
@@ -1277,7 +1521,11 @@ const handleSelectAll = () => {
                 }}
               />
 
-              <PositionedMenu selectMonitors={selectMonitors} setSelectMonitors={setSelectMonitors}/>
+              <PositionedMenu
+                selectMonitors={selectMonitors}
+                setSelectMonitors={setSelectMonitors}
+              />
+              <FiltredMenu filtreOptions={filtreOptions} setFiltereOptions={setFiltereOptions}/>
             </Box>
 
             <DataGrid
@@ -1285,7 +1533,6 @@ const handleSelectAll = () => {
               columns={columns}
               pageSizeOptions={[5, 10, 25]}
               rowHeight={38}
-              
               autoHeight
               disableRowSelectionOnClick
               localeText={{
@@ -1301,7 +1548,7 @@ const handleSelectAll = () => {
                 sortAscending: 'Artan sırala',
                 sortDescending: 'Azalan sırala',
                 noRowsLabel: 'Veri bulunamadı',
-                
+
                 MuiTablePagination: {
                   fontSize: {
                     xs: '0.3rem',

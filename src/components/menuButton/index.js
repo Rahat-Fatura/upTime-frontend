@@ -1,17 +1,29 @@
 import * as React from 'react'
 import { styled, alpha } from '@mui/material/styles'
 import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import EditIcon from '@mui/icons-material/Edit'
+import NotificationsPaused from '@mui/icons-material/NotificationsPaused'
 import Divider from '@mui/material/Divider'
 import ArchiveIcon from '@mui/icons-material/Archive'
 import FileCopyIcon from '@mui/icons-material/FileCopy'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import Swal from 'sweetalert2'
+import Dialog from '@mui/material/Dialog'
+import Box from '@mui/material/Box'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import InfoIcon from '@mui/icons-material/Info'
 import api from '../../api/auth/axiosInstance'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from 'dayjs'
 import {
   Add as AddIcon,
   Warning as WarningIcon,
@@ -22,12 +34,18 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Menu as MenuIcon,
+  Build,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { fontSize, margin } from '@mui/system'
-import { IconButton } from '@mui/material'
+import { Alert, IconButton } from '@mui/material'
 import MonitorDetail from '../../pages/monitorPage/monitorDetail'
 import { pink } from '@mui/material/colors'
+import {
+  DateCalendar,
+  DatePicker,
+  LocalizationProvider,
+} from '@mui/x-date-pickers'
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -77,6 +95,18 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
   const navigate = useNavigate()
+  const [openDialog, setOpenDialog] = React.useState(false)
+  const [startDate, setStartDate] = React.useState(dayjs())
+  const [endDate, setEndDate] = React.useState(dayjs())
+  //const [startTime, setStarTime] = React.useState(dayjs())
+  //const [endTime, setEndTime] = React.useState(dayjs())
+  const handleClickOpenDialog = () => {
+    setOpenDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false)
+  }
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget)
   }
@@ -302,9 +332,108 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
     }
   }
 
-  const handlDetailMenu = (monitor) => {
-    navigate(`${monitor.id}/detail`, { state: {  monitor } })
+  const handleMaintanceMenu = () => {
+    handleClickOpenDialog()
+    handleClose()
   }
+
+   const handleMaintanance = async() => {
+      const startDateTime = startDate.toDate()
+      startDateTime.setSeconds(0)
+      startDateTime.setMilliseconds(0)
+      const endDateTime = endDate.toDate()
+      endDateTime.setSeconds(0)
+      endDateTime.setMilliseconds(0)
+      const now = new Date()
+
+      console.log("BAşlangıç Tarih", startDateTime)
+      console.log("Bitiş Tarih", endDateTime)
+      if (!startDateTime || !endDateTime) {
+        handleCloseDialog();
+        Swal.fire({
+          title: 'Warning',
+          text: 'Lütfen tüm tarih ve saat bilgilerini giriniz',
+          icon: 'warning',
+        })
+        return
+      }
+  
+      if (endDateTime < now) {
+        handleCloseDialog();
+        Swal.fire({
+          title: 'Hata',
+          text: 'Bitiş tarihi geçmişte olamaz',
+          icon: 'warning',
+        })
+    
+        return
+      }
+  
+      if (startDateTime >= endDateTime) {
+        handleCloseDialog();
+        Swal.fire({
+          title: 'Hata',
+          text: 'Başlangıç tarihi geçmiş tarihten ön tarihte olamaz',
+          icon: 'warning',
+        })
+        
+        return
+      }
+  
+      try {
+        const response = await api.post(`monitors/maintanance/${monitor.id}`, {
+          startTime: startDateTime,
+          endTime: endDateTime,
+        })
+        setMonitors((prevMonitors) =>
+          prevMonitors.map((m) =>
+            m.id === monitor.id
+              ? { ...m, maintanance: Object.assign(m.maintanance||{startTime:startDateTime,endTime: endDateTime},{status: true}),status: now>=startDateTime? 'maintanance': m.status}
+              : m
+          )
+        )
+        handleCloseDialog();
+        Swal.fire({
+          title: 'Success',
+          text: 'Bakım planı başarıyla kaydedildi',
+          icon: 'success',
+        })
+        
+      } catch (error) {
+        handleCloseDialog();
+        Swal.fire({
+          title: 'Hata',
+          text: 'Bakım planı kaydedilirken bir hata oluştu',
+          icon: 'error',
+        })
+      }
+    }
+
+    const handleCancelMaintenance = async () => {
+        try {
+          const response = await api.put(`monitors/maintanance/${monitor.id}`)
+          setMonitors((prevMonitors) =>
+          prevMonitors.map((m) =>
+            m.id === monitor.id
+              ? { ...m, maintanance: Object.assign(m.maintanance,{status: false}), status: 'uncertain' }
+              : m
+          )
+        )
+          Swal.fire({
+            title: 'Başarılı',
+            text: 'Bakım modu başarıyla iptal edildi.',
+            icon: 'success',
+          })
+          handleCloseDialog();
+        } catch (error) {
+          Swal.fire({
+            title: 'Hata',
+            text: 'Bakım modu ipat edilirken bir hata oluştu',
+            icon: 'error',
+          })
+          handleCloseDialog();
+        }
+      }
 
   return (
     <div style={{ 'margin-top': '0px', 'margin-left': '15px' }}>
@@ -350,11 +479,11 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
             weight: 'auto',
             color: '#413ef8f3',
           }}
-          onClick={() => handlDetailMenu(monitor)}
+          onClick={() => handleMaintanceMenu()}
           disableRipple
         >
-          <InfoIcon color="primary" />
-          Detayı
+          <Build />
+          Bakım
         </MenuItem>
         {/*<Divider sx={{ my: 0.5 }} />*/}
         <MenuItem
@@ -365,7 +494,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           onClick={() => handleTestButton(monitor)}
           disableRipple
         >
-          <ArchiveIcon />
+          <NotificationsPaused fontSize="small" color="#ffff" />
           Test et
         </MenuItem>
         <MenuItem
@@ -393,6 +522,186 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           Kaldır
         </MenuItem>
       </StyledMenu>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle fontSize={'1rem'}>{monitor.maintanance?.status?
+        `\"${monitor.name.substring(
+          0,
+          50
+        )}\" Monitörü Bakım Durumundan Çıkart`:
+        `\"${monitor.name.substring(
+          0,
+          50
+        )}\" Monitörü Bakım Durumuna Geçir`}</DialogTitle>
+        <DialogContent sx={{ paddingBottom: 0 }}>
+          <DialogContentText sx={{ marginBottom: 2 }}>
+            <Alert severity={monitor.maintanance?.status?"warning":"info"}>{monitor.maintanance?.status?
+            `Bakım Modu, aktif halde gözükyor isterseniz iptal edip yeniden kurabilirsiniz.`:`
+              Bakım Modu, belirlediğiniz süre aralığında bu monitoring i devre
+              dışı bırakır. Belirlediğiniz süre aralığında kesintiler sistem
+              çalışma oranınızı etkilemez ve bildirim gönderilmez.`}
+            </Alert>
+          </DialogContentText>
+          <form>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer
+                components={[
+                  'DatePicker',
+                  'TimePicker',
+                  'DatePicker',
+                  'TimePicker',
+                ]}
+              >
+                <Box display={'flex'} gap={2} justifyContent={'space-around'}>
+                  <DatePicker
+                    label="Başlangıç Tarih"
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: 'offset',
+                            options: {
+                              offset: [0, -300], // yukarı kaydırma
+                            },
+                          },
+                        ],
+                        sx: {
+                          zIndex: 1500, // popup görünürlüğü garanti
+                        },
+                      },
+                      textField: {
+                        size: 'small',
+                        InputProps: {
+                          sx: {
+                            '& input': {
+                              fontSize: '0.8rem',
+                            },
+                          },
+                        },
+                        InputLabelProps: {
+                          sx: {
+                            fontSize: '0.9rem',
+                          },
+                        },
+                      },
+                    }}
+                    value={monitor?.maintanance?dayjs(monitor.maintanance.startTime) : startDate}
+                    onChange={(newValue) => setStartDate(newValue)}
+                  />
+                  <Divider orientation="vertical" variant="large" flexItem />
+                  <TimePicker
+                    minutesStep={1}
+                    timeSteps={{ minutes: 1 }}
+                    views={['hours', 'minutes']}
+                    openTo="hours"
+                    ampm={false}
+                    label="Başlangıç Zaman"
+                    value={monitor?.maintanance?dayjs(monitor.maintanance.startTime) : startDate}
+                    onChange={(newValue) => setStartDate(newValue)}
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        InputProps: {
+                          sx: {
+                            '& input': {
+                              fontSize: '0.7rem',
+                            },
+                          },
+                          /*endAdornment: (
+                                        <InputAdornment position="start">
+                                          <AccessTimeIcon sx={{ fontSize: '16px'}} />
+                                        </InputAdornment>
+                                      ),*/
+                        },
+                        InputLabelProps: {
+                          sx: {
+                            fontSize: '0.8rem',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+
+                <Box display={'flex'} gap={2} justifyContent={'space-around'}>
+                  <DatePicker
+                    label="Bitiş Tarih"
+                    value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
+                    onChange={(newValue) => setEndDate(newValue)}
+                    slotProps={{
+                      popper: {
+                        modifiers: [
+                          {
+                            name: 'offset',
+                            options: {
+                              offset: [0, -300], // yukarı kaydırma
+                            },
+                          },
+                        ],
+                        sx: {
+                          zIndex: 1500, // popup görünürlüğü garanti
+                        },
+                      },
+                      textField: {
+                        size: 'small',
+                        InputProps: {
+                          sx: {
+                            '& input': {
+                              fontSize: '0.8rem',
+                            },
+                          },
+                        },
+                        InputLabelProps: {
+                          sx: {
+                            fontSize: '0.9rem',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                  <Divider orientation="vertical" flexItem />
+                  <TimePicker
+                    minutesStep={1}
+                    timeSteps={{ minutes: 1 }}
+                    views={['hours', 'minutes']}
+                    openTo="hours"
+                    ampm={false}
+                    label="Bitiş Zaman"
+                    value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
+                    onChange={(newValue) => setEndDate(newValue)}
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        InputProps: {
+                          sx: {
+                            '& input': {
+                              fontSize: '0.7rem',
+                            },
+                          },
+                          /*endAdornment: (
+                                        <InputAdornment position="start">
+                                          <AccessTimeIcon sx={{ fontSize: '16px'}} />
+                                        </InputAdornment>
+                                      ),*/
+                        },
+                        InputLabelProps: {
+                          sx: {
+                            fontSize: '0.8rem',
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              </DemoContainer>
+            </LocalizationProvider>
+
+            <DialogActions sx={{marginTop: '1rem', gap: 2}}>
+              <Button sx={{fontSize: '0.8rem', color: 'white', bgcolor: 'secondary.dark', ':hover':{bgcolor: 'secondary.main'}}} onClick={handleCloseDialog}>Kapat</Button>
+              <Button sx={{fontSize: '0.8rem', color: 'white', bgcolor: monitor.maintanance?.status?'error.main':'primary.main', ':hover':{bgcolor: monitor.maintanance?.status?'error.dark': 'primary.dark'}}} onClick={monitor.maintanance?.status?handleCancelMaintenance:handleMaintanance}>{monitor.maintanance?.status?'Bakım Durumu İptal Et':'Bakım Durumunu Başlat'}</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

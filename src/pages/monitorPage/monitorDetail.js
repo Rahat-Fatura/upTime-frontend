@@ -445,6 +445,7 @@ export default function MonitorDetail() {
                         animeHeight: 18,
                       }}
                       status={monitor?.status || ''}
+                      iconSize={16}
                     />
                   </Box>
                 </Grid>
@@ -688,6 +689,29 @@ export default function MonitorDetail() {
                             }
                             sx={{ fontSize: '0.75rem', height: 22 }}
                           />
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ fontSize: '0.8rem' }}
+                          >
+                            Oluşturulma Tarihi
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            fontWeight="bold"
+                            sx={{ fontSize: '0.7rem' }}
+                          >
+                            {monitor?.createdAt.split("T")[0] || '-'}
+                          </Typography>
+                          {/* <Chip
+                            label=
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ fontSize: '0.75rem', height: 22 }}
+                          /> */}
                         </Grid>
                       </Grid>
                     </Box>

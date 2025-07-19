@@ -510,6 +510,7 @@ export default function MaintanancePage() {
                               animeHeight: 15,
                             }}
                             status={monitor.status}
+                            iconSize={14}
                           />
                         }
                         title={
