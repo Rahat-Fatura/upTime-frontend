@@ -297,7 +297,7 @@ const NewMonitorPage = (update = false) => {
           width: {
             xs: isOpen ? '100%' : 0,
             sm: isOpen ? '100%' : 0,
-            md: isOpen ? '30%' : '2.5%',
+            md: isOpen ? '15%' : 0,
             lg: isOpen ? '19.16%' : '6.5%',
             xlg: isOpen ? '19.16%' : '2.5%',
           },
@@ -306,7 +306,11 @@ const NewMonitorPage = (update = false) => {
           position: { xs: 'fixed', sm: 'relative' },
           zIndex: 1000,
           height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
+          display: { 
+            xs: isOpen ? 'block' : 'none',
+            lg: 'block',
+            xlg: 'block'
+          },
         }}
       >
         {role === 'admin' ? (
@@ -320,7 +324,7 @@ const NewMonitorPage = (update = false) => {
           width: {
             xs: isOpen ? 0 : '100%',
             sm: isOpen ? 0 : '100%',
-            md: isOpen ? '30%' : '2.5%',
+            md: isOpen ? '85%' : '100%',
             lg: isOpen ? '78%' : '80%',
             xlg: isOpen ? '80.74%' : '97.5%',
           },
@@ -364,7 +368,7 @@ const NewMonitorPage = (update = false) => {
           <IconButton
             onClick={toggleSidebar}
             sx={{
-              display: { xs: 'flex', sm: 'flex', md: 'none' },
+              display: { xs: 'flex', sm:  'flex', md: isOpen? 'none' : 'flex', lg: 'none', xlg: 'none' },
               bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {
@@ -395,9 +399,7 @@ const NewMonitorPage = (update = false) => {
             display={'flex'}
             flexDirection={'column'}
           >
-            <Grid item md={12} alignContent={'end'}>
-              <Typography variant="subtitle1" gutterBottom></Typography>
-            </Grid>
+            
             <Grid item md={12}>
               <Alert severity="info">
                 {monitorType === 'http'

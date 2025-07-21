@@ -33,12 +33,12 @@ const UserProfileInfoPage = ({ userInfo}) => {
                 Bilgiler
               </Typography>
               <List dense>
-                <ListItem>
+                {/* <ListItem>
                   <ListItemIcon>
                     <FlagIcon />
                   </ListItemIcon>
                   <ListItemText primary="id" secondary={userInfo.id} />
-                </ListItem>
+                </ListItem> */}
                 <ListItem>
                   <ListItemIcon>
                     <PersonIcon />

@@ -34,7 +34,7 @@ const menuItems = [
   { text: "Monitors", icon: <Server size={22}/> , path: "/user/monitors" },
   //{ text: "Raporlar", icon: <ReportAnalytics size={22} />, path: "/user/monitoringReports" },
  // { text: "Anlık Kontrol", icon: <CellTowerIcon size={22} />, path: "/user/instantControl" },
-  { text: "Bakım", icon: <Engineering size={22} />, path: "/user/maintanance" },
+  // { text: "Bakım", icon: <Engineering size={22} />, path: "/user/maintanance" },
  /* { text: "Team Members", icon: <TopologyBus size={22} />, path: "/user/teamMembers" },
   { text: "Integrations & API", icon: <IntegrationInstructionsOutlined size={22} />, path: "/user/integrationsApi" },*/
 

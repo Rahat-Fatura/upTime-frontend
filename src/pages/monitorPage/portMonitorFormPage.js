@@ -278,7 +278,7 @@ const portMonitorFormPage = (update = false) => {
             width: {
               xs: isOpen ? '100%' : 0,
               sm: isOpen ? '100%' : 0,
-              md: isOpen ? '30%' : '2.5%',
+              md: isOpen ? '15 %' : 0,
               lg: isOpen ? '19.16%' : '6.5%',
               xlg: isOpen ? '19.16%' : '2.5%',
             },
@@ -301,7 +301,7 @@ const portMonitorFormPage = (update = false) => {
             width: {
               xs: isOpen ? 0 : '100%',
               sm: isOpen ? 0 : '100%',
-              md: isOpen ? '30%' : '2.5%',
+              md: isOpen ? '85%' : '100%',
               lg: isOpen ? '78%' : '80%',
               xlg: isOpen ? '80.74%' : '97.5%',
             },
@@ -345,7 +345,7 @@ const portMonitorFormPage = (update = false) => {
             <IconButton
               onClick={toggleSidebar}
               sx={{
-                display: { xs: 'flex', sm: 'flex', md: 'none' },
+                display: { xs: 'flex', sm:  'flex', md: isOpen? 'none' : 'flex', lg: 'none', xlg: 'none' },
                 bgcolor: 'primary.main',
                 color: 'white',
                 '&:hover': {

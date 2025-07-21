@@ -1034,7 +1034,7 @@ export default function Dashboard() {
           width: {
             xs: isOpen ? '100%' : 0,
             sm: isOpen ? '100%' : 0,
-            md: isOpen ? '30%' : '2.5%',
+            md: isOpen ? '15%' : 0,
             lg: isOpen ? '19.16%' : '6.5%',
             xlg: isOpen ? '19.16%' : '2.5%',
           },
@@ -1043,7 +1043,11 @@ export default function Dashboard() {
           position: { xs: 'fixed', sm: 'relative' },
           zIndex: 1000,
           height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
+          display: { 
+            xs: isOpen ? 'block' : 'none',
+            lg: 'block',
+            xlg: 'block'
+          },
         }}
       >
         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
@@ -1053,14 +1057,14 @@ export default function Dashboard() {
           width: {
             xs: isOpen ? 0 : '100%',
             sm: isOpen ? 0 : '100%',
-            md: isOpen ? '30%' : '2.5%',
-            lg: isOpen ? '78%' : '80%',
+            md: isOpen ? '85%' : '100%',
+            lg: isOpen ? '78%' : '97.5%',
             xlg: isOpen ? '80.74%' : '97.5%',
           },
           flexShrink: 0,
           flexGrow: 1,
-          pt: { xs: 2, sm: 3 },
-          pr: { xs: 2, sm: 3 },
+          pt: { xs: 2, sm: 3, md: 3 },
+          pr: { xs: 2, sm: 3, md: 3 },
           pl: 1,
           margin: '0 auto',
           transition: 'margin-left 0.3s',
@@ -1097,7 +1101,7 @@ export default function Dashboard() {
           <IconButton
             onClick={toggleSidebar}
             sx={{
-              display: { xs: 'flex', sm: 'flex', md: 'none' },
+              display: { xs: 'flex', sm:  'flex', md: isOpen? 'none' : 'flex', lg: 'none', xlg: 'none' },
               bgcolor: 'primary.main',
               color: 'white',
               '&:hover': {

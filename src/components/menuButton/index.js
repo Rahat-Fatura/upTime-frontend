@@ -98,8 +98,8 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   const [openDialog, setOpenDialog] = React.useState(false)
   const [startDate, setStartDate] = React.useState(dayjs())
   const [endDate, setEndDate] = React.useState(dayjs())
-  //const [startTime, setStarTime] = React.useState(dayjs())
-  //const [endTime, setEndTime] = React.useState(dayjs())
+  const [startTime, setStarTime] = React.useState(dayjs())
+  const [endTime, setEndTime] = React.useState(dayjs())
   const handleClickOpenDialog = () => {
     setOpenDialog(true)
   }
@@ -341,9 +341,15 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
       const startDateTime = startDate.toDate()
       startDateTime.setSeconds(0)
       startDateTime.setMilliseconds(0)
+      const startTimeValue = startTime.toDate();
+      startDateTime.setHours(startTimeValue.getHours())
+      startDateTime.setMinutes(startTimeValue.getMinutes())
       const endDateTime = endDate.toDate()
       endDateTime.setSeconds(0)
       endDateTime.setMilliseconds(0)
+      const endTimeValue = endTime.toDate();
+      endDateTime.setHours(endTimeValue.getHours())
+      endDateTime.setMinutes(endTimeValue.getMinutes())
       const now = new Date()
 
       console.log("BAşlangıç Tarih", startDateTime)
@@ -553,6 +559,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
               >
                 <Box display={'flex'} gap={2} justifyContent={'space-around'}>
                   <DatePicker
+                    disabled={monitor.maintanance?.status||false}
                     label="Başlangıç Tarih"
                     slotProps={{
                       popper: {
@@ -589,6 +596,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                   />
                   <Divider orientation="vertical" variant="large" flexItem />
                   <TimePicker
+                    disabled={monitor.maintanance?.status||false}
                     minutesStep={1}
                     timeSteps={{ minutes: 1 }}
                     views={['hours', 'minutes']}
@@ -596,7 +604,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                     ampm={false}
                     label="Başlangıç Zaman"
                     value={monitor?.maintanance?dayjs(monitor.maintanance.startTime) : startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
+                    onChange={(newValue) => setStarTime(newValue)}
                     slotProps={{
                       textField: {
                         size: 'small',
@@ -624,6 +632,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
 
                 <Box display={'flex'} gap={2} justifyContent={'space-around'}>
                   <DatePicker
+                    disabled={monitor.maintanance?.status||false}
                     label="Bitiş Tarih"
                     value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
                     onChange={(newValue) => setEndDate(newValue)}
@@ -660,6 +669,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                   />
                   <Divider orientation="vertical" flexItem />
                   <TimePicker
+                    disabled={monitor.maintanance?.status||false}
                     minutesStep={1}
                     timeSteps={{ minutes: 1 }}
                     views={['hours', 'minutes']}
@@ -667,7 +677,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                     ampm={false}
                     label="Bitiş Zaman"
                     value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
+                    onChange={(newValue) => setEndTime(newValue)}
                     slotProps={{
                       textField: {
                         size: 'small',
