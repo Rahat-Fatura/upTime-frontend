@@ -10,7 +10,6 @@ import {
   Divider,
 } from '@mui/material'
 import WorkIcon from '@mui/icons-material/Work'
-import AdminSidebar from '../../components/adminSideBar/adminSideBar'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday'
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined'
@@ -29,39 +28,7 @@ const UserDetail = () => {
   userInfo.password='';
   const [isOpen, setIsOpen] = useState(true)
   const navigate = useNavigate()
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
-  /*useEffect(() => {
-    const sideBarOpen = localStorage.get("sidebar");
-
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
-
-    const cleanupLocalStorage = () => {
-      localStorage.clear();
-    };
-    window.addEventListener("beforeunload", cleanupLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", cleanupLocalStorage);
-    };
-  }, []);*/
-  /*const [userInfo, setUserInfo] = useState({
-    name: "Mustafa",
-    surname: "Teker",
-    email:"mstftkr99@gmail.com",
-    number:"5310000000",
-    country:"Türkiye",
-    language:"Türkçe",
-    organization:"EtrSoft",
-    address:"Nivo Ataköy",
-    state:"İstanbul",
-    zipCode:"34200",
-    role:"Yazılımcı"
-  });*/
+  
   const [userStatus, setUserStatus] = useState(true) //Kullanıcının aktif pasiflik durumunu belirtir.
   const [selectedButtonId, setSelectedButtonId] = useState(1)
 
@@ -105,9 +72,7 @@ const UserDetail = () => {
   }
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
+
       <Grid
         item
         md={isOpen ? 9.7 : 11.3}

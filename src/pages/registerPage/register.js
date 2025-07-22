@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { useFormik } from 'formik'
 import { registerFormSchema } from '../../utils/formSchema/formSchemas'
@@ -26,6 +26,8 @@ const Register = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
+  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
 
   const submit = async (values,action) => {
       axios
@@ -63,11 +65,16 @@ const Register = () => {
       },
       validationSchema: registerFormSchema,
       onSubmit: submit,
-      validateOnChange: false,
-      validateOnBlur: false
+      validateOnChange: vaidateOnChangeState,
+      validateOnBlur: vaidateOnBlurState,
   });
 
-  
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidateOnChangeState(true);
+      setValidateOnBlurState(false);
+    }
+  }, [errors]);
 
   return (
     <Box

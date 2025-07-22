@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import api from '../../api/auth/axiosInstance'
-import Sidebar from '../../components/sideBar/sideBar'
 import Swal from 'sweetalert2'
 import {
   Card,
@@ -57,7 +56,6 @@ const TimeInfoBox = styled(Box)(({ theme }) => ({
 }))
 
 export default function MaintanancePage() {
-  const [isOpen, setIsOpen] = useState(false)
   const [monitors, setMonitors] = useState([])
   const [filteredMonitors, setFilteredMonitors] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -70,9 +68,6 @@ export default function MaintanancePage() {
     severity: 'success',
   })
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
 
   useEffect(() => {
     const interval = setInterval(fetchMonitors, 60000)
@@ -286,14 +281,7 @@ export default function MaintanancePage() {
     }
   }
   useEffect(() => {
-    const sideBarOpen = localStorage.get('sidebar')
-
-    if (sideBarOpen === 'false') {
-      setIsOpen(false)
-    } else {
-      setIsOpen(true)
-    }
-
+  
     const cleanupLocalStorage = () => {
       localStorage.clear()
     }
@@ -305,25 +293,7 @@ export default function MaintanancePage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box
-        sx={{
-          width: {
-            xs: isOpen ? '100%' : 0,
-            sm: isOpen ? '100%' : 0,
-            md: isOpen ? '30%' : '2.5%',
-            lg: isOpen ? '19.16%' : '6.5%',
-            xlg: isOpen ? '19.16%' : '2.5%',
-          },
-          flexShrink: 0,
-          transition: 'width 0.3s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
+     
       <Box
         sx={{
           flexGrow: 1,
@@ -337,13 +307,7 @@ export default function MaintanancePage() {
           //minHeight: '100vh',
           position: 'relative',
           zIndex: 1,
-          width: {
-            xs: isOpen ? 0 : '100%',
-            sm: isOpen ? 0 : '100%',
-            md: isOpen ? '30%' : '2.5%',
-            lg: isOpen ? '78%' : '80%',
-            xlg: isOpen ? '80.74%' : '97.5%',
-          },
+          width: '100%',
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -375,19 +339,7 @@ export default function MaintanancePage() {
             >
               Bakım Sayfası
             </Typography>
-            <IconButton
-              onClick={toggleSidebar}
-              sx={{
-                display: { xs: 'flex', sm: 'none' },
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+           
           </Box>
           <Divider sx={{ mb: 2 }} />
           <Box

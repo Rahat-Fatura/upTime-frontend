@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import WorkIcon from "@mui/icons-material/Work";
 import localStorage from "local-storage";
-import Sidebar from "../../components/sideBar/sideBar";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
@@ -23,10 +22,6 @@ import api from "../../api/auth/axiosInstance.js";
 import { Password } from "@mui/icons-material";
 import { updateCacheWithNewRows } from "@mui/x-data-grid/hooks/features/rows/gridRowsUtils.js";
 const ProfilePage = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
   const [userInfo, setUserInfo] = useState({
     /*name: cookies.get("user").name,
     email:cookies.get("user").email,
@@ -68,13 +63,7 @@ const ProfilePage = () => {
     setSelectedButtonId(buttonId);
   };
   useEffect(() => {
-    const sideBarOpen = localStorage.get("sidebar");
-
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
+ 
 
     const cleanupLocalStorage = () => {
       localStorage.clear();
@@ -85,23 +74,19 @@ const ProfilePage = () => {
     };
   }, []);
   return (
-    <Grid container>
-      <Grid item md={isOpen?2.3:0.75}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
+    <Grid container >
       <Grid
         item
-        md={isOpen?9.7:11.25}
+        xs={11.5}
+        md={12}
         sx={{
           display: "flex",
           justifyContent: "flex-end",
           flexDirection: "column",
-          pr: "4vh",
+         
         }}
       >
         <Grid //Profil Header Alanı
-          item
-          md={12}
           sx={{
             marginTop: "3vh",
             backgroundColor: "white",

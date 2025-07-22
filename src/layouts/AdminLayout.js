@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
+import AdminSidebar from "../components/adminSideBar/adminSideBar"; // Admin'e özel bir sidebar yapabilirsin
 import localStorage from "local-storage";
 import { Grid } from "@mui/material";
 import Navbar from "../components/navbar/navbar";
-import AdminSidebar from "../../components/adminSideBar/adminSideBar";
 
 const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(true);

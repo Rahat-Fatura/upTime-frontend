@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import AdminSidebar from '../../components/adminSideBar/adminSideBar'
 import api from '../../api/auth/axiosInstance'
 import {
   Grid,
@@ -25,16 +24,13 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Swal from 'sweetalert2'
 
 const NewUser = () => {
-  const [isOpen, setIsOpen] = useState(true)
   const [userName, setUserName] = useState()
   const [email, setEmail] = useState()
   const [password, setPassword] = useState()
   const [showPassword, setShowPassword] = useState(false)
   const [role, setRole] = useState('user')
   const navigate = useNavigate()
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
+
 
   const handleChange = (event) => {
     setRole(event.target.value)
@@ -98,13 +94,9 @@ const NewUser = () => {
 
   return (
     <Grid container>
-      <Grid item sx={isOpen ? 12 : 0} md={isOpen ? 2.7 : 0.3}>
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
+     
       <Grid
         item
-        sx={isOpen ? 0 : 12}
-        md={isOpen ? 9.3 : 11.7}
         justifyContent="center"
       >
         <Grid

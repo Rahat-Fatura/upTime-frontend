@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import AdminSidebar from "../../components/adminSideBar/adminSideBar";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -25,12 +24,8 @@ import { Monitor } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 function AdminUsers() {
-  const [isOpen, setIsOpen] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-    console.log(isOpen);
-  };
+
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,13 +50,7 @@ function AdminUsers() {
     //getUsers();
     const lastPage = localStorage.get("page");
     const lastPageSize = localStorage.get("pageSize");
-    const sideBarOpen = localStorage.get("sidebar");
-    
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
+  
     if (lastPage) {
       setCurrentPage(lastPage);
     }
@@ -254,16 +243,9 @@ function AdminUsers() {
   }, []);
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <AdminSidebar
-          status={isOpen}
-          toggleSidebar={toggleSidebar}
-          location={"homePage"}
-        />
-      </Grid>
+      
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
         sx={{
           display: "flex",
           justifyContent: "flex-end",

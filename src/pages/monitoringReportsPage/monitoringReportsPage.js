@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import api from '../../api/auth/axiosInstance'
-import Sidebar from '../../components/sideBar/sideBar'
 import {
   Grid,
   Card,
@@ -39,15 +38,12 @@ import MenuIcon from '@mui/icons-material/Menu'
 import localStorage from 'local-storage'
 export default function MonitoringReportsPage() {
   const theme = useTheme()
-  const [isOpen, setIsOpen] = useState(true)
   const [logs, setLogs] = useState([])
   const [filteredLogs, setFilteredLogs] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
+
 
   useEffect(() => {
     if (!logs || logs.length === 0) {
@@ -121,13 +117,7 @@ export default function MonitoringReportsPage() {
   }, [])
 
   useEffect(() => {
-        const sideBarOpen = localStorage.get("sidebar");
-    
-        if (sideBarOpen === "false") {
-          setIsOpen(false);
-        } else {
-          setIsOpen(true);
-        }
+       
     
         const cleanupLocalStorage = () => {
           localStorage.clear();
@@ -162,34 +152,10 @@ export default function MonitoringReportsPage() {
     <Box
       sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}
     >
+   
       <Box
         sx={{
-          width: {
-            xs: isOpen ? '100%' : 0,
-            sm: isOpen ? '100%' : 0,
-            md: isOpen ? '30%' : '2.5%',
-            lg: isOpen ? '19.16%' : '6.5%',
-            xlg: isOpen ? '19.16%' : '2.5%',
-          },
-          flexShrink: 0,
-          transition: 'width 0.3s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
-      <Box
-        sx={{
-          width: {
-            xs: isOpen ? 0 : '100%',
-            sm: isOpen ? 0 : '100%',
-            md: isOpen ? '30%' : '2.5%',
-            lg: isOpen ? '78%' : '80%',
-            xlg: isOpen ? '80.74%' : '97.5%',
-          },
+          width: '100%',
           flexGrow: 1,
           pt: { xs: 2, sm: 3 },
           pr: { xs: 2, sm: 3 },
@@ -226,19 +192,7 @@ export default function MonitoringReportsPage() {
           >
             İzleme Raporları
           </Typography>
-          <IconButton
-            onClick={toggleSidebar}
-            sx={{
-              display: { xs: 'flex', sm: 'none' },
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              },
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+         
         </Box>
         <Divider sx={{ mb: 2 }} />
         <Box sx={{

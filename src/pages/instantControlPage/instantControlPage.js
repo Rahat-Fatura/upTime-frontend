@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import api from '../../api/auth/axiosInstance'
-import Sidebar from '../../components/sideBar/sideBar'
 import {
   Box,
   Card,
@@ -67,7 +66,6 @@ const StatusIndicator = styled(Box)(({ theme, status }) => ({
 
 export default function InstantControlPage() {
   const theme = useTheme()
-  const [isOpen, setIsOpen] = useState(true)
   const [statusPages, setStatusPages] = useState([])
   const [filteredPages, setFilteredPages] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -75,9 +73,6 @@ export default function InstantControlPage() {
   const [requestResults, setRequestResults] = useState({})
   const [loadingRequests, setLoadingRequests] = useState({})
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
 
   useEffect(() => {
     if (!statusPages || statusPages.length === 0) {
@@ -169,19 +164,7 @@ export default function InstantControlPage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box
-        sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 240 },
-          flexShrink: 0,
-          transition: 'width 0.3s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
+     
       <Box
         sx={{
           flexGrow: 1,
@@ -193,7 +176,7 @@ export default function InstantControlPage() {
           ml: { xs: 0, sm: '120px'},
           mr: { xs: 0, sm: '120px'},
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
+          width:'100%'
         }}
       >
         <Box sx={{ 
@@ -215,19 +198,7 @@ export default function InstantControlPage() {
           >
             Anlık Kontrol Sayfası
           </Typography>
-          <IconButton
-            onClick={toggleSidebar}
-            sx={{ 
-              display: { xs: 'flex', sm: 'none' },
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+        
         </Box>
         <Divider sx={{ mb: 4 }} />
 

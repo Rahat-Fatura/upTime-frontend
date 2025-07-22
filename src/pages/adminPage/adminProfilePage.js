@@ -10,7 +10,6 @@ import {
   Divider,
 } from "@mui/material";
 import WorkIcon from "@mui/icons-material/Work";
-import AdminSidebar from "../../components/adminSideBar/adminSideBar";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
@@ -19,19 +18,8 @@ import AdminInfo from "./adminProfileInfoPage.js";
 import AdminSettings from "./adminProfileSettingsPage.js";
 import localStorage from "local-storage";
 const AdminSettingsPage = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+ 
   useEffect(() => {
-    const sideBarOpen = localStorage.get("sidebar");
-
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
-
     const cleanupLocalStorage = () => {
       localStorage.clear();
     };
@@ -62,12 +50,10 @@ const AdminSettingsPage = () => {
 
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
+ 
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
+       
         sx={{
           display: "flex",
           justifyContent: "flex-end",

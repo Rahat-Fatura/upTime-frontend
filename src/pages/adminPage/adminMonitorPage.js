@@ -36,10 +36,8 @@ import {
 import { DataGrid } from '@mui/x-data-grid'
 import { Edit, ReportAnalytics } from 'tabler-icons-react'
 import { INITIAL_STATS } from './constants/monitorConstants'
-import Sidebar from '../../components/sideBar/sideBar'
 import * as Yup from 'yup'
 import { useNavigate } from 'react-router-dom'
-import AdminSidebar from '../../components/adminSideBar/adminSideBar'
 import NextPlanIcon from '@mui/icons-material/NextPlan';
 import Swal from 'sweetalert2'
 
@@ -160,10 +158,7 @@ export default function AdmimMonitors() {
       .required('allowedStatusCodes zorunludur!'),
   })
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-    console.log(isOpen)
-  }
+  
 
   const handleSubmit = async (e) => {
     navigate('/admin/monitors/new/http',{state: { userInfo }})
@@ -711,19 +706,7 @@ export default function AdmimMonitors() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <Box
-        sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 300 },
-          flexShrink: 0,
-          transition: 'width 0.3s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
+     
       <Box
         sx={{
           flexGrow: 1,
@@ -762,19 +745,7 @@ export default function AdmimMonitors() {
           >
             {userInfo?userInfo.name:'...'}'ın izleme Sayfası
           </Typography>
-          <IconButton
-            onClick={toggleSidebar}
-            sx={{
-              display: { xs: 'flex', sm: 'none' },
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              },
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+          
         </Box>
         <Divider sx={{ mb: 4 }} />
 

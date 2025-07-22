@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "../../components/sideBar/sideBar";
-import Navbar from "../../components/navbar/navbar";
+import Sidebar from "../components/sideBar/sideBar";
+import Navbar from "../components/navbar/navbar";
 import localStorage from "local-storage";
 import { Box, Grid } from "@mui/material";
 
@@ -52,7 +52,7 @@ const MainLayout = () => {
         }}
       >
         <Box sx={{ width: "100%", paddingRight: { xs: "10px", sm: "20px" } }}>
-         
+          <Navbar />
           <Outlet />
         </Box>
       </Box>

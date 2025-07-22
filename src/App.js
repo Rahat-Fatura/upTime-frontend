@@ -65,45 +65,46 @@ const NotFound = () => {
 }
 
 function AppRoutes() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [isLoading, setIsLoading] = useState(true)
   useEffect(() => {
     const checkAuth = async () => {
-      const jwtToken = cookies.get("jwt-access");
-      if (jwtToken && !location.pathname.includes("/verify-email")) {
-        const decodedToken = jwtDecode(jwtToken);
-        const userRole = decodedToken.role;
-        if (
-          userRole === "admin" && !location.pathname.startsWith("/admin")
+      const jwtToken = cookies.get('jwt-access')
+      if (jwtToken && !location.pathname.includes('/verify-email')) {
+        const decodedToken = jwtDecode(jwtToken)
+        const userRole = decodedToken.role
+        if (userRole === 'admin' && !location.pathname.startsWith('/admin')) {
+          navigate('/admin')
+        } else if (
+          userRole === 'user' &&
+          !location.pathname.startsWith('/user')
         ) {
-          navigate("/admin");
-        }
-        else if (
-          userRole === "user" &&
-          !location.pathname.startsWith("/user")
+          navigate('/user')
+        } else if (
+          userRole === 'user' &&
+          location.pathname.startsWith('/admin')
         ) {
-          navigate("/user");
-        }
-        else if (
-          userRole === "user" &&
-          location.pathname.startsWith("/admin")
-        ) {
-          navigate("/NotFound");
+          navigate('/NotFound')
         }
       } else if (!jwtToken) {
         if (
-          !["/register", "/forgot-password", "/reset-password", "/login","/verify-email", "/"].includes(
-            location.pathname
-          ) 
+          ![
+            '/register',
+            '/forgot-password',
+            '/reset-password',
+            '/login',
+            '/verify-email',
+            '/',
+          ].includes(location.pathname)
         ) {
-          navigate("/");
+          navigate('/')
         }
       }
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, [navigate, location]);
+      setIsLoading(false)
+    }
+    checkAuth()
+  }, [navigate, location])
 
   if (isLoading) {
     return <div>...</div> // veya bir yükleme spinner'ı
@@ -111,88 +112,78 @@ function AppRoutes() {
 
   return (
     <Routes>
-        <Route
-          index
-          element={
-            <LandingPage />
-          }
-        />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/register" element={<Register />} />
+      <Route index element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/user/verify-email" element={<VerifyEmailPage />} />
 
+      <Route path="/admin" element={<AdminUsers />} />
+      <Route path="/admin/settings" element={<AdminSettings />} />
+      <Route path="/admin/users" element={<AdminUsers />} />
+      <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
+      <Route path="/admin/userDetail" element={<UserDetail />} />
+      <Route path="/admin/monitors/maintanance" element={<AdminMaintance />} />
+      <Route path="/admin/newUser" element={<NewUser />} />
+      <Route path="/admin/monitors/new/http" element={<NewMonitorPage />} />
+      <Route
+        path="/admin/monitors/:id/http"
+        element={<NewMonitorPage update={true} />}
+      />
+
+      <Route
+        path="/admin/monitors/new/ping"
+        element={<PingMonitorFormPage />}
+      />
+      <Route
+        path="/admin/monitors/:id/ping"
+        element={<PingMonitorFormPage update={true} />}
+      />
+
+      <Route
+        path="/admin/monitors/new/port"
+        element={<PortMonitorFormPage />}
+      />
+      <Route
+        path="/admin/monitors/:id/port"
+        element={<PortMonitorFormPage update={true} />}
+      />
+
+      <Route
+        path="/admin/monitors/new/keyword"
+        element={<KeyWordMonitorFormPage />}
+      />
+      <Route
+        path="/admin/monitors/:id/keyword"
+        element={<KeyWordMonitorFormPage update={true} />}
+      />
+
+      <Route
+        path="/admin/monitors/new/cronjob"
+        element={<CronJobMonitorFormPage />}
+      />
+      <Route
+        path="/admin/monitors/:id/cronjob"
+        element={<CronJobMonitorFormPage update={true} />}
+      />
+      <Route
+        path="/admin/monitors/report"
+        element={<AdminMonitoringReportsPage />}
+      />
+
+      <Route path="/" element={<MainLayout />}>
         <Route path="/user/profile" element={<ProfilePage />} />
-        <Route path="/user/verify-email" element={<VerifyEmailPage />} />
         <Route path="/user/gridPage" element={<GridPage />} />
-
-        <Route path="/admin" element={<AdminUsers />} />
-        <Route path="/admin/settings" element={<AdminSettings />} />
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
-        <Route path="/admin/userDetail" element={<UserDetail/>} />
-        <Route path="/admin/monitors/maintanance" element={<AdminMaintance/>} />
-        <Route path="/admin/newUser" element={<NewUser/>} />
-        <Route path="/admin/monitors/new/http" element={<NewMonitorPage />} />
-        <Route
-          path="/admin/monitors/:id/http"
-          element={<NewMonitorPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/ping"
-          element={<PingMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/ping"
-          element={<PingMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/port"
-          element={<PortMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/port"
-          element={<PortMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/keyword"
-          element={<KeyWordMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/keyword"
-          element={<KeyWordMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/cronjob"
-          element={<CronJobMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/cronjob"
-          element={<CronJobMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/admin/monitors/report"
-          element={<AdminMonitoringReportsPage />}
-        />
-
-
-
-
-
         <Route path="/user/" element={<Dashboard />} />
         <Route path="/user/monitors" element={<Dashboard />} />
-        <Route path="/user/monitors/:id/detail" element={<MonitorDetail/>} />
+        <Route path="/user/monitors/:id/detail" element={<MonitorDetail />} />
         <Route path="/user/monitors/new/http" element={<NewMonitorPage />} />
         <Route
           path="/user/monitors/:id/http"
           element={<NewMonitorPage update={true} />}
         />
-
         <Route
           path="/user/monitors/new/ping"
           element={<PingMonitorFormPage />}
@@ -237,7 +228,7 @@ function AppRoutes() {
         <Route path="/user/teamMembers" element={<TeamMembersPage />} />
         <Route path="/user/integrationsApi" element={<IntegrationsPage />} />
         <Route path="*" element={<NotFound />} />
-      
+      </Route>
     </Routes>
   )
 }

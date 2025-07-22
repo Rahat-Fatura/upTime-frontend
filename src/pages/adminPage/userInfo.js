@@ -22,8 +22,8 @@ import { Password, TimerOutlined, Update, Verified } from "@mui/icons-material";
 
 const UserProfileInfoPage = ({ userInfo}) => {
   return (
-    <Grid item md={12} className="grid-area">
-      <Card>
+    <Grid item xs={11.5} md={12} className="grid-area">
+      <Card sx={{width: '100%'}}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item md={5}>

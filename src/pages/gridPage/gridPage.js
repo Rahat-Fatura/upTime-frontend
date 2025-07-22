@@ -1,7 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 
-import Sidebar from "../../components/sideBar/sideBar";
-import Navbar from "../../components/navbar/navbar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import KeyboardDoubleArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardDoubleArrowLeftOutlined";
@@ -53,7 +51,6 @@ function GridPage() {
     setEndDate((prevDate) => prevDate.clone().add(1, "month").endOf("month"));
   };
 
-  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [pageSize, setPageSize] = useState(50);
@@ -65,11 +62,7 @@ function GridPage() {
   useEffect(() => {
     const lastPage = localStorage.get("page");
     const lastPageSize = localStorage.get("pageSize");
-    const sideBarOpen = localStorage.get("sidebar");
 
-    if (sideBarOpen==="false") {
-      setIsOpen(false)
-    }else{setIsOpen(true)}
     if (lastPage) {
       setCurrentPage(lastPage);
     }
@@ -92,9 +85,6 @@ function GridPage() {
   function clearLocalStorage() {
     localStorage.clear();
   }
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
 
   const defaultColDef = useMemo(
     () => ({
@@ -232,12 +222,9 @@ function GridPage() {
 
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
+   
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
         sx={{
           display: "flex",
           justifyContent: "flex-end",
@@ -246,9 +233,7 @@ function GridPage() {
           pr: "4vh",
         }}
       >
-        <Grid item xs={12}>
-          <Navbar />
-        </Grid>
+      
         <Grid item md={12} sx={{ display: "flex", flexDirection: "column" }}>
           <Grid item md={12} sx={{ mt: 1 }}>
             <Alert

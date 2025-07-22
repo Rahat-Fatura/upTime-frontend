@@ -19,7 +19,6 @@ import {
 } from '@mui/material'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import Sidebar from '../../components/sideBar/sideBar'
 import MonitorStatus from '../../components/Animate/monitorStatus'
 import ReportTable from '../../components/reportTable'
 import api from '../../api/auth/axiosInstance'
@@ -113,9 +112,6 @@ export default function MonitorDetail() {
       })
   }
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
 
   const handleEditButton = (monitor) => {
     switch (monitor.monitorType) {
@@ -399,13 +395,7 @@ export default function MonitorDetail() {
   }
 
    useEffect(() => {
-      const sideBarOpen = localStorage.get('sidebar')
-  
-      if (sideBarOpen === 'false') {
-        setIsOpen(false)
-      } else {
-        setIsOpen(true)
-      }
+   
   
       const cleanupLocalStorage = () => {
         localStorage.clear()
@@ -416,21 +406,13 @@ export default function MonitorDetail() {
       }
     }, [])
   return monitor ? (
-    <Grid container spacing={2}>
-      <Grid item md={isOpen ? 2.3 : 0.75}>
-        <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Grid>
-      <Grid
-        item
-        md={isOpen ? 9.7 : 11.25}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          mt: 2,
-          flexShrink: 0,
-          flexGrow: 1,
-        }}
-      >
+    <Grid container>
+          <Grid
+            item
+            xs={11.5}
+            md={12}
+            sx={{  backgroundColor: '#f8f9fa', width: '100%' }}
+          >
         <Grid item md={12} sx={{ mb: 2 }}>
           <Grid item md={12} sx={{ display: 'flex' }}>
             <Grid md={6.5} sx={{ display: 'flex', alignItems: 'self-start' }}>

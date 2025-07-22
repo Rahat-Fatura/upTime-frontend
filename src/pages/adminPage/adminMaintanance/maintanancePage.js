@@ -33,16 +33,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import MenuIcon from '@mui/icons-material/Menu'
 import { useLocation } from 'react-router-dom';
-import AdminSidebar from '../../../components/adminSideBar/adminSideBar';
 
-const StatusBadge = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(0.5, 1),
-  borderRadius: theme.shape.borderRadius,
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing(0.5),
-  fontWeight: 500,
-}))
 
 const TimeInfoBox = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -55,7 +46,6 @@ const TimeInfoBox = styled(Box)(({ theme }) => ({
 }))
 
 export default function AdminMaintanance() {
-  const [isOpen, setIsOpen] = useState(true)
   const [monitors, setMonitors] = useState([])
   const [filteredMonitors, setFilteredMonitors] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
@@ -69,9 +59,6 @@ export default function AdminMaintanance() {
     severity: 'success',
   })
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
 
   useEffect(() => {
     const interval = setInterval(fetchMonitors, 60000)
@@ -284,19 +271,7 @@ export default function AdminMaintanance() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box
-        sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 240 },
-          flexShrink: 0,
-          transition: 'width 0.8s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
+      
       <Box
         sx={{
           flexGrow: 1,
@@ -308,7 +283,7 @@ export default function AdminMaintanance() {
           minHeight: '100vh',
           position: 'relative',
           zIndex: 1,
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '0px'})` },
+          width: '100%'
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -332,19 +307,7 @@ export default function AdminMaintanance() {
             >
               Bakım Sayfası
             </Typography>
-            <IconButton
-              onClick={toggleSidebar}
-              sx={{ 
-                display: { xs: 'flex', sm: 'none' },
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                }
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
+           
           </Box>
           <Divider sx={{ mb: 4 }} />
 

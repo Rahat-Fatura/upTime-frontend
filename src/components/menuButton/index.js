@@ -394,7 +394,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         setMonitors((prevMonitors) =>
           prevMonitors.map((m) =>
             m.id === monitor.id
-              ? { ...m, maintanance: Object.assign(m.maintanance||{startTime:startDateTime,endTime: endDateTime},{status: true}),status: now>=startDateTime? 'maintanance': m.status}
+              ? { ...m, maintanance: Object.assign(m.maintanance||{startTime:startDateTime,endTime: endDateTime},{status: true})}
               : m
           )
         )
@@ -591,7 +591,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                         },
                       },
                     }}
-                    value={monitor?.maintanance?dayjs(monitor.maintanance.startTime) : startDate}
+                    value={monitor?.maintanance?.status?dayjs(monitor.maintanance.startTime) : startDate}
                     onChange={(newValue) => setStartDate(newValue)}
                   />
                   <Divider orientation="vertical" variant="large" flexItem />
@@ -603,7 +603,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                     openTo="hours"
                     ampm={false}
                     label="Başlangıç Zaman"
-                    value={monitor?.maintanance?dayjs(monitor.maintanance.startTime) : startDate}
+                    value={monitor?.maintanance?.status?dayjs(monitor.maintanance.startTime) : startTime}
                     onChange={(newValue) => setStarTime(newValue)}
                     slotProps={{
                       textField: {
@@ -634,7 +634,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                   <DatePicker
                     disabled={monitor.maintanance?.status||false}
                     label="Bitiş Tarih"
-                    value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
+                    value={monitor?.maintanance?.status?dayjs(monitor.maintanance.endTime) : endDate}
                     onChange={(newValue) => setEndDate(newValue)}
                     slotProps={{
                       popper: {
@@ -676,7 +676,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                     openTo="hours"
                     ampm={false}
                     label="Bitiş Zaman"
-                    value={monitor?.maintanance?dayjs(monitor.maintanance.endTime) : endDate}
+                    value={monitor?.maintanance?.status?dayjs(monitor.maintanance.endTime) : endTime}
                     onChange={(newValue) => setEndTime(newValue)}
                     slotProps={{
                       textField: {

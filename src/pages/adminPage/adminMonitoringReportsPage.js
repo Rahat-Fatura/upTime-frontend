@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import api from '../../api/auth/axiosInstance'
-import Sidebar from '../../components/sideBar/sideBar'
 import {
   Grid,
   Card,
@@ -27,21 +26,17 @@ import Paper from '@mui/material/Paper'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import SearchIcon from '@mui/icons-material/Search'
 import MenuIcon from '@mui/icons-material/Menu'
-import AdminSidebar from '../../components/adminSideBar/adminSideBar'
 import { useLocation } from 'react-router-dom'
 
 export default function AdminMonitoringReportsPage() {
   const theme = useTheme()
-  const [isOpen, setIsOpen] = useState(true)
   const [logs, setLogs] = useState([])
   const [filteredLogs, setFilteredLogs] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const location = useLocation();
   const userInfo = location.state.userInfo;
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
+ 
 
   useEffect(() => {
     if (!logs || logs.length === 0) {
@@ -129,19 +124,7 @@ export default function AdminMonitoringReportsPage() {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box
-        sx={{
-          width: { xs: isOpen ? '100%' : 0, sm: 240 },
-          flexShrink: 0,
-          transition: 'width 0.3s',
-          position: { xs: 'fixed', sm: 'relative' },
-          zIndex: 1000,
-          height: { xs: '100vh', sm: 'auto' },
-          display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-        }}
-      >
-        <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-      </Box>
+    
       <Box
         sx={{
           flexGrow: 1,
@@ -153,7 +136,7 @@ export default function AdminMonitoringReportsPage() {
           ml: { xs: 0, sm: '120px'},
           mr: { xs: 0, sm: '120px'},
           transition: 'margin-left 0.3s',
-          width: { xs: '100%', sm: `calc(100% - ${isOpen ? '240px' : '240px'})` },
+          width:'100%'
         }}
       >
         <Box sx={{ 
@@ -175,19 +158,7 @@ export default function AdminMonitoringReportsPage() {
           >
             {userInfo.name}'ın izleme raporları
           </Typography>
-          <IconButton
-            onClick={toggleSidebar}
-            sx={{ 
-              display: { xs: 'flex', sm: 'none' },
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-              }
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+         
         </Box>
         <Divider sx={{ mb: 4 }} />
 

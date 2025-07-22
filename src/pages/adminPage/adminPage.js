@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useEffect } from "react";
-import AdminSidebar from "../../components/adminSideBar/adminSideBar";
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -8,18 +7,9 @@ import { Grid, Typography, Button, TextField } from "@mui/material";
 
 import localStorage from "local-storage";
 function AdminPage() {
-  const [isOpen, setIsOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+ 
   useEffect(() => {
-    const sideBarOpen = localStorage.get("sidebar");
-
-    if (sideBarOpen === "false") {
-      setIsOpen(false);
-    } else {
-      setIsOpen(true);
-    }
+  
 
     const cleanupLocalStorage = () => {
       localStorage.clear();
@@ -31,16 +21,10 @@ function AdminPage() {
   }, []);
   return (
     <Grid container>
-      <Grid item md={isOpen ? 2.3 : 0.7}>
-        <AdminSidebar
-          status={isOpen}
-          toggleSidebar={toggleSidebar}
-          location={"homePage"}
-        />
-      </Grid>
+      
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
+        
         sx={{
           display: "flex",
           justifyContent: "flex-end",

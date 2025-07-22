@@ -19,12 +19,11 @@ import LanguageIcon from "@mui/icons-material/Language";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import { Password, TimerOutlined, Update, Verified } from "@mui/icons-material";
-import { Handshake, ManageAccounts, ManageAccountsRounded, RollerShades, WorkOutlineRounded } from "@mui/icons-material";
 import { AddressBook, HandThreeFingers, Trees } from "tabler-icons-react";
 
 const UserProfileInfoPage = ({ userInfo}) => {
   return (
-    <Grid item md={12} className="grid-area">
+    <Grid item  className="grid-area">
       <Card>
         <CardContent>
           <Grid container spacing={2}>

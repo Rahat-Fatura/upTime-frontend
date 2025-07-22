@@ -1,89 +1,47 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useState, useEffect } from 'react'
-import Sidebar from '../../components/sideBar/sideBar'
 import api from '../../api/auth/axiosInstance'
 import Swal from 'sweetalert2'
 import { useFormik } from 'formik'
 import {
   Box,
-  Container,
   Typography,
-  Paper,
   Grid,
-  AppBar,
-  Toolbar,
   Button,
   TextField,
   MenuItem,
   FormControl,
-  FormControlLabel,
-  FormGroup,
-  RadioGroup,
-  Radio,
-  Checkbox,
-  InputLabel,
   Select,
   Divider,
-  Tab,
-  Tabs,
-  IconButton,
-  Avatar,
-  Tooltip,
-  NativeSelect,
-  Card,
-  CardContent,
-  Chip,
   FormHelperText,
   Slider,
   useTheme,
   Alert,
-  Menu,
 } from '@mui/material'
 import {
-  Language as LanguageIcon,
   Timer as TimerIcon,
-  Notifications as NotificationsIcon,
-  ArrowBack as ArrowBackIcon,
-  Help as HelpIcon,
   Public as PublicIcon,
   Code as CodeIcon,
-  Storage as StorageIcon,
   DeveloperBoard as DeveloperBoardIcon,
-  Email as EmailIcon,
-  Info as InfoIcon,
-  Close as CloseIcon,
-  KeyboardArrowDown as KeyboardArrowDownIcon,
-  Menu as MenuIcon
 } from '@mui/icons-material'
 import ComputerIcon from '@mui/icons-material/Computer'
-import { width } from '@mui/system'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import {
-  HTTP_METHODS,
-  INTERVAL_UNITS,
-  REPORT_TIME_UNITS,
-} from './constants/monitorConstants'
+import { INTERVAL_UNITS } from './constants/monitorConstants'
 import { jwtDecode } from 'jwt-decode'
 import { cookies } from '../../utils/cookie'
-import AdminSidebar from '../../components/adminSideBar/adminSideBar'
 import { newPingMonitorFormShhema } from '../../utils/formSchema/formSchemas'
-const pingMonitorFormPage = (update = false) => {
+
+const PingMonitorFormPage = (update = false) => {
   const [params, setParams] = useState(useParams())
   const [monitorType, setMonitorType] = useState('ping')
-  const [alertContacts, setAlertContacts] = useState([])
-  const [activeTab, setActiveTab] = useState(0)
-  const [isOpen, setIsOpen] = useState(true)
   const [min, setMin] = useState()
   const [max, setMax] = useState()
-  const [emailInput, setEmailInput] = useState('')
-  const [emailList, setEmailList] = useState([])
-  const [anchorEl, setAnchorEl] = useState(null)
   const [role, setRole] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
-  const theme = useTheme();
-
+  const theme = useTheme()
+  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
+  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
 
   useEffect(() => {
     const fetchMonitorData = async () => {
@@ -96,11 +54,10 @@ const pingMonitorFormPage = (update = false) => {
         }
         const response = await api.get(`monitors/ping/${params.id}`)
         console.log(response.data)
-        values.name=response.data.monitor.name;
-        values.host= response.data.host;
-        values.interval= response.data.monitor.interval;
-        values.intervalUnit= response.data.monitor.intervalUnit;
-        setEmailList(response.data.monitor.alertContacts || [])
+        values.name = response.data.monitor.name
+        values.host = response.data.host
+        values.interval = response.data.monitor.interval
+        values.intervalUnit = response.data.monitor.intervalUnit
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -127,17 +84,23 @@ const pingMonitorFormPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(values.interval >= 20 && values.interval < 60 ? values.interval : 20)
+        setInterval(
+          values.interval >= 20 && values.interval < 60 ? values.interval : 20
+        )
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(values.interval > 0 && values.interval < 60 ? values.interval : 1)
+        setInterval(
+          values.interval > 0 && values.interval < 60 ? values.interval : 1
+        )
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(values.interval > 0 && values.interval < 24 ? values.interval : 1)
+        setInterval(
+          values.interval > 0 && values.interval < 24 ? values.interval : 1
+        )
         setMin(1)
         setMax(23)
         return { min: 1, max: 23 }
@@ -218,99 +181,49 @@ const pingMonitorFormPage = (update = false) => {
     setMonitorType(event.target.value)
   }
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen)
-  }
-
   const turnMonitorPage = () => {
     role === 'user'
       ? navigate('/user/monitors/')
       : navigate('/admin/userMonitors/', { state: { userInfo } })
   }
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue)
-  }
+  const { values, errors, isValid, handleChange, handleSubmit } = useFormik({
+    isInitialValid: false,
+    initialValues: {
+      name: '',
+      host: '',
+      interval: 5,
+      intervalUnit: 'minutes',
+    },
+    validationSchema: newPingMonitorFormShhema,
+    onSubmit: update.update ? updateMonitor : createMonitor,
+    validateOnChange: vaidateOnChangeState,
+    validateOnBlur: vaidateOnBlurState,
+  })
 
-  const handleAddEmail = () => {
-    if (
-      isValidEmail(emailInput) &&
-      emailInput &&
-      !emailList.includes(emailInput)
-    ) {
-      setEmailList([...emailList, emailInput])
-      setEmailInput('')
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setValidateOnChangeState(true)
+      setValidateOnBlurState(false)
     }
-  }
+  }, [errors])
 
-  const handleRemoveEmail = (emailToRemove) => {
-    setEmailList(emailList.filter((email) => email !== emailToRemove))
-  }
+  useEffect(() => {
+    console.log('Interval Unit:', values.intervalUnit)
+    console.log('Interval Value:', values.interval)
+    getIntervalLimits(values.intervalUnit)
+  }, [values.intervalUnit])
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const isValidEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  }
-
-  const { values, errors, isValid, handleChange, handleSubmit,  } = useFormik({
-      isInitialValid: false,
-      initialValues: {
-        name: '',
-        host: '',
-        interval: 5,
-        intervalUnit: 'minutes',
-      },
-      validationSchema: newPingMonitorFormShhema,
-      onSubmit: update.update? updateMonitor: createMonitor,
-    })
-  
-      useEffect(() => {
-      console.log('Interval Unit:', values.intervalUnit)
-      console.log('Interval Value:', values.interval)
-      getIntervalLimits(values.intervalUnit)
-    }, [values.intervalUnit])
-  
-    return (
-      <Box sx={{ display: 'flex' }}>
+  return (
+    <Grid container>
+      <Grid
+        item
+        xs={11.5}
+        md={12}
+        sx={{ backgroundColor: '#f8f9fa', width: '100%' }}
+      >
         <Box
           sx={{
-            width: {
-              xs: isOpen ? '100%' : 0,
-              sm: isOpen ? '100%' : 0,
-              md: isOpen ? '15%' : 0,
-              lg: isOpen ? '19.16%' : '6.5%',
-              xlg: isOpen ? '19.16%' : '2.5%',
-            },
-            flexShrink: 0,
-            transition: 'width 0.3s',
-            position: { xs: 'fixed', sm: 'relative' },
-            zIndex: 1000,
-            height: { xs: '100vh', sm: 'auto' },
-            display: { xs: isOpen ? 'block' : 'none', sm: 'block' },
-          }}
-        >
-          {role === 'admin' ? (
-            <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-          ) : (
-            <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-          )}
-        </Box>
-        <Box
-          sx={{
-            width: {
-              xs: isOpen ? 0 : '100%',
-              sm: isOpen ? 0 : '100%',
-              md: isOpen ? '85%' : '100%',
-              lg: isOpen ? '78%' : '80%',
-              xlg: isOpen ? '80.74%' : '97.5%',
-            },
             flexShrink: 0,
             flexGrow: 1,
             pt: { xs: 2, sm: 3 },
@@ -346,21 +259,10 @@ const pingMonitorFormPage = (update = false) => {
                 },
               }}
             >
-              {update.update ? 'Ping Monitoring Güncelle' : 'Ping Monitoring Ekle'}
+              {update.update
+                ? 'Ping Monitoring Güncelle'
+                : 'Ping Monitoring Ekle'}
             </Typography>
-            <IconButton
-              onClick={toggleSidebar}
-              sx={{
-                display: { xs: 'flex', sm:  'flex', md: isOpen? 'none' : 'flex', lg: 'none', xlg: 'none' },
-                bgcolor: 'primary.main',
-                color: 'white',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
           </Box>
           <Divider sx={{ mb: 2 }} />
           {/* Monitor Type Selection */}
@@ -388,13 +290,13 @@ const pingMonitorFormPage = (update = false) => {
               <Grid item md={12}>
                 <Alert severity="info">
                   {monitorType === 'http'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/http')
-                          : navigate('/admin/monitors/new/http', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'ping'
-                        ? `Ping Monitörü, bir sunucunun çevrimiçi (erişilebilir)
+                    ? role === 'user'
+                      ? navigate('/user/monitors/new/http')
+                      : navigate('/admin/monitors/new/http', {
+                          state: { userInfo },
+                        })
+                    : monitorType === 'ping'
+                    ? `Ping Monitörü, bir sunucunun çevrimiçi (erişilebilir)
                            olup olmadığını kontrol etmek için ICMP protokolünü kullanarak
                            düzenli aralıklarla sinyal gönderir. Gönderilen bu 'ping' sinyallerine
                            sunucu cevap verirse, sunucunun aktif olduğu anlaşılır. Eğer yanıt
@@ -402,25 +304,25 @@ const pingMonitorFormPage = (update = false) => {
                            veya kesinti olarak değerlendirilir. Ping monitörü, özellikle ağ
                            bağlantısı takibi ve temel erişilebilirlik kontrolü için hızlı ve
                            etkili bir çözümdür.`
-                        : monitorType === 'port'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/port')
-                          : navigate('/admin/monitors/new/port', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'keyword'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/keyword')
-                          : navigate('/admin/monitors/new/keyword', {
-                              state: { userInfo },
-                            })
-                        : monitorType === 'cronjob'
-                        ? role === 'user'
-                          ? navigate('/user/monitors/new/cronjob')
-                          : navigate('/admin/monitors/new/cronjob', {
-                              state: { userInfo },
-                            })
-                        : 'Select a monitor type to get started.'}
+                    : monitorType === 'port'
+                    ? role === 'user'
+                      ? navigate('/user/monitors/new/port')
+                      : navigate('/admin/monitors/new/port', {
+                          state: { userInfo },
+                        })
+                    : monitorType === 'keyword'
+                    ? role === 'user'
+                      ? navigate('/user/monitors/new/keyword')
+                      : navigate('/admin/monitors/new/keyword', {
+                          state: { userInfo },
+                        })
+                    : monitorType === 'cronjob'
+                    ? role === 'user'
+                      ? navigate('/user/monitors/new/cronjob')
+                      : navigate('/admin/monitors/new/cronjob', {
+                          state: { userInfo },
+                        })
+                    : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>
             </Grid>
@@ -459,7 +361,11 @@ const pingMonitorFormPage = (update = false) => {
                         },
                       }}
                     >
-                      <MenuItem disabled={update.update ? true : false} value="http" sx={{ bgcolor: 'white' }}>
+                      <MenuItem
+                        disabled={update.update ? true : false}
+                        value="http"
+                        sx={{ bgcolor: 'white' }}
+                      >
                         <Box
                           sx={{
                             display: 'flex',
@@ -468,7 +374,7 @@ const pingMonitorFormPage = (update = false) => {
                             width: '100%',
                             //bgcolor: 'white',
                           }}
-                        > 
+                        >
                           <Box
                             sx={{
                               bgcolor: '#3f51b5',
@@ -494,7 +400,6 @@ const pingMonitorFormPage = (update = false) => {
                       </MenuItem>
                       <Divider />
                       <MenuItem
-                        
                         value="ping"
                         sx={{
                           bgcolor: 'white',
@@ -520,7 +425,9 @@ const pingMonitorFormPage = (update = false) => {
                               minWidth: 48,
                             }}
                           >
-                            <ComputerIcon sx={{ color: 'white', fontSize: 20 }} />
+                            <ComputerIcon
+                              sx={{ color: 'white', fontSize: 20 }}
+                            />
                           </Box>
                           <Box sx={{ flex: 1 }}>
                             <Typography variant="subtitle2" fontWeight="500">
@@ -609,7 +516,8 @@ const pingMonitorFormPage = (update = false) => {
                               KEYWORD
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              Web servislerdeki belirli anahtar kelimeleri izleyin
+                              Web servislerdeki belirli anahtar kelimeleri
+                              izleyin
                             </Typography>
                           </Box>
                         </Box>
@@ -851,7 +759,7 @@ const pingMonitorFormPage = (update = false) => {
                    </Box>
                  </Grid>
               </Grid> */}
-  
+
               <Grid
                 item
                 md={6}
@@ -888,24 +796,21 @@ const pingMonitorFormPage = (update = false) => {
                     width: '12rem',
                   }}
                   onClick={() => {
-                    if(isValid){
+                    if (isValid) {
                       if (update.update) {
                         handleSubmit()
-                      }
-                      else{
+                      } else {
                         handleSubmit()
                       }
-                    }
-                    else{
+                    } else {
                       Swal.fire({
                         icon: 'error',
                         title: 'Hata',
                         text: 'Lütfen Formu Tekrar Gözden Geçirin',
-                        confirmButtonText: 'Tamam'
-                      });
+                        confirmButtonText: 'Tamam',
+                      })
                       handleSubmit()
                     }
-                    
                   }}
                 >
                   {update.update ? 'Monitoring Güncelle' : 'Monitoring Oluştur'}
@@ -914,440 +819,9 @@ const pingMonitorFormPage = (update = false) => {
             </Grid>
           </Grid>
         </Box>
-      </Box>
-    )
-
-  // return (
-  //   <Box sx={{ display: 'flex' }}>
-  //     <Box sx={{ width: '240px' }}>
-  //       {console.log('Side', role)}
-  //       {role === 'admin' ? (
-  //         <AdminSidebar status={isOpen} toggleSidebar={toggleSidebar} />
-  //       ) : (
-  //         <Sidebar status={isOpen} toggleSidebar={toggleSidebar} />
-  //       )}
-  //     </Box>
-  //     <Box sx={{ flexGrow: 1 }}>
-  //       <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-  //         <Paper sx={{ p: 4 }}>
-  //           <Typography variant="h5" gutterBottom fontWeight="500">
-  //             {update.update ? 'İzleme Güncelle' : 'İzleme ekle'}
-  //           </Typography>
-
-  //           {/* Monitor Type Selection */}
-  //           <Box sx={{ mb: 4, mt: 3 }}>
-  //             <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-  //               İzleme tipi
-  //             </Typography>
-  //             <FormControl fullWidth>
-  //               <Select
-  //                 value={monitorType}
-  //                 onChange={handleMonitorTypeChange}
-  //                 displayEmpty
-  //                 sx={{
-  //                   '& .MuiSelect-select': {
-  //                     display: 'flex',
-  //                     alignItems: 'center',
-  //                     gap: 2,
-  //                     py: 2,
-  //                   },
-  //                 }}
-  //               >
-  //                 <MenuItem value="ping">
-  //                   <Box
-  //                     sx={{
-  //                       display: 'flex',
-  //                       alignItems: 'center',
-  //                       gap: 2,
-  //                       width: '100%',
-  //                     }}
-  //                   >
-  //                     <Box
-  //                       sx={{
-  //                         bgcolor: '#4caf50',
-  //                         p: 1.5,
-  //                         borderRadius: 1,
-  //                         display: 'flex',
-  //                         alignItems: 'center',
-  //                         justifyContent: 'center',
-  //                         minWidth: 48,
-  //                       }}
-  //                     >
-  //                       <ComputerIcon sx={{ color: 'white', fontSize: 28 }} />
-  //                     </Box>
-  //                     <Box sx={{ flex: 1 }}>
-  //                       <Typography variant="subtitle1" fontWeight="500">
-  //                         Ping
-  //                       </Typography>
-  //                       <Typography variant="body2" color="text.secondary">
-  //                         Ağ bağlantısından ICMP protokolünden izleyin
-  //                       </Typography>
-  //                     </Box>
-  //                   </Box>
-  //                 </MenuItem>
-
-  //                 <Divider />
-
-  //                 <MenuItem
-  //                   disabled={update.update ? true : false}
-  //                   value="http"
-  //                 >
-  //                   <Box
-  //                     sx={{
-  //                       display: 'flex',
-  //                       alignItems: 'center',
-  //                       gap: 2,
-  //                       width: '100%',
-  //                     }}
-  //                   >
-  //                     <Box
-  //                       sx={{
-  //                         bgcolor: '#3f51b5',
-  //                         p: 1.5,
-  //                         borderRadius: 1,
-  //                         display: 'flex',
-  //                         alignItems: 'center',
-  //                         justifyContent: 'center',
-  //                         minWidth: 48,
-  //                       }}
-  //                     >
-  //                       <PublicIcon sx={{ color: 'white', fontSize: 28 }} />
-  //                     </Box>
-  //                     <Box sx={{ flex: 1 }}>
-  //                       <Typography variant="subtitle1" fontWeight="500">
-  //                         HTTP(S)
-  //                       </Typography>
-  //                       <Typography variant="body2" color="text.secondary">
-  //                         Web sitelerini ve web api servislerini izleyin
-  //                       </Typography>
-  //                     </Box>
-  //                   </Box>
-  //                 </MenuItem>
-
-  //                 <Divider />
-  //                 <MenuItem
-  //                   disabled={update.update ? true : false}
-  //                   value="port"
-  //                 >
-  //                   <Box
-  //                     sx={{
-  //                       display: 'flex',
-  //                       alignItems: 'center',
-  //                       gap: 2,
-  //                       width: '100%',
-  //                     }}
-  //                   >
-  //                     <Box
-  //                       sx={{
-  //                         bgcolor: '#ff9800',
-  //                         p: 1.5,
-  //                         borderRadius: 1,
-  //                         display: 'flex',
-  //                         alignItems: 'center',
-  //                         justifyContent: 'center',
-  //                         minWidth: 48,
-  //                       }}
-  //                     >
-  //                       <DeveloperBoardIcon
-  //                         sx={{ color: 'white', fontSize: 28 }}
-  //                       />
-  //                     </Box>
-  //                     <Box sx={{ flex: 1 }}>
-  //                       <Typography variant="subtitle1" fontWeight="500">
-  //                         Port
-  //                       </Typography>
-  //                       <Typography variant="body2" color="text.secondary">
-  //                         Belirli bağlantı portları izleyin
-  //                       </Typography>
-  //                     </Box>
-  //                   </Box>
-  //                 </MenuItem>
-  //                 <Divider />
-  //                 <MenuItem
-  //                   disabled={update.update ? true : false}
-  //                   value="keyword"
-  //                 >
-  //                   <Box
-  //                     sx={{
-  //                       display: 'flex',
-  //                       alignItems: 'center',
-  //                       gap: 2,
-  //                       width: '100%',
-  //                     }}
-  //                   >
-  //                     <Box
-  //                       sx={{
-  //                         bgcolor: '#e91e63',
-  //                         p: 1.5,
-  //                         borderRadius: 1,
-  //                         display: 'flex',
-  //                         alignItems: 'center',
-  //                         justifyContent: 'center',
-  //                         minWidth: 48,
-  //                       }}
-  //                     >
-  //                       <CodeIcon sx={{ color: 'white', fontSize: 28 }} />
-  //                     </Box>
-  //                     <Box sx={{ flex: 1 }}>
-  //                       <Typography variant="subtitle1" fontWeight="500">
-  //                         Keyword
-  //                       </Typography>
-  //                       <Typography variant="body2" color="text.secondary">
-  //                         Web servislerdeki belirli anahtar kelimeleri izleyin
-  //                       </Typography>
-  //                     </Box>
-  //                   </Box>
-  //                 </MenuItem>
-  //                 <Divider />
-  //                 <MenuItem
-  //                   disabled={update.update ? true : false}
-  //                   value="cronjob"
-  //                 >
-  //                   <Box
-  //                     sx={{
-  //                       display: 'flex',
-  //                       alignItems: 'center',
-  //                       gap: 2,
-  //                       width: '100%',
-  //                     }}
-  //                   >
-  //                     <Box
-  //                       sx={{
-  //                         bgcolor: '#3f51b5',
-  //                         p: 1.5,
-  //                         borderRadius: 1,
-  //                         display: 'flex',
-  //                         alignItems: 'center',
-  //                         justifyContent: 'center',
-  //                         minWidth: 48,
-  //                       }}
-  //                     >
-  //                       <TimerIcon sx={{ color: 'white', fontSize: 28 }} />
-  //                     </Box>
-  //                     <Box sx={{ flex: 1 }}>
-  //                       <Typography variant="subtitle1" fontWeight="500">
-  //                         CRON JOB
-  //                       </Typography>
-  //                       <Typography variant="body2" color="text.secondary">
-  //                         Tekrarlanan işleri izleyin
-  //                       </Typography>
-  //                     </Box>
-  //                   </Box>
-  //                 </MenuItem>
-  //                 <Divider />
-  //               </Select>
-  //               <FormHelperText>
-  //                 <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-  //                   <InfoIcon
-  //                     sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }}
-  //                   />
-  //                   <Typography variant="body2" color="text.secondary">
-  //                     {monitorType === 'http'
-  //                       ? role === 'user'
-  //                         ? navigate('/user/monitors/new/http')
-  //                         : navigate('/admin/monitors/new/http', {
-  //                             state: { userInfo },
-  //                           })
-  //                       : monitorType === 'ping'
-  //                       ? 'Sunucunuzun veya ağınızdaki herhangi bir cihazın her zaman erişilebilir olduğundan ICMP kontrol ile emin olun.'
-  //                       : monitorType === 'port'
-  //                       ? role === 'user'
-  //                         ? navigate('/user/monitors/new/port')
-  //                         : navigate('/admin/monitors/new/port', {
-  //                             state: { userInfo },
-  //                           })
-  //                       : monitorType === 'keyword'
-  //                       ? role === 'user'
-  //                         ? navigate('/user/monitors/new/keyword')
-  //                         : navigate('/admin/monitors/new/keyword', {
-  //                             state: { userInfo },
-  //                           })
-  //                       : monitorType === 'cronjob'
-  //                       ? role === 'user'
-  //                         ? navigate('/user/monitors/new/cronjob')
-  //                         : navigate('/admin/monitors/new/cronjob', {
-  //                             state: { userInfo },
-  //                           })
-  //                       : 'Select a monitor type to get started.'}
-  //                   </Typography>
-  //                 </Box>
-  //               </FormHelperText>
-  //             </FormControl>
-  //           </Box>
-
-  //           <Divider sx={{ my: 3 }} />
-
-  //           {/* Monitor Details */}
-  //           <Grid container spacing={3}>
-  //             <Grid item xs={12}>
-  //               <TextField
-  //                 required
-  //                 fullWidth
-  //                 label="Tanımlayıcı ad"
-  //                 value={friendlyName}
-  //                 onChange={(e) => setFriendlyName(e.target.value)}
-  //                 helperText="İzleme için tanımlayıcı bir ad belirleyin"
-  //               />
-  //             </Grid>
-  //             <Grid item xs={12}>
-  //               <TextField
-  //                 required
-  //                 fullWidth
-  //                 label={'URL (veya IP)'}
-  //                 value={host}
-  //                 onChange={(e) => setHost(e.target.value)}
-  //                 placeholder={'8.8.8.8'}
-  //                 helperText={'Ping atılacak IP adresi veya domain adı'}
-  //               />
-  //             </Grid>
-  //           </Grid>
-  //           <Divider sx={{ my: 3 }} />
-  //           <Grid container spacing={3}>
-  //             <Grid item xs={12} sm={6}>
-  //               <Grid item sx={{ pb: 1 }}>
-  //                 <InputLabel>Zaman</InputLabel>
-  //               </Grid>
-  //               <FormControl fullWidth>
-  //                 <Slider
-  //                   name="interval"
-  //                   value={interval}
-  //                   onChange={(e) => setInterval(e.target.value)}
-  //                   min={min}
-  //                   max={max}
-  //                   step={1} // Her tıklamada 1 artar/azalır
-  //                   valueLabelDisplay="auto" // Değeri üzerinde gösterir
-  //                   marks={[
-  //                     { value: min, label: `${min}` }, // Min değeri etiketliyor
-  //                     { value: max, label: `${max}` }, // Max değeri etiketliyor
-  //                   ]}
-  //                   sx={{ color: '#1976d2' }} // Mavi renk
-  //                 />
-  //               </FormControl>
-  //             </Grid>
-
-  //             <Grid item xs={12} sm={6}>
-  //               <Grid item sx={{ pb: 1 }}>
-  //                 <InputLabel>Zaman Birimi</InputLabel>
-  //               </Grid>
-  //               <FormControl fullWidth>
-  //                 <Select
-  //                   name="intervalUnit"
-  //                   value={intervalUnit || 'minutes'}
-  //                   label="Birim"
-  //                   onChange={(e) => {
-  //                     setIntervalUnit(e.target.value)
-  //                   }}
-  //                   variant="outlined"
-  //                 >
-  //                   {INTERVAL_UNITS.map((unit) => (
-  //                     <MenuItem key={unit.value} value={unit.value}>
-  //                       {unit.label}
-  //                     </MenuItem>
-  //                   ))}
-  //                 </Select>
-  //               </FormControl>
-  //             </Grid>
-  //           </Grid>
-  //           <Divider sx={{ my: 3 }} />
-  //           <Box sx={{ mb: 4 }}>
-  //             <Typography variant="subtitle1" fontWeight="500" gutterBottom>
-  //               Bildirim Atılacaklar
-  //             </Typography>
-  //             <Box sx={{ width: '%75', display: 'flex', gap: 1, mb: 2 }}>
-  //               <TextField
-  //                 fullWidth
-  //                 label="Email"
-  //                 type="email"
-  //                 value={emailInput}
-  //                 onChange={(e) => setEmailInput(e.target.value)}
-  //                 placeholder="rahatup@gmail.com"
-  //               />
-  //               <Button
-  //                 variant="contained"
-  //                 onClick={handleAddEmail}
-  //                 disabled={!emailInput}
-  //               >
-  //                 Ekle
-  //               </Button>
-  //             </Box>
-  //             <Box>
-  //               <Button
-  //                 variant="outlined"
-  //                 onClick={handleClick}
-  //                 startIcon={<EmailIcon />}
-  //                 endIcon={<KeyboardArrowDownIcon />}
-  //                 sx={{ width: '40%', justifyContent: 'space-between' }}
-  //               >
-  //                 {`${emailList.length} Mails`}
-  //               </Button>
-  //               <Menu
-  //                 anchorEl={anchorEl}
-  //                 open={Boolean(anchorEl)}
-  //                 onClose={handleClose}
-  //                 PaperProps={{
-  //                   style: {
-  //                     maxHeight: 300,
-  //                     width: '20%',
-  //                   },
-  //                 }}
-  //               >
-  //                 {emailList.map((email, index) => (
-  //                   <MenuItem
-  //                     key={index}
-  //                     sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-  //                   >
-  //                     <EmailIcon sx={{ color: '#607d8b' }} />
-  //                     <Typography sx={{ flex: 1 }}>{email}</Typography>
-  //                     <IconButton
-  //                       size="small"
-  //                       onClick={(e) => {
-  //                         e.stopPropagation()
-  //                         handleRemoveEmail(email)
-  //                       }}
-  //                       color="error"
-  //                     >
-  //                       <CloseIcon />
-  //                     </IconButton>
-  //                   </MenuItem>
-  //                 ))}
-  //                 {emailList.length === 0 && (
-  //                   <MenuItem disabled>
-  //                     <Typography color="text.secondary">
-  //                       Henüz email eklenmedi
-  //                     </Typography>
-  //                   </MenuItem>
-  //                 )}
-  //               </Menu>
-  //             </Box>
-  //           </Box>
-  //           {/* Action Buttons */}
-  //           <Box
-  //             sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}
-  //           >
-  //             <Button
-  //               variant="outlined"
-  //               color="inherit"
-  //               onClick={() => turnMonitorPage()}
-  //             >
-  //               İptal
-  //             </Button>
-  //             <Box>
-  //               <Button
-  //                 variant="contained"
-  //                 color="primary"
-  //                 onClick={() => {
-  //                   update.update ? updateMonitor() : createMonitor()
-  //                 }}
-  //               >
-  //                 {update.update ? 'İzleme Güncelle' : 'İzleme Oluştur'}
-  //               </Button>
-  //             </Box>
-  //           </Box>
-  //         </Paper>
-  //       </Container>
-  //     </Box>
-  //   </Box>
-  // )
+      </Grid>
+    </Grid>
+  )
 }
 
-export default pingMonitorFormPage
+export default PingMonitorFormPage
