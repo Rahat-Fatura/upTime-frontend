@@ -181,6 +181,10 @@ const saveChangesInfo = async () => {
           <Button
             variant="contained"
             onClick={()=> handleVerificationLink()}
+            sx={{
+              borderRadius: '8px',
+              fontSize: '0.6rem',
+            }}
           >
               Doğrulama bağlantısı gönder
           </Button>

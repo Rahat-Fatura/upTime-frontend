@@ -858,7 +858,7 @@ export default function Dashboard() {
       disableColumnMenu: true,
       sortable: false,
       headerName: 'Başarı Oranı',
-      flex: 2,
+      flex: 2.1,
       renderCell: (params) => {
         let logs = params.row.logs.sort(function (a, b) {
           return a.id - b.id

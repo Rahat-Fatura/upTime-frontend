@@ -315,6 +315,13 @@ export default function MonitorDetail() {
     } catch (error) {}
   }
 
+  useEffect(() => {
+    setInterval(()=>{
+      getMonitorById(id);
+    },60000);
+    
+  }, []);
+
   const getMonitorById = async (monitorId) => {
     try {
       const monitor = await api.get(`monitors/${monitorId}`)
@@ -326,8 +333,6 @@ export default function MonitorDetail() {
   }
 
   useEffect(() => {
-    console.log('Useefefefe jfje njnj')
-    // const monitorId = params.id
     getMonitorById(id)
   }, [id])
 
@@ -734,7 +739,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.75rem' }}
                             >
-                              {monitor.httpMonitor.host.substring(0, 36)}
+                              {monitor.httpMonitor.host.substring(0, 24)}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
@@ -849,7 +854,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.9rem' }}
                             >
-                              {monitor.pingMonitor.host.substring(0, 36)}
+                              {monitor.pingMonitor.host.substring(0, 24)}
                             </Typography>
                           </Grid>
 
@@ -916,7 +921,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.9rem' }}
                             >
-                              {monitor.portMonitor.host.substring(0, 36)}
+                              {monitor.portMonitor.host.substring(0, 24)}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
@@ -1014,7 +1019,7 @@ export default function MonitorDetail() {
                               fontWeight="bold"
                               sx={{ fontSize: '0.75rem' }}
                             >
-                              {monitor.keyWordMonitor.host.substring(0, 36)}
+                              {monitor.keyWordMonitor.host.substring(0, 24)}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>

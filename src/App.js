@@ -43,7 +43,7 @@ import AdminMaintance from './pages/adminPage/adminMaintanance/maintanancePage.j
 import AdminMonitoringReportsPage from './pages/adminPage/adminMonitoringReportsPage.js'
 import VerifyEmailPage from './pages/verifyEmailPage/verifyEmailPage.js'
 import MonitorDetail from './pages/monitorPage/monitorDetail.js'
-
+import AdminLayout from './layouts/AdminLayout.js'
 const NotFound = () => {
   return (
     <div
@@ -120,59 +120,6 @@ function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/user/verify-email" element={<VerifyEmailPage />} />
 
-      <Route path="/admin" element={<AdminUsers />} />
-      <Route path="/admin/settings" element={<AdminSettings />} />
-      <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
-      <Route path="/admin/userDetail" element={<UserDetail />} />
-      <Route path="/admin/monitors/maintanance" element={<AdminMaintance />} />
-      <Route path="/admin/newUser" element={<NewUser />} />
-      <Route path="/admin/monitors/new/http" element={<NewMonitorPage />} />
-      <Route
-        path="/admin/monitors/:id/http"
-        element={<NewMonitorPage update={true} />}
-      />
-
-      <Route
-        path="/admin/monitors/new/ping"
-        element={<PingMonitorFormPage />}
-      />
-      <Route
-        path="/admin/monitors/:id/ping"
-        element={<PingMonitorFormPage update={true} />}
-      />
-
-      <Route
-        path="/admin/monitors/new/port"
-        element={<PortMonitorFormPage />}
-      />
-      <Route
-        path="/admin/monitors/:id/port"
-        element={<PortMonitorFormPage update={true} />}
-      />
-
-      <Route
-        path="/admin/monitors/new/keyword"
-        element={<KeyWordMonitorFormPage />}
-      />
-      <Route
-        path="/admin/monitors/:id/keyword"
-        element={<KeyWordMonitorFormPage update={true} />}
-      />
-
-      <Route
-        path="/admin/monitors/new/cronjob"
-        element={<CronJobMonitorFormPage />}
-      />
-      <Route
-        path="/admin/monitors/:id/cronjob"
-        element={<CronJobMonitorFormPage update={true} />}
-      />
-      <Route
-        path="/admin/monitors/report"
-        element={<AdminMonitoringReportsPage />}
-      />
-
       <Route path="/" element={<MainLayout />}>
         <Route path="/user/profile" element={<ProfilePage />} />
         <Route path="/user/gridPage" element={<GridPage />} />
@@ -228,6 +175,64 @@ function AppRoutes() {
         <Route path="/user/teamMembers" element={<TeamMembersPage />} />
         <Route path="/user/integrationsApi" element={<IntegrationsPage />} />
         <Route path="*" element={<NotFound />} />
+      </Route>
+
+      <Route path="/" element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminUsers />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
+        <Route path="/admin/userDetail" element={<UserDetail />} />
+        <Route
+          path="/admin/monitors/maintanance"
+          element={<AdminMaintance />}
+        />
+        <Route path="/admin/newUser" element={<NewUser />} />
+        <Route path="/admin/monitors/new/http" element={<NewMonitorPage />} />
+        <Route
+          path="/admin/monitors/:id/http"
+          element={<NewMonitorPage update={true} />}
+        />
+
+        <Route
+          path="/admin/monitors/new/ping"
+          element={<PingMonitorFormPage />}
+        />
+        <Route
+          path="/admin/monitors/:id/ping"
+          element={<PingMonitorFormPage update={true} />}
+        />
+
+        <Route
+          path="/admin/monitors/new/port"
+          element={<PortMonitorFormPage />}
+        />
+        <Route
+          path="/admin/monitors/:id/port"
+          element={<PortMonitorFormPage update={true} />}
+        />
+
+        <Route
+          path="/admin/monitors/new/keyword"
+          element={<KeyWordMonitorFormPage />}
+        />
+        <Route
+          path="/admin/monitors/:id/keyword"
+          element={<KeyWordMonitorFormPage update={true} />}
+        />
+
+        <Route
+          path="/admin/monitors/new/cronjob"
+          element={<CronJobMonitorFormPage />}
+        />
+        <Route
+          path="/admin/monitors/:id/cronjob"
+          element={<CronJobMonitorFormPage update={true} />}
+        />
+        <Route
+          path="/admin/monitors/report"
+          element={<AdminMonitoringReportsPage />}
+        />
       </Route>
     </Routes>
   )

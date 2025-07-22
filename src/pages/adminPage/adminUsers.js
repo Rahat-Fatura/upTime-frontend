@@ -242,10 +242,12 @@ function AdminUsers() {
     getUsers();
   }, []);
   return (
-    <Grid container>
+    <Grid container width={'100%'}>
       
       <Grid
         item
+        md={12}
+
         sx={{
           display: "flex",
           justifyContent: "flex-end",
