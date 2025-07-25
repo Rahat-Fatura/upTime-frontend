@@ -52,7 +52,7 @@ const MainLayout = () => {
         }}
       >
         <Box sx={{ width: "100%", paddingRight: { xs: "10px", sm: "20px" } }}>
-          <Navbar />
+          {/* <Navbar /> */}
           <Outlet />
         </Box>
       </Box>

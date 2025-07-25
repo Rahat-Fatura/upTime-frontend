@@ -37,13 +37,9 @@ const NewMonitorPage = (update = false) => {
   const [monitorType, setMonitorType] = useState('http')
   const [min, setMin] = useState()
   const [max, setMax] = useState()
-  const [emailInput, setEmailInput] = useState('')
-  const [emailList, setEmailList] = useState('')
   const [role, setRole] = useState('')
   const navigate = useNavigate()
-  const location = useLocation()
   const theme = useTheme()
-  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
 
@@ -56,19 +52,17 @@ const NewMonitorPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/http/${params.id}`)
-        console.log('body:', JSON.stringify(response.data.body))
-        values.name = response.data.monitor.name
-        values.host = response.data.host
-        values.method = response.data.method
-        values.headers = JSON.stringify(response.data.headers)
-        values.body = JSON.stringify(response.data.body)
-        values.allowedStatusCodes = response.data.allowedStatusCodes
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('host', response.data.host)
+        setFieldValue('method', response.data.method)
+        setFieldValue('headers', JSON.stringify(response.data.headers))
+        setFieldValue('body', JSON.stringify(response.data.body))
+        setFieldValue('allowedStatusCodes', response.data.allowedStatusCodes
           ? response.data.allowedStatusCodes.join(',')
-          : ''
-        values.interval = response.data.monitor.interval
-        values.intervalUnit = response.data.monitor.intervalUnit
-        values.timeOut = response.data.timeOut
-        setEmailList(response.data.monitor.alertContacts || [])
+          : '')
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
+        setFieldValue('timeOut', response.data.timeOut)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -138,7 +132,7 @@ const NewMonitorPage = (update = false) => {
       }
       console.log(formattedData)
       const response = await api.post(
-        role === 'admin' ? `monitors/http/${userInfo.id}` : `monitors/http/`,
+        role === 'admin' ? `monitors/http/${params.userId}` : `monitors/http/`,
         formattedData
       )
       if (response.data) {
@@ -205,10 +199,9 @@ const NewMonitorPage = (update = false) => {
   }
 
   const turnMonitorPage = () => {
-    console.log('Role:', userInfo)
     role === 'user'
       ? navigate('/user/monitors/')
-      : navigate('/admin/userMonitors/', { state: { userInfo } })
+      : navigate(`/admin/userMonitors/${params.userId}`)
   }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
@@ -322,27 +315,19 @@ const NewMonitorPage = (update = false) => {
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate('/admin/monitors/new/ping', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate('/admin/monitors/new/port', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate('/admin/monitors/new/keyword', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate('/admin/monitors/new/cronjob', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>

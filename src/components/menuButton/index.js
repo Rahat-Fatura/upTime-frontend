@@ -24,6 +24,8 @@ import InfoIcon from '@mui/icons-material/Info'
 import api from '../../api/auth/axiosInstance'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
+import { cookies } from '../../utils/cookie'
+import { jwtDecode } from 'jwt-decode'
 import {
   Add as AddIcon,
   Warning as WarningIcon,
@@ -36,7 +38,7 @@ import {
   Menu as MenuIcon,
   Build,
 } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { fontSize, margin } from '@mui/system'
 import { Alert, IconButton } from '@mui/material'
 import MonitorDetail from '../../pages/monitorPage/monitorDetail'
@@ -100,6 +102,8 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   const [endDate, setEndDate] = React.useState(dayjs())
   const [startTime, setStarTime] = React.useState(dayjs())
   const [endTime, setEndTime] = React.useState(dayjs())
+  const [role, setRole] = React.useState('user')
+  const [params] = React.useState(useParams())
   const handleClickOpenDialog = () => {
     setOpenDialog(true)
   }
@@ -115,25 +119,52 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
   const handleEditDetails = (monitor) => {
+    let token = cookies.get('jwt-access')
+    let role = jwtDecode(token).role
     switch (monitor.monitorType) {
       case 'HttpMonitor':
-        navigate(`/user/monitors/${monitor.id}/http`)
+        if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/http`)
+        }
+        else{
+          navigate(`/user/monitors/${monitor.id}/http`)
+        }
         handleClose()
         break
       case 'PingMonitor':
-        navigate(`/user/monitors/${monitor.id}/ping`)
+        if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/ping`)
+        }
+        else{
+          navigate(`/user/monitors/${monitor.id}/ping`)
+        }
         handleClose()
         break
       case 'CronJobMonitor':
-        navigate(`/user/monitors/${monitor.id}/cronjob`)
+        if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/cronjob`)
+        }
+        else{
+          navigate(`/user/monitors/${monitor.id}/cronjob`)
+        }
         handleClose()
         break
       case 'PortMonitor':
-        navigate(`/user/monitors/${monitor.id}/port`)
+        if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/port`)
+        }
+        else{
+          navigate(`/user/monitors/${monitor.id}/port`)
+        }
         handleClose()
         break
       case 'KeywordMonitor':
-        navigate(`/user/monitors/${monitor.id}/keyword`)
+        if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/keyword`)
+        }
+        else{
+          navigate(`/user/monitors/${monitor.id}/keyword`)
+        }
         handleClose()
         break
       default:

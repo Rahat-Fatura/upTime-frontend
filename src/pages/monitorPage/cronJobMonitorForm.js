@@ -37,9 +37,7 @@ const CronJobMonitorFormPage = (update = false) => {
   const [max, setMax] = useState()
   const [role, setRole] = useState('')
   const navigate = useNavigate()
-  const location = useLocation()
   const theme = useTheme()
-  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
   useEffect(() => {
@@ -52,10 +50,10 @@ const CronJobMonitorFormPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/cronjob/${params.id}`)
-        values.name = response.data.monitor.name
-        values.divitionTime = response.data.devitionTime
-        values.interval = response.data.monitor.interval
-        values.intervalUnit = response.data.monitor.intervalUnit
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('divitionTime', response.data.devitionTime)
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -117,7 +115,7 @@ const CronJobMonitorFormPage = (update = false) => {
       console.log(formattedData)
       const response = await api.post(
         role === 'admin'
-          ? `monitors/cronjob/${userInfo.id}`
+          ? `monitors/cronjob/${params.userId}`
           : `monitors/cronjob/`,
         formattedData
       )
@@ -181,7 +179,7 @@ const CronJobMonitorFormPage = (update = false) => {
   const turnMonitorPage = () => {
     role === 'user'
       ? navigate('/user/monitors/')
-      : navigate('/admin/userMonitors/', { state: { userInfo } })
+      : navigate(`/admin/userMonitors/${params.userId}/`)
   }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
@@ -291,27 +289,19 @@ const CronJobMonitorFormPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate('/admin/monitors/new/http', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate('/admin/monitors/new/ping', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate('/admin/monitors/new/port', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate('/admin/monitors/new/keyword', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
                     : monitorType === 'cronjob'
                     ? `Cron Job Monitörü, zamanlanmış görevlerin (cron job'ların)
                            düzgün şekilde çalışıp çalışmadığını takip eder. Genellikle

@@ -95,10 +95,10 @@ function AdminUsers() {
       localStorage.set("scrollPosition", Math.floor(window.scrollY));
       // Buraya tıklama durumunda yapılacak işlemi ekleyin
       if(USER_DETAIL){
-        navigate('/admin/userDetail', { state: { userInfo } })
+        navigate(`/admin/userDetail/${userInfo.id}`)
       }
       else if(MONITORS){
-        navigate('/admin/userMonitors', { state: { userInfo } })
+        navigate(`/admin/userMonitors/${userInfo.id}`)
       }
       else{
         console.log("Geçersiz button ")
@@ -109,20 +109,20 @@ function AdminUsers() {
     return (
       <Button
        sx={{
-        "background": "blue",
+        //"background": "blue",
        }}
        onClick={handleClick}>
         {
           USER_DETAIL?
           <GroupOutlinedIcon sx={{
-            'color': 'white',
+            'color': 'black',
             '&:hover':{
               "color": "blue"
             },
           }} size={22}  />
           :
           <Monitor sx={{
-            'fill': 'white',
+            'fill': 'black',
             '&:hover':{
               "fill": "blue"
             },
@@ -274,7 +274,7 @@ function AdminUsers() {
                 marginBottom: "2%",
               }}
             >
-              <Typography variant="h4">Kullanıcılar</Typography>
+              <Typography variant="h5">Kullanıcılar</Typography>
             </Grid>
 
             <Grid

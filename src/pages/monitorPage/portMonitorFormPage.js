@@ -38,8 +38,6 @@ const PortMonitorFormPage = (update = false) => {
   const [max, setMax] = useState()
   const [role, setRole] = useState('')
   const navigate = useNavigate()
-  const location = useLocation()
-  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
   useEffect(() => {
@@ -52,12 +50,13 @@ const PortMonitorFormPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/port/${params.id}`)
-        values.name = response.data.monitor.name
-        values.host = response.data.host
-        values.port = response.data.port
-        values.interval = response.data.monitor.interval
-        values.intervalUnit = response.data.monitor.intervalUnit
-        values.timeOut = response.data.timeOut
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('host', response.data.host)
+        setFieldValue('port', response.data.port)
+        setFieldValue('timeOut', response.data.timeOut)
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
+        setFieldValue('timeOut', response.data.timeOut)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -84,21 +83,21 @@ const PortMonitorFormPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(
+        setFieldValue("interval",
           values.interval >= 20 && values.interval < 60 ? values.interval : 20
         )
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(
+        setFieldValue("interval",
           values.interval > 0 && values.interval < 60 ? values.interval : 0
         )
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(
+        setFieldValue("interval",
           values.interval > 0 && values.interval < 24 ? values.interval : 1
         )
         setMin(1)
@@ -123,7 +122,7 @@ const PortMonitorFormPage = (update = false) => {
       }
       console.log(formattedData)
       const response = await api.post(
-        role === 'admin' ? `monitors/port/${userInfo.id}` : `monitors/port/`,
+        role === 'admin' ? `monitors/port/${params.userId}` : `monitors/port/`,
         formattedData
       )
       console.log('Response:', response.data)
@@ -188,7 +187,7 @@ const PortMonitorFormPage = (update = false) => {
   const turnMonitorPage = () => {
     role === 'user'
       ? navigate('/user/monitors/')
-      : navigate('/admin/userMonitors/', { state: { userInfo } })
+      : navigate(`/admin/userMonitors/${params.userId}/`)
   }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
@@ -297,15 +296,11 @@ const PortMonitorFormPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate('/admin/monitors/new/http', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate('/admin/monitors/new/ping', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
                     : monitorType === 'port'
                     ? `Port Monitörü, belirli bir IP adresinde ya da alan
                           adında tanımladığınız ağ portunun (örneğin 21, 22, 80, 443 gibi)
@@ -317,15 +312,11 @@ const PortMonitorFormPage = (update = false) => {
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate('/admin/monitors/new/keyword', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate('/admin/monitors/new/cronjob', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>

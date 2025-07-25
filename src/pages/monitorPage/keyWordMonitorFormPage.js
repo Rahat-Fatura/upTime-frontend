@@ -37,8 +37,6 @@ const KeyWordMonitorPage = (update = false) => {
   const [role, setRole] = useState('')
   const theme = useTheme()
   const navigate = useNavigate()
-  const location = useLocation()
-  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
   useEffect(() => {
@@ -51,25 +49,23 @@ const KeyWordMonitorPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/keyword/${params.id}`)
-        values.name = response.data.monitor.name
-        values.host = response.data.host
-        values.method = response.data.method
-        values.headers =
-          response.data.headers.length > 0
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('host', response.data.host)
+        setFieldValue('method', response.data.method)
+        setFieldValue('headers', response.data.headers.length > 0
             ? JSON.stringify(response.data.headers)
-            : ''
-        values.body =
-          response.data.body.length > 0
+            : '')   
+        setFieldValue('body', response.data.body.length > 0
             ? JSON.stringify(response.data.body)
-            : ''
-        values.keyWordType = response.data.keyWordType || 'txt'
-        values.keyWord = response.data.keyWord
-        values.allowedStatusCodes = response.data.allowedStatusCodes
+            : '')
+        setFieldValue('keyWordType', response.data.keyWordType || 'txt')
+        setFieldValue('keyWord', response.data.keyWord)
+        setFieldValue('allowedStatusCodes', response.data.allowedStatusCodes
           ? response.data.allowedStatusCodes.join(',')
-          : ''
-        values.interval = response.data.monitor.interval
-        values.intervalUnit = response.data.monitor.intervalUnit
-        values.timeOut = response.data.timeOut
+          : '')
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
+        setFieldValue('timeOut', response.data.timeOut)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -141,7 +137,7 @@ const KeyWordMonitorPage = (update = false) => {
       console.log(formattedData)
       const response = await api.post(
         role === 'admin'
-          ? `monitors/keyword/${userInfo.id}`
+          ? `monitors/keyword/${params.userId}`
           : `monitors/keyword/`,
         formattedData
       )
@@ -215,7 +211,7 @@ const KeyWordMonitorPage = (update = false) => {
   const turnMonitorPage = () => {
     role === 'user'
       ? navigate('/user/monitors/')
-      : navigate('/admin/userMonitors/', { state: { userInfo } })
+      : navigate(`/admin/userMonitors/${params.userId}/`)
   }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
@@ -329,21 +325,15 @@ const KeyWordMonitorPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate('/admin/monitors/new/http', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate('/admin/monitors/new/ping', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate('/admin/monitors/new/port', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
                     : monitorType === 'keyword'
                     ? `Anahtar Kelime Monitörü, belirli bir web sayfasının
                            içeriğinde sizin belirlediğiniz kelimelerin var olup
@@ -354,9 +344,7 @@ const KeyWordMonitorPage = (update = false) => {
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate('/admin/monitors/new/cronjob', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>

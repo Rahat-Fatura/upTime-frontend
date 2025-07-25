@@ -11,7 +11,7 @@ import Login from './pages/loginPage/loginPage.js'
 import ForgotPassword from './pages/forgotPassword/forgotPassword.js'
 
 import LandingPage from './pages/landingPage/index.js'
-import MainLayout from './pages/layouts/MainLayout.js'
+import MainLayout from './layouts/MainLayout.js'
 //import AdminLayout from './pages/layouts/AdminLayout.js'
 
 import Register from './pages/registerPage/register.js'
@@ -44,6 +44,7 @@ import AdminMonitoringReportsPage from './pages/adminPage/adminMonitoringReports
 import VerifyEmailPage from './pages/verifyEmailPage/verifyEmailPage.js'
 import MonitorDetail from './pages/monitorPage/monitorDetail.js'
 import AdminLayout from './layouts/AdminLayout.js'
+import AdminUserMonitorDetail from './pages/adminPage/adminUserMonitorDetail.js'
 const NotFound = () => {
   return (
     <div
@@ -181,58 +182,25 @@ function AppRoutes() {
         <Route path="/admin" element={<AdminUsers />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/userMonitors" element={<AdmimMonitors />} />
-        <Route path="/admin/userDetail" element={<UserDetail />} />
+        <Route path="/admin/userMonitors/:userId" element={<AdmimMonitors />} />
         <Route
-          path="/admin/monitors/maintanance"
-          element={<AdminMaintance />}
-        />
+          path="/admin/userMonitors/:userId/:id/detail" element={<AdminUserMonitorDetail/>}/>
+        <Route path="/admin/userDetail/:userId" element={<UserDetail />} />
+        
         <Route path="/admin/newUser" element={<NewUser />} />
-        <Route path="/admin/monitors/new/http" element={<NewMonitorPage />} />
-        <Route
-          path="/admin/monitors/:id/http"
-          element={<NewMonitorPage update={true} />}
-        />
+        <Route path="/admin/userMonitors/:userId/new/http" element={<NewMonitorPage />} />
+        <Route path="/admin/userMonitors/:userId/new/ping" element={<PingMonitorFormPage />} />
+        <Route path="/admin/userMonitors/:userId/new/port" element={<PortMonitorFormPage />} />
+        <Route path="/admin/userMonitors/:userId/new/keyword" element={<KeyWordMonitorFormPage />} />
+        <Route path="/admin/userMonitors/:userId/new/cronjob" element={<CronJobMonitorFormPage />} />
 
-        <Route
-          path="/admin/monitors/new/ping"
-          element={<PingMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/ping"
-          element={<PingMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/port"
-          element={<PortMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/port"
-          element={<PortMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/keyword"
-          element={<KeyWordMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/keyword"
-          element={<KeyWordMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/admin/monitors/new/cronjob"
-          element={<CronJobMonitorFormPage />}
-        />
-        <Route
-          path="/admin/monitors/:id/cronjob"
-          element={<CronJobMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/admin/monitors/report"
-          element={<AdminMonitoringReportsPage />}
-        />
+        <Route path="/admin/userMonitors/:userId/:id/http" element={<NewMonitorPage update={true} />} />
+        <Route path="/admin/userMonitors/:userId/:id/ping" element={<PingMonitorFormPage update={true} />} />
+        <Route path="/admin/userMonitors/:userId/:id/port" element={<PortMonitorFormPage update={true} />} />
+        <Route path="/admin/userMonitors/:userId/:id/keyword" element={<KeyWordMonitorFormPage update={true} />} />
+        <Route path="/admin/userMonitors/:userId/:id/cronjob" element={<CronJobMonitorFormPage update={true} />} />
+        
+        
       </Route>
     </Routes>
   )

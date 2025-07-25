@@ -29,6 +29,7 @@ import { INTERVAL_UNITS } from './constants/monitorConstants'
 import { jwtDecode } from 'jwt-decode'
 import { cookies } from '../../utils/cookie'
 import { newPingMonitorFormShhema } from '../../utils/formSchema/formSchemas'
+import { set } from 'local-storage'
 
 const PingMonitorFormPage = (update = false) => {
   const [params, setParams] = useState(useParams())
@@ -37,8 +38,6 @@ const PingMonitorFormPage = (update = false) => {
   const [max, setMax] = useState()
   const [role, setRole] = useState('')
   const navigate = useNavigate()
-  const location = useLocation()
-  const [userInfo, setUserInfo] = useState(location.state?.userInfo || {})
   const theme = useTheme()
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
@@ -53,11 +52,12 @@ const PingMonitorFormPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/ping/${params.id}`)
-        console.log(response.data)
-        values.name = response.data.monitor.name
-        values.host = response.data.host
-        values.interval = response.data.monitor.interval
-        values.intervalUnit = response.data.monitor.intervalUnit
+       
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('host', response.data.host)
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
+        
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -84,21 +84,21 @@ const PingMonitorFormPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setInterval(
+        setFieldValue("interval",
           values.interval >= 20 && values.interval < 60 ? values.interval : 20
         )
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setInterval(
+        setFieldValue("interval",
           values.interval > 0 && values.interval < 60 ? values.interval : 1
         )
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setInterval(
+        setFieldValue("interval",
           values.interval > 0 && values.interval < 24 ? values.interval : 1
         )
         setMin(1)
@@ -121,7 +121,7 @@ const PingMonitorFormPage = (update = false) => {
       }
       console.log(formattedData)
       const response = api.post(
-        role === 'admin' ? `monitors/ping/${userInfo.id}` : `monitors/ping/`,
+        role === 'admin' ? `monitors/ping/${params.userId}` : `monitors/ping/`,
         formattedData
       )
       console.log('Response:', response)
@@ -184,10 +184,10 @@ const PingMonitorFormPage = (update = false) => {
   const turnMonitorPage = () => {
     role === 'user'
       ? navigate('/user/monitors/')
-      : navigate('/admin/userMonitors/', { state: { userInfo } })
+      : navigate(`/admin/userMonitors/${params.userId}/`)
   }
 
-  const { values, errors, isValid, handleChange, handleSubmit } = useFormik({
+  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } = useFormik({
     isInitialValid: false,
     initialValues: {
       name: '',
@@ -292,9 +292,7 @@ const PingMonitorFormPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate('/admin/monitors/new/http', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
                     : monitorType === 'ping'
                     ? `Ping Monitörü, bir sunucunun çevrimiçi (erişilebilir)
                            olup olmadığını kontrol etmek için ICMP protokolünü kullanarak
@@ -307,21 +305,15 @@ const PingMonitorFormPage = (update = false) => {
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate('/admin/monitors/new/port', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate('/admin/monitors/new/keyword', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate('/admin/monitors/new/cronjob', {
-                          state: { userInfo },
-                        })
+                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>

@@ -36,11 +36,11 @@ const menuItems = [
     icon: <GroupOutlinedIcon size={22} />,
     path: "/admin/users",
   },
-  {
-    text: "Ayarlar",
-    icon: <Settings size={22} />,
-    path: "/admin/settings",
-  },
+  // {
+  //   text: "Ayarlar",
+  //   icon: <Settings size={22} />,
+  //   path: "/admin/settings",
+  // },
  /* {
     text: "Yeni Kullanıcı",
     icon: <GroupOutlinedIcon size={22}/>,

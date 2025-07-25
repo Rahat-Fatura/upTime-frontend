@@ -18,19 +18,30 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import UserInfo from './userInfo.js'
 import UserSettings from './userSettings.js'
 import localStorage from 'local-storage'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import api from '../../api/auth/axiosInstance.js'
 import Swal from 'sweetalert2'
 import { Monitor } from "@mui/icons-material";
 const UserDetail = () => {
-  const location = useLocation()
-  const userInfo = location.state.userInfo
-  userInfo.password='';
+  const [params, setParams] = useState(useParams())
   const [isOpen, setIsOpen] = useState(true)
   const navigate = useNavigate()
-  
+  const [userInfo, setUserInfo] = useState({})
   const [userStatus, setUserStatus] = useState(true) //Kullanıcının aktif pasiflik durumunu belirtir.
   const [selectedButtonId, setSelectedButtonId] = useState(1)
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await api.get(`users/${params.userId}`)
+        console.log(response.data)
+        setUserInfo(response.data)
+      } catch (error) {
+        console.error('Kullanıcı bilgileri alınırken hata oluştu:', error)
+      }
+    }
+    fetchUserInfo()
+  }, [])
 
   const handleButtonClick = (buttonId) => {
     setSelectedButtonId(buttonId)
@@ -75,7 +86,7 @@ const UserDetail = () => {
 
       <Grid
         item
-        md={isOpen ? 9.7 : 11.3}
+        md={11.3}
         sx={{
           display: 'flex',
           justifyContent: 'flex-end',
@@ -244,10 +255,10 @@ const UserDetail = () => {
                 pb: '1vh',
                 background: '#1976d2',
               }}
-              onClick={() =>navigate('/admin/userMonitors', { state: { userInfo } })}
+              onClick={() =>navigate(`/admin/userMonitors/${params.userId}`)}
             >
               <Monitor fontSize="medium" />
-              İzledikleri
+              
             </Button>
           </Grid>
           <Grid item md={1} sx={{ justifyContent: 'end' }}>
@@ -265,7 +276,7 @@ const UserDetail = () => {
               onClick={() => deleteUser()}
             >
               <DeleteIcon fontSize="medium" />
-              Kaldır
+              
             </Button>
           </Grid>
         </Grid>

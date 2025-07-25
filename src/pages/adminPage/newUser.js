@@ -93,11 +93,12 @@ const NewUser = () => {
   }
 
   return (
-    <Grid container>
+    <Grid container width={'100%'}>
      
       <Grid
         item
         justifyContent="center"
+        width={'100%'}
       >
         <Grid
           md={8}
@@ -119,8 +120,8 @@ const NewUser = () => {
             }}
           >
             <Typography
-              variant="h5"
-              component="h5"
+              variant="body"
+              component="h3"
               sx={{ textAlign: 'center' }}
             >
               Yeni Kullanıcı Ekle
@@ -186,6 +187,9 @@ const NewUser = () => {
                 sx={{
                   background: '#fc7703',
                   color: 'white',
+                  ':hover': {
+                    color: 'black',
+                  }
                 }}
               >
                 İptal
@@ -197,7 +201,9 @@ const NewUser = () => {
                 sx={{
                   background: 'blue',
                   color: 'white',
-                }}
+                  ':hover': {
+                    color: 'black',
+                }}}
               >
                 Oluştur
               </Button>

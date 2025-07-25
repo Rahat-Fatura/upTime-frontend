@@ -844,7 +844,7 @@ export default function Dashboard() {
           <Tooltip title="Detay">
             <IconButton
               onClick={() => {
-                navigate(`${params.row.id}/detail`)
+                navigate(`/user/monitors/${params.row.id}/detail`)
               }}
             >
               <Visibility label="Detay" fontSize="small" color="primary" />
