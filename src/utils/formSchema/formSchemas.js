@@ -182,6 +182,10 @@ export const newHttpMonitorFormShhema = yup.object().shape({
         }
       }
     ),
+  failCountRef: yup
+    .number()
+    .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
+    .required('Başarısızlık sayısı zorunludur !')
 })
 
 export const newKeywordMonitorFormShhema = yup.object().shape({
@@ -326,6 +330,10 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
         }
       }
     ),
+  failCountRef: yup
+    .number()
+    .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
+    .required('Başarısızlık sayısı zorunludur !')
 })
 
 export const newPingMonitorFormShhema = yup.object().shape({
@@ -345,6 +353,10 @@ export const newPingMonitorFormShhema = yup.object().shape({
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
     .required('Zaman birimi zorunludur!'),
+  failCountRef: yup
+    .number()
+    .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
+    .required('Başarısızlık sayısı zorunludur !')
 })
 
 export const newPortMonitorFormShhema = yup.object().shape({
@@ -379,6 +391,10 @@ export const newPortMonitorFormShhema = yup.object().shape({
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
     .required('Zaman birimi zorunludur!'),
+  failCountRef: yup
+    .number()
+    .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
+    .required('Başarısızlık sayısı zorunludur !')
 })
 
 export const newCronJobMonitorFormShhema = yup.object().shape({
@@ -399,4 +415,8 @@ export const newCronJobMonitorFormShhema = yup.object().shape({
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
     .required('Zaman birimi zorunludur!'),
+  failCountRef: yup
+    .number()
+    .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
+    .required('Başarısızlık sayısı zorunludur !')
 })

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import api from "../../api/auth/axiosInstance";
-import Swal from "sweetalert2";
+import { useState, useEffect } from 'react'
+import api from '../../api/auth/axiosInstance'
+import Swal from 'sweetalert2'
 import {
   Box,
   Typography,
@@ -17,7 +17,7 @@ import {
   Slider,
   Alert,
   Stack,
-} from "@mui/material";
+} from '@mui/material'
 import {
   Timer as TimerIcon,
   Public as PublicIcon,
@@ -26,125 +26,110 @@ import {
   Menu as MenuIcon,
   Add,
   Remove,
-} from "@mui/icons-material";
-import ComputerIcon from "@mui/icons-material/Computer";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { INTERVAL_UNITS } from "./constants/monitorConstants";
-import { cookies } from "../../utils/cookie";
-import { jwtDecode } from "jwt-decode";
-import { useFormik } from "formik";
-import { newHttpMonitorFormShhema } from "../../utils/formSchema/formSchemas";
+} from '@mui/icons-material'
+import ComputerIcon from '@mui/icons-material/Computer'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { INTERVAL_UNITS } from './constants/monitorConstants'
+import { cookies } from '../../utils/cookie'
+import { jwtDecode } from 'jwt-decode'
+import { useFormik } from 'formik'
+import { newHttpMonitorFormShhema } from '../../utils/formSchema/formSchemas'
 
 const NewMonitorPage = (update = false) => {
-  const [params, setParams] = useState(useParams());
-  const [monitorType, setMonitorType] = useState("http");
-  const [min, setMin] = useState();
-  const [max, setMax] = useState();
-  const [role, setRole] = useState("");
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false);
-  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true);
-  const [failCountRef, setFailCountRef] = useState(3);
-  const [value, setValue] = useState(1);
-  const minValue = 1;
-  const maxValue = 100;
+  const [params, setParams] = useState(useParams())
+  const [monitorType, setMonitorType] = useState('http')
+  const [min, setMin] = useState()
+  const [max, setMax] = useState()
+  const [role, setRole] = useState('')
+  const navigate = useNavigate()
+  const theme = useTheme()
+  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
+  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
 
   const handleIncrementForFailCount = () => {
-    if (value < maxValue) {
-      setValue(value + 1);
-    }
-  };
+    setFieldValue('failCountRef', values.failCountRef + 1)
+  }
 
   const handleDecrementForFailCount = () => {
-    if (value > minValue) {
-      setValue(value - 1);
-    }
-  };
-
-  const handleChangeForFailCount = (e) => {
-    const newValue = parseInt(e.target.value) || minValue;
-    if (newValue >= minValue && newValue <= maxValue) {
-      setValue(newValue);
-    }
-  };
+    setFieldValue('failCountRef', values.failCountRef - 1)
+  }
 
   useEffect(() => {
     const fetchMonitorData = async () => {
       try {
-        const jwtToken = cookies.get("jwt-access");
+        const jwtToken = cookies.get('jwt-access')
         if (jwtToken) {
-          const decodedToken = jwtDecode(jwtToken);
-          setRole(decodedToken.role);
+          const decodedToken = jwtDecode(jwtToken)
+          setRole(decodedToken.role)
         }
-        const response = await api.get(`monitors/http/${params.id}`);
-        console.log(response.data);
-        setFieldValue("name", response.data.monitor.name);
-        setFieldValue("host", response.data.host);
-        setFieldValue("method", response.data.method);
-        setFieldValue("headers", JSON.stringify(response.data.headers));
-        setFieldValue("body", JSON.stringify(response.data.body));
+        const response = await api.get(`monitors/http/${params.id}`)
+        console.log(response.data)
+        setFieldValue('name', response.data.monitor.name)
+        setFieldValue('host', response.data.host)
+        setFieldValue('method', response.data.method)
+        setFieldValue('headers', JSON.stringify(response.data.headers))
+        setFieldValue('body', JSON.stringify(response.data.body))
         setFieldValue(
-          "allowedStatusCodes",
+          'allowedStatusCodes',
           response.data.allowedStatusCodes
-            ? response.data.allowedStatusCodes.join(",")
-            : ""
-        );
-        setFieldValue("interval", response.data.monitor.interval);
-        setFieldValue("intervalUnit", response.data.monitor.intervalUnit);
-        setFieldValue("timeOut", response.data.timeOut);
-        setFailCountRef(response.data.failCountRef);
+            ? response.data.allowedStatusCodes.join(',')
+            : ''
+        )
+        setFieldValue('interval', response.data.monitor.interval)
+        setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
+        setFieldValue('timeOut', response.data.timeOut)
+        setFieldValue('failCountRef', response.data.monitor.failCountRef)
       } catch (error) {
         Swal.fire({
-          title: "Hata",
-          text: "Monitor bilgileri alınırken bir hata oluştu.",
-          icon: "error",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
-        console.error("Monitor bilgileri alınırken hata oluştu:", error);
-      }
-    };
-    if (update.update) {
-      fetchMonitorData();
-    } else {
-      const jwtToken = cookies.get("jwt-access");
-      console.log("JWT Token:", jwtToken);
-      if (jwtToken) {
-        const decodedToken = jwtDecode(jwtToken);
-        setRole(decodedToken.role);
+          title: 'Hata',
+          text: 'Monitor bilgileri alınırken bir hata oluştu.',
+          icon: 'error',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
+        console.error('Monitor bilgileri alınırken hata oluştu:', error)
       }
     }
-  }, []);
+    if (update.update) {
+      fetchMonitorData()
+    } else {
+      const jwtToken = cookies.get('jwt-access')
+      console.log('JWT Token:', jwtToken)
+      if (jwtToken) {
+        const decodedToken = jwtDecode(jwtToken)
+        setRole(decodedToken.role)
+      }
+    }
+  }, [])
   const getIntervalLimits = (unit) => {
     switch (unit) {
-      case "seconds":
+      case 'seconds':
         values.interval =
-          values.interval >= 20 && values.interval < 60 ? values.interval : 20;
-        setMin(20);
-        setMax(59);
-        return { min: 20, max: 59 };
-      case "minutes":
+          values.interval >= 20 && values.interval < 60 ? values.interval : 20
+        setMin(20)
+        setMax(59)
+        return { min: 20, max: 59 }
+      case 'minutes':
         values.interval =
-          values.interval > 0 && values.interval < 60 ? values.interval : 1;
-        setMin(1);
-        setMax(59);
-        return { min: 1, max: 59 };
-      case "hours":
+          values.interval > 0 && values.interval < 60 ? values.interval : 1
+        setMin(1)
+        setMax(59)
+        return { min: 1, max: 59 }
+      case 'hours':
         values.interval =
-          values.interval > 0 && values.interval < 24 ? values.interval : 1;
-        setMin(1);
-        setMax(23);
-        return { min: 1, max: 23 };
+          values.interval > 0 && values.interval < 24 ? values.interval : 1
+        setMin(1)
+        setMax(23)
+        return { min: 1, max: 23 }
       default:
-        return;
+        return
     }
-  };
+  }
 
   const createMonitor = async (values, actions) => {
     try {
-      console.log(values.allowedStatusCodes.length);
-      console.log(values.allowedStatusCodes);
+      console.log(values.allowedStatusCodes.length)
+      console.log(values.allowedStatusCodes)
       const formattedData = {
         name: values.name,
         httpMonitor: {
@@ -154,35 +139,36 @@ const NewMonitorPage = (update = false) => {
           headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
           allowedStatusCodes:
             values.allowedStatusCodes.length > 0
-              ? values.allowedStatusCodes.split(",").map((code) => code.trim())
+              ? values.allowedStatusCodes.split(',').map((code) => code.trim())
               : [],
           timeOut: values.timeOut,
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
-      };
-      console.log(formattedData);
+        failCountRef: values.failCountRef,
+      }
+      console.log(formattedData)
       const response = await api.post(
-        role === "admin" ? `monitors/http/${params.userId}` : `monitors/http/`,
+        role === 'admin' ? `monitors/http/${params.userId}` : `monitors/http/`,
         formattedData
-      );
+      )
       if (response.data) {
         Swal.fire({
-          title: "İzleme Başarılı Şekilde Oluşturuldu",
-          icon: "success",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
+          title: 'İzleme Başarılı Şekilde Oluşturuldu',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
         title: error.response.data.message,
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
-      console.error("Sunucu eklenirken hata oluştu:", error);
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
+      console.error('Sunucu eklenirken hata oluştu:', error)
     }
-  };
+  }
 
   const updateMonitor = async (e) => {
     try {
@@ -195,79 +181,81 @@ const NewMonitorPage = (update = false) => {
           headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
           allowedStatusCodes:
             values.allowedStatusCodes.length > 0
-              ? values.allowedStatusCodes.split(",").map((code) => code.trim())
+              ? values.allowedStatusCodes.split(',').map((code) => code.trim())
               : [],
           timeOut: values.timeOut,
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
-      };
-      console.log(formattedData);
+        failCountRef: values.failCountRef,
+      }
+      console.log(formattedData)
       const response = await api.put(
         `monitors/http/${params.id}`,
         formattedData
-      );
+      )
       if (response.data) {
         Swal.fire({
-          title: "İzleme Başarılı Şekilde Güncellendi",
-          icon: "success",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
+          title: 'İzleme Başarılı Şekilde Güncellendi',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
         title: error.response.data.message,
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
-      console.error("Monitor update error :", error);
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
+      console.error('Monitor update error :', error)
     }
-  };
+  }
 
   const handleMonitorTypeChange = (event) => {
-    setMonitorType(event.target.value);
-  };
+    setMonitorType(event.target.value)
+  }
 
   const turnMonitorPage = () => {
-    role === "user"
-      ? navigate("/user/monitors/")
-      : navigate(`/admin/userMonitors/${params.userId}`);
-  };
+    role === 'user'
+      ? navigate('/user/monitors/')
+      : navigate(`/admin/userMonitors/${params.userId}`)
+  }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
     useFormik({
       isInitialValid: false,
       initialValues: {
-        name: "",
-        host: "",
-        method: "GET",
-        body: "",
-        headers: "",
-        allowedStatusCodes: "",
+        name: '',
+        host: '',
+        method: 'GET',
+        body: '',
+        headers: '',
+        allowedStatusCodes: '',
         timeOut: 30,
         interval: 5,
-        intervalUnit: "minutes",
+        intervalUnit: 'minutes',
+        failCountRef: 3,
       },
       validationSchema: newHttpMonitorFormShhema,
       onSubmit: update.update ? updateMonitor : createMonitor,
 
       validateOnChange: vaidateOnChangeState,
       validateOnBlur: vaidateOnBlurState,
-    });
+    })
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
-      setValidateOnChangeState(true);
-      setValidateOnBlurState(false);
+      setValidateOnChangeState(true)
+      setValidateOnBlurState(false)
     }
-  }, [errors]);
+  }, [errors])
 
   useEffect(() => {
-    console.log("Interval Unit:", values.intervalUnit);
-    console.log("Interval Value:", values.interval);
-    getIntervalLimits(values.intervalUnit);
-  }, [values.intervalUnit]);
+    console.log('Interval Unit:', values.intervalUnit)
+    console.log('Interval Value:', values.interval)
+    getIntervalLimits(values.intervalUnit)
+  }, [values.intervalUnit])
 
   return (
     <Grid container>
@@ -275,14 +263,14 @@ const NewMonitorPage = (update = false) => {
         item
         xs={11.5}
         md={12}
-        sx={{ backgroundColor: "#0080ff", width: "100%" }}
+        sx={{ backgroundColor: '#0080ff', width: '100%' }}
       >
         <Box
           sx={{
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "space-between",
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            justifyContent: 'space-between',
             mb: 2,
             gap: 1,
           }}
@@ -291,20 +279,20 @@ const NewMonitorPage = (update = false) => {
             variant="h4"
             component="h1"
             sx={{
-              fontWeight: "bold",
+              fontWeight: 'bold',
               color: theme.palette.primary.main,
               fontSize: {
-                xs: "0.8rem",
-                sm: "0.8rem",
-                md: "1rem",
-                lg: "1.2rem",
-                xlg: "1.5rem",
+                xs: '0.8rem',
+                sm: '0.8rem',
+                md: '1rem',
+                lg: '1.2rem',
+                xlg: '1.5rem',
               },
             }}
           >
             {update.update
-              ? "Http(s) Monitor Güncelle"
-              : "Http(s) Monitor Ekle"}
+              ? 'Http(s) Monitor Güncelle'
+              : 'Http(s) Monitor Ekle'}
           </Typography>
         </Box>
         <Divider sx={{ mb: 2 }} />
@@ -312,33 +300,33 @@ const NewMonitorPage = (update = false) => {
         <Grid
           container
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            bgcolor: "white",
-            borderRadius: "12px",
+            display: 'flex',
+            flexDirection: 'column',
+            bgcolor: 'white',
+            borderRadius: '12px',
           }}
         >
           <Grid item md={12}>
-            <Alert severity="info" sx={{ width: "fit-content" }}>
-              {monitorType === "http"
-                ? "HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.ornek.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar."
-                : monitorType === "ping"
-                ? role === "user"
-                  ? navigate("/user/monitors/new/ping")
+            <Alert severity="info" sx={{ width: 'fit-content' }}>
+              {monitorType === 'http'
+                ? 'HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.ornek.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar.'
+                : monitorType === 'ping'
+                ? role === 'user'
+                  ? navigate('/user/monitors/new/ping')
                   : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
-                : monitorType === "port"
-                ? role === "user"
-                  ? navigate("/user/monitors/new/port")
+                : monitorType === 'port'
+                ? role === 'user'
+                  ? navigate('/user/monitors/new/port')
                   : navigate(`/admin/userMonitors/${params.userId}/new/port`)
-                : monitorType === "keyword"
-                ? role === "user"
-                  ? navigate("/user/monitors/new/keyword")
+                : monitorType === 'keyword'
+                ? role === 'user'
+                  ? navigate('/user/monitors/new/keyword')
                   : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
-                : monitorType === "cronjob"
-                ? role === "user"
-                  ? navigate("/user/monitors/new/cronjob")
+                : monitorType === 'cronjob'
+                ? role === 'user'
+                  ? navigate('/user/monitors/new/cronjob')
                   : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
-                : "Select a monitor type to get started."}
+                : 'Select a monitor type to get started.'}
             </Alert>
           </Grid>
           {/*Birinci satır*/}
@@ -347,7 +335,7 @@ const NewMonitorPage = (update = false) => {
               Monitoring Tipi
             </Typography>
 
-            <FormControl sx={{ width: "100%" }}>
+            <FormControl sx={{ width: '100%' }}>
               <Select
                 fullWidth
                 value={monitorType}
@@ -356,41 +344,41 @@ const NewMonitorPage = (update = false) => {
                 MenuProps={{
                   PaperProps: {
                     sx: {
-                      bgcolor: "white",
+                      bgcolor: 'white',
                     },
                   },
                 }}
                 sx={{
-                  "& .MuiSelect-select": {
-                    display: "flex",
-                    alignItems: "center",
+                  '& .MuiSelect-select': {
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 0,
                     py: 0.6,
                   },
                 }}
               >
-                <MenuItem value="http" sx={{ bgcolor: "white" }}>
+                <MenuItem value="http" sx={{ bgcolor: 'white' }}>
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 2,
-                      width: "100%",
+                      width: '100%',
                       //bgcolor: 'white',
                     }}
                   >
                     <Box
                       sx={{
-                        bgcolor: "#3f51b5",
+                        bgcolor: '#3f51b5',
                         p: 0.6,
                         borderRadius: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         minWidth: 48,
                       }}
                     >
-                      <PublicIcon sx={{ color: "white", fontSize: 20 }} />
+                      <PublicIcon sx={{ color: 'white', fontSize: 20 }} />
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" fontWeight="500">
@@ -407,30 +395,30 @@ const NewMonitorPage = (update = false) => {
                   disabled={update.update ? true : false}
                   value="ping"
                   sx={{
-                    bgcolor: "white",
-                    ":hover": { bgcolor: "#b1d1f1c5" },
+                    bgcolor: 'white',
+                    ':hover': { bgcolor: '#b1d1f1c5' },
                   }}
                 >
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 2,
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <Box
                       sx={{
-                        bgcolor: "#4caf50",
+                        bgcolor: '#4caf50',
                         p: 0.6,
                         borderRadius: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         minWidth: 48,
                       }}
                     >
-                      <ComputerIcon sx={{ color: "white", fontSize: 20 }} />
+                      <ComputerIcon sx={{ color: 'white', fontSize: 20 }} />
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" fontWeight="500">
@@ -447,31 +435,31 @@ const NewMonitorPage = (update = false) => {
                   disabled={update.update ? true : false}
                   value="port"
                   sx={{
-                    bgcolor: "white",
-                    ":hover": { bgcolor: "#b1d1f1c5" },
+                    bgcolor: 'white',
+                    ':hover': { bgcolor: '#b1d1f1c5' },
                   }}
                 >
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 2,
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <Box
                       sx={{
-                        bgcolor: "#ff9800",
+                        bgcolor: '#ff9800',
                         p: 0.6,
                         borderRadius: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         minWidth: 48,
                       }}
                     >
                       <DeveloperBoardIcon
-                        sx={{ color: "white", fontSize: 20 }}
+                        sx={{ color: 'white', fontSize: 20 }}
                       />
                     </Box>
                     <Box sx={{ flex: 1 }}>
@@ -489,30 +477,30 @@ const NewMonitorPage = (update = false) => {
                   disabled={update.update ? true : false}
                   value="keyword"
                   sx={{
-                    bgcolor: "white",
-                    ":hover": { bgcolor: "#b1d1f1c5" },
+                    bgcolor: 'white',
+                    ':hover': { bgcolor: '#b1d1f1c5' },
                   }}
                 >
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 2,
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <Box
                       sx={{
-                        bgcolor: "#e91e63",
+                        bgcolor: '#e91e63',
                         p: 0.6,
                         borderRadius: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         minWidth: 48,
                       }}
                     >
-                      <CodeIcon sx={{ color: "white", fontSize: 20 }} />
+                      <CodeIcon sx={{ color: 'white', fontSize: 20 }} />
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" fontWeight="500">
@@ -529,30 +517,30 @@ const NewMonitorPage = (update = false) => {
                   disabled={update.update ? true : false}
                   value="cronjob"
                   sx={{
-                    bgcolor: "white",
-                    ":hover": { bgcolor: "#b1d1f1c5" },
+                    bgcolor: 'white',
+                    ':hover': { bgcolor: '#b1d1f1c5' },
                   }}
                 >
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
+                      display: 'flex',
+                      alignItems: 'center',
                       gap: 2,
-                      width: "100%",
+                      width: '100%',
                     }}
                   >
                     <Box
                       sx={{
-                        bgcolor: "#3f51b5",
+                        bgcolor: '#3f51b5',
                         p: 0.6,
                         borderRadius: 1,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         minWidth: 48,
                       }}
                     >
-                      <TimerIcon sx={{ color: "white", fontSize: 20 }} />
+                      <TimerIcon sx={{ color: 'white', fontSize: 20 }} />
                     </Box>
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" fontWeight="500">
@@ -568,8 +556,8 @@ const NewMonitorPage = (update = false) => {
               </Select>
               <FormHelperText
                 sx={{
-                  justifyContent: "start",
-                  alignItems: "center",
+                  justifyContent: 'start',
+                  alignItems: 'center',
                   //bgcolor: '#99a7fa',
                 }}
               ></FormHelperText>
@@ -577,15 +565,15 @@ const NewMonitorPage = (update = false) => {
           </Grid>
           <Divider />
           {/*İkincii satır*/}
-          <Grid item md={12} display={"flex"}>
+          <Grid item md={12} display={'flex'}>
             <Grid
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Ad</Typography>
               </Grid>
               <Grid item md={12}>
@@ -596,12 +584,12 @@ const NewMonitorPage = (update = false) => {
                   InputProps={{
                     sx: {
                       height: 35,
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                   label="Tanımlayıcı ad"
@@ -610,9 +598,9 @@ const NewMonitorPage = (update = false) => {
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "1.5em" }}
+                      sx={{ color: 'red', minHeight: '1.5em' }}
                     >
-                      {errors.name || " "}
+                      {errors.name || ' '}
                     </Typography>
                   }
                 />
@@ -622,10 +610,10 @@ const NewMonitorPage = (update = false) => {
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Url</Typography>
               </Grid>
               <Grid item md={12}>
@@ -636,24 +624,24 @@ const NewMonitorPage = (update = false) => {
                   InputProps={{
                     sx: {
                       height: 35,
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
-                  label={"URL (veya IP)"}
+                  label={'URL (veya IP)'}
                   value={values.host}
                   onChange={handleChange}
-                  placeholder={"https://rahatup.com"}
+                  placeholder={'https://rahatup.com'}
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "1.5em" }}
+                      sx={{ color: 'red', minHeight: '1.5em' }}
                     >
-                      {errors.host || " "}
+                      {errors.host || ' '}
                     </Typography>
                   }
                 />
@@ -662,33 +650,33 @@ const NewMonitorPage = (update = false) => {
           </Grid>
           <Divider />
           {/*Üçüncü satır*/}
-          <Grid item md={12} display={"flex"}>
+          <Grid item md={12} display={'flex'}>
             <Grid
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
               gap={1}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
               </Grid>
-              <Grid item md={12} gap={3} display={"flex"}>
+              <Grid item md={12} gap={3} display={'flex'}>
                 <Grid item md={9}>
                   <FormControl fullWidth>
                     <Slider
                       sx={{
-                        color: "#1976d2",
+                        color: '#1976d2',
                         height: 4, // Track kalınlığı
-                        "& .MuiSlider-thumb": {
+                        '& .MuiSlider-thumb': {
                           width: 10,
                           height: 10,
                         },
-                        "& .MuiSlider-track": {
-                          border: "none", // varsa kalın kenar çizgilerini kapatır
+                        '& .MuiSlider-track': {
+                          border: 'none', // varsa kalın kenar çizgilerini kapatır
                         },
-                        "& .MuiSlider-rail": {
+                        '& .MuiSlider-rail': {
                           opacity: 0.5,
                           height: 4,
                         },
@@ -709,7 +697,7 @@ const NewMonitorPage = (update = false) => {
                     <FormHelperText>
                       <Typography
                         variant="body2"
-                        sx={{ color: "red", minHeight: "1.5em" }}
+                        sx={{ color: 'red', minHeight: '1.5em' }}
                       >
                         {errors.interval}
                       </Typography>
@@ -721,16 +709,16 @@ const NewMonitorPage = (update = false) => {
                     <Select
                       id="intervalUnit"
                       name="intervalUnit"
-                      value={values.intervalUnit || "dakika"}
+                      value={values.intervalUnit || 'dakika'}
                       onChange={handleChange}
                       variant="outlined"
                       sx={{
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                       }}
                     >
                       {INTERVAL_UNITS.map((unit) => (
                         <MenuItem
-                          sx={{ fontSize: "0.8rem" }}
+                          sx={{ fontSize: '0.8rem' }}
                           key={unit.value}
                           value={unit.value}
                         >
@@ -746,11 +734,11 @@ const NewMonitorPage = (update = false) => {
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
               gap={1}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Method</Typography>
               </Grid>
               <Grid item md={12}>
@@ -761,58 +749,58 @@ const NewMonitorPage = (update = false) => {
                   label="HTTP Metot"
                   select
                   value={values.method}
-                  onChange={(e) => setFieldValue("method", e.target.value)}
+                  onChange={(e) => setFieldValue('method', e.target.value)}
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "2rem" }}
+                      sx={{ color: 'red', minHeight: '2rem' }}
                     >
                       {errors.method}
                     </Typography>
                   }
                   InputProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                 >
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="GET"
                   >
                     GET
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="POST"
                   >
                     POST
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="PUT"
                   >
                     PUT
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="DELETE"
                   >
                     DELETE
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="PATCH"
                   >
                     PATCH
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="HEAD"
                   >
                     HEAD
@@ -823,16 +811,16 @@ const NewMonitorPage = (update = false) => {
           </Grid>
           <Divider />
           {/*Dördüncü satır*/}
-          <Grid item md={12} display={"flex"}>
+          <Grid item md={12} display={'flex'}>
             <Grid
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
               gap={1}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Başlık</Typography>
               </Grid>
               <Grid item md={12}>
@@ -845,7 +833,7 @@ const NewMonitorPage = (update = false) => {
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "1.5em" }}
+                      sx={{ color: 'red', minHeight: '1.5em' }}
                     >
                       {errors.headers}
                     </Typography>
@@ -860,19 +848,19 @@ const NewMonitorPage = (update = false) => {
                   size="small"
                   InputProps={{
                     sx: {
-                      fontSize: "0.8rem",
-                      "& textarea": {
-                        maxHeight: "200px", // yüksekliği sınırla
-                        overflowY: "auto", // dikey scroll bar
+                      fontSize: '0.8rem',
+                      '& textarea': {
+                        maxHeight: '200px', // yüksekliği sınırla
+                        overflowY: 'auto', // dikey scroll bar
                       },
                     },
                     startAdornment: (
-                      <CodeIcon sx={{ mr: 1, color: "#1976d2" }} />
+                      <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
                     ),
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                 />
@@ -882,11 +870,11 @@ const NewMonitorPage = (update = false) => {
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
               gap={1}
             >
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Gövde</Typography>
               </Grid>
               <Grid item md={12}>
@@ -900,31 +888,31 @@ const NewMonitorPage = (update = false) => {
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "1.5em" }}
+                      sx={{ color: 'red', minHeight: '1.5em' }}
                     >
                       {errors.body}
                     </Typography>
                   }
                   sx={{ mb: 2 }}
                   value={values.body}
-                  onChange={(e) => setFieldValue("body", e.target.value)}
+                  onChange={(e) => setFieldValue('body', e.target.value)}
                   variant="outlined"
                   size="small"
                   InputProps={{
                     sx: {
-                      fontSize: "0.8rem",
-                      "& textarea": {
-                        maxHeight: "200px", // yüksekliği sınırla
-                        overflowY: "auto", // dikey scroll bar
+                      fontSize: '0.8rem',
+                      '& textarea': {
+                        maxHeight: '200px', // yüksekliği sınırla
+                        overflowY: 'auto', // dikey scroll bar
                       },
                     },
                     startAdornment: (
-                      <CodeIcon sx={{ mr: 1, color: "#1976d2" }} />
+                      <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
                     ),
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                 />
@@ -933,83 +921,163 @@ const NewMonitorPage = (update = false) => {
           </Grid>
           <Divider />
           {/*Beşinci satır*/}
-          <Grid item md={12} display={"flex"}>
+          <Grid item md={12} display={'flex'}>
             <Grid
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
             >
-              <Grid item md={12}>
-                {" "}
-                <Typography gutterBottom>İstek Zaman Aşımı</Typography>
-                <FormControl fullWidth>
-                  <Select
-                    id="timeOut"
-                    name="timeOut"
-                    value={values.timeOut}
-                    onChange={(e) => setFieldValue("timeOut", e.target.value)}
-                    sx={{
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={10}>
-                      10 saniye
-                    </MenuItem>
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={20}>
-                      20 saniye
-                    </MenuItem>
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={30}>
-                      30 saniye
-                    </MenuItem>
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={40}>
-                      40 saniye
-                    </MenuItem>
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={50}>
-                      50 saniye
-                    </MenuItem>
-                    <MenuItem sx={{ fontSize: "0.8rem" }} value={60}>
-                      60 saniye
-                    </MenuItem>
-                  </Select>
-                  <FormHelperText>
+              <Grid
+                item
+                md={12}
+                display={'flex'}
+                justifyContent={'space-between'}
+              >
+                <Box sx={{ width: '40%', gap: 2 }}>
+                  <Typography gutterBottom>İstek Zaman Aşımı</Typography>
+                  <FormControl fullWidth>
+                    <Select
+                      id="timeOut"
+                      name="timeOut"
+                      value={values.timeOut}
+                      onChange={(e) => setFieldValue('timeOut', e.target.value)}
+                      sx={{
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
+                        10 saniye
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
+                        20 saniye
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
+                        30 saniye
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
+                        40 saniye
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
+                        50 saniye
+                      </MenuItem>
+                      <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
+                        60 saniye
+                      </MenuItem>
+                    </Select>
+                    <FormHelperText>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: 'red', minHeight: '1.5em' }}
+                      >
+                        {errors.timeOut}
+                      </Typography>
+                    </FormHelperText>
+                  </FormControl>
+                </Box>
+                <Box sx={{ width: '50%' }}>
+                  <Typography sx={{ mb: 0.5 }}>
+                    Kaç Hata Sonrası Bildirim Gönderilsin
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton
+                      aria-label="decrease"
+                      onClick={handleDecrementForFailCount}
+                      disabled={values.failCountRef <= 1}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '8px 0 0 8px',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+
+                    <TextField
+                      id="failCountRef"
+                      name="failCountRef"
+                      value={values.failCountRef}
+                      fullWidth
+                      onChange={handleChange}
+                      InputProps={{
+                        sx: {
+                          height: 35,
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          textAlign: 'center',
+                          padding: '8px',
+                        },
+                        type: 'number',
+                      }}
+                    />
+
+                    <IconButton
+                      aria-label="increase"
+                      onClick={handleIncrementForFailCount}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '0 8px 8px 0',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Stack>
+
+                  {
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "1.5em" }}
+                      sx={{ color: 'red', minHeight: '1.5em' }}
                     >
-                      {errors.timeOut}
+                      {errors.failCountRef || ' '}
                     </Typography>
-                  </FormHelperText>
-                </FormControl>
+                  }
+                </Box>
               </Grid>
             </Grid>
             <Grid
               item
               md={6}
               padding={2}
-              display={"flex"}
-              flexDirection={"column"}
+              display={'flex'}
+              flexDirection={'column'}
             >
-              <Grid item md={12} sx={{ display: "flex", gap: 2 }}>
-                <Box sx={{ width: "50%" }}>
+              <Grid item md={12} sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ width: '100%' }}>
                   <Typography gutterBottom>
                     İzin Verilen Durum Kodlar
                   </Typography>
                   <TextField
                     id="allowedStatusCodes"
-                    placeholder="örnek:200,400,500"
+                    placeholder="örnek: 200,400,500"
                     required
                     fullWidth
                     InputProps={{
                       sx: {
                         height: 35,
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                       },
                     }}
                     InputLabelProps={{
                       sx: {
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                       },
                     }}
                     name="allowedStatusCodes"
@@ -1020,85 +1088,19 @@ const NewMonitorPage = (update = false) => {
                     helperText={
                       <Typography
                         variant="body2"
-                        sx={{ color: "red", minHeight: "1.5em" }}
+                        sx={{ color: 'red', minHeight: '1.5em' }}
                       >
-                        {errors.allowedStatusCodes || " "}
+                        {errors.allowedStatusCodes || ' '}
                       </Typography>
                     }
                   />
-                </Box>
-                <Box sx={{ width: "50%" }}>
-                  <Typography sx={{ mb: 0.5 }}>
-                    Kaç Hata Sonrası Bildirim Gönderilsin
-                  </Typography>
-
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <IconButton
-                      aria-label="decrease"
-                      onClick={handleDecrementForFailCount}
-                      disabled={value <= minValue}
-                      sx={{
-                        border: "1px solid #ddd",
-                        borderRadius: "8px 0 0 8px",
-                        backgroundColor: "#f5f5f5",
-                        "&:hover": {
-                          backgroundColor: "#e0e0e0",
-                        },
-                      }}
-                    >
-                      <Remove />
-                    </IconButton>
-
-                    <TextField
-                      value={value}
-                      fullWidth
-                      onChange={handleChangeForFailCount}
-                      variant="outlined"
-                      size="small"
-                      inputProps={{
-                        style: {
-                          textAlign: "center",
-                          padding: "8px",
-                        },
-                        min: minValue,
-                        max: maxValue,
-                        type: "number",
-                      }}
-                    />
-
-                    <IconButton
-                      aria-label="increase"
-                      onClick={handleIncrementForFailCount}
-                      disabled={value >= maxValue}
-                      sx={{
-                        border: "1px solid #ddd",
-                        borderRadius: "0 8px 8px 0",
-                        backgroundColor: "#f5f5f5",
-                        "&:hover": {
-                          backgroundColor: "#e0e0e0",
-                        },
-                      }}
-                    >
-                      <Add />
-                    </IconButton>
-                  </Stack>
-
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 1, display: "block" }}
-                  >
-                    {value === maxValue
-                      ? "Maksimum limit"
-                      : `${minValue}-${maxValue} arasında değer girin`}
-                  </Typography>
                 </Box>
               </Grid>
             </Grid>
           </Grid>
           <Divider />
           {/*Altıncı satır*/}
-          <Grid item md={12} display={"flex"} mt={2} mb={2}>
+          <Grid item md={12} display={'flex'} mt={2} mb={2}>
             {/* <Grid item md={6} display={'flex'} flexDirection={'column'}>
               <Grid item md={12} alignContent={'end'}>
                 <Typography variant="subtitle1" gutterBottom>Bildirim Atılacaklar</Typography>
@@ -1116,17 +1118,17 @@ const NewMonitorPage = (update = false) => {
             <Grid
               item
               md={6}
-              display={"flex"}
-              justifyContent={"center"}
-              alignContent={"center"}
+              display={'flex'}
+              justifyContent={'center'}
+              alignContent={'center'}
             >
               <Grid item>
                 <Button
                   variant="contained"
                   color="secondary"
                   sx={{
-                    fontSize: "0.8rem",
-                    width: "8rem",
+                    fontSize: '0.8rem',
+                    width: '8rem',
                   }}
                   onClick={() => turnMonitorPage()}
                 >
@@ -1137,44 +1139,44 @@ const NewMonitorPage = (update = false) => {
             <Grid
               item
               md={6}
-              display={"flex"}
-              alignContent={"center"}
-              justifyContent={"center"}
+              display={'flex'}
+              alignContent={'center'}
+              justifyContent={'center'}
             >
               <Button
                 variant="contained"
                 color="primary"
                 sx={{
-                  fontSize: "0.8rem",
-                  width: "12rem",
+                  fontSize: '0.8rem',
+                  width: '12rem',
                 }}
                 onClick={() => {
                   if (isValid) {
                     if (update.update) {
-                      handleSubmit();
+                      handleSubmit()
                     } else {
-                      handleSubmit();
+                      handleSubmit()
                     }
                   } else {
                     Swal.fire({
-                      icon: "error",
-                      title: "Hata",
-                      text: "Lütfen Formu Tekrar Gözden Geçirin",
-                      confirmButtonText: "Tamam",
-                    });
-                    handleSubmit();
+                      icon: 'error',
+                      title: 'Hata',
+                      text: 'Lütfen Formu Tekrar Gözden Geçirin',
+                      confirmButtonText: 'Tamam',
+                    })
+                    handleSubmit()
                   }
                 }}
               >
-                {update.update ? "Monitoring Güncelle" : "Monitoring Oluştur"}
+                {update.update ? 'Monitoring Güncelle' : 'Monitoring Oluştur'}
               </Button>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
     </Grid>
-  );
-};
+  )
+}
 
 {
   /*activeTab === 2 && (
@@ -1207,4 +1209,4 @@ const NewMonitorPage = (update = false) => {
                     </Grid>
                   )*/
 }
-export default NewMonitorPage;
+export default NewMonitorPage

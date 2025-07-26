@@ -24,12 +24,15 @@ import {
   DeveloperBoard as DeveloperBoardIcon,
 } from '@mui/icons-material'
 import ComputerIcon from '@mui/icons-material/Computer'
+import { Add, Remove } from '@mui/icons-material'
+import Stack from '@mui/material/Stack'
+import { IconButton } from '@mui/material'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { INTERVAL_UNITS } from './constants/monitorConstants'
 import { jwtDecode } from 'jwt-decode'
 import { cookies } from '../../utils/cookie'
 import { newPingMonitorFormShhema } from '../../utils/formSchema/formSchemas'
-import { set } from 'local-storage'
+
 
 const PingMonitorFormPage = (update = false) => {
   const [params, setParams] = useState(useParams())
@@ -52,12 +55,12 @@ const PingMonitorFormPage = (update = false) => {
           setRole(decodedToken.role)
         }
         const response = await api.get(`monitors/ping/${params.id}`)
-       
+
         setFieldValue('name', response.data.monitor.name)
         setFieldValue('host', response.data.host)
         setFieldValue('interval', response.data.monitor.interval)
         setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
-        
+        setFieldValue('failCountRef', response.data.monitor.failCountRef)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -81,24 +84,35 @@ const PingMonitorFormPage = (update = false) => {
     }
   }, [])
 
+    const handleIncrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef + 1)
+  }
+
+  const handleDecrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef - 1)
+  }
+
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval >= 20 && values.interval < 60 ? values.interval : 20
         )
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval > 0 && values.interval < 60 ? values.interval : 1
         )
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval > 0 && values.interval < 24 ? values.interval : 1
         )
         setMin(1)
@@ -118,6 +132,7 @@ const PingMonitorFormPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = api.post(
@@ -152,6 +167,7 @@ const PingMonitorFormPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = await api.put(
@@ -187,19 +203,21 @@ const PingMonitorFormPage = (update = false) => {
       : navigate(`/admin/userMonitors/${params.userId}/`)
   }
 
-  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } = useFormik({
-    isInitialValid: false,
-    initialValues: {
-      name: '',
-      host: '',
-      interval: 5,
-      intervalUnit: 'minutes',
-    },
-    validationSchema: newPingMonitorFormShhema,
-    onSubmit: update.update ? updateMonitor : createMonitor,
-    validateOnChange: vaidateOnChangeState,
-    validateOnBlur: vaidateOnBlurState,
-  })
+  const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
+    useFormik({
+      isInitialValid: false,
+      initialValues: {
+        name: '',
+        host: '',
+        interval: 5,
+        intervalUnit: 'minutes',
+        failCountRef: 3,
+      },
+      validationSchema: newPingMonitorFormShhema,
+      onSubmit: update.update ? updateMonitor : createMonitor,
+      validateOnChange: vaidateOnChangeState,
+      validateOnBlur: vaidateOnBlurState,
+    })
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -292,7 +310,9 @@ const PingMonitorFormPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/http`
+                        )
                     : monitorType === 'ping'
                     ? `Ping Monitörü, bir sunucunun çevrimiçi (erişilebilir)
                            olup olmadığını kontrol etmek için ICMP protokolünü kullanarak
@@ -305,15 +325,21 @@ const PingMonitorFormPage = (update = false) => {
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/port`
+                        )
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/keyword`
+                        )
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/cronjob`
+                        )
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>
@@ -654,20 +680,11 @@ const PingMonitorFormPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Üçüncü satır*/}
-            <Grid item md={12} display={'flex'}>
-              <Grid
-                item
-                md={12}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-                gap={1}
-              >
-                <Grid item md={12} alignContent={'end'}>
-                  <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
-                </Grid>
-                <Grid item md={12} gap={3} display={'flex'}>
-                  <Grid item md={9}>
+            <Grid item md={12} display={'flex'} padding={2} gap={10}>
+              <Box sx={{ width: '70%', gap: 2 }}>
+                <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
+                <Box display={'flex'} gap={2}>
+                  <Grid item md={12}>
                     <FormControl fullWidth>
                       <Slider
                         sx={{
@@ -708,7 +725,7 @@ const PingMonitorFormPage = (update = false) => {
                       </FormHelperText>
                     </FormControl>
                   </Grid>
-                  <Grid item md={3}>
+                  <Grid item md={2}>
                     <FormControl fullWidth>
                       <Select
                         id="intervalUnit"
@@ -732,8 +749,83 @@ const PingMonitorFormPage = (update = false) => {
                       </Select>
                     </FormControl>
                   </Grid>
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
+
+              <Box sx={{ width: '30%' }}>
+                  <Typography sx={{ mb: 0.5 }}>
+                    Kaç Hata Sonrası Bildirim Gönderilsin
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton
+                      aria-label="decrease"
+                      onClick={handleDecrementForFailCount}
+                      disabled={values.failCountRef <= 1}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '8px 0 0 8px',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+
+                    <TextField
+                      id="failCountRef"
+                      name="failCountRef"
+                      value={values.failCountRef}
+                      fullWidth
+                      onChange={handleChange}
+                      InputProps={{
+                        sx: {
+                          height: 35,
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          textAlign: 'center',
+                          padding: '8px',
+                        },
+                        type: 'number',
+                      }}
+                    />
+
+                    <IconButton
+                      aria-label="increase"
+                      onClick={handleIncrementForFailCount}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '0 8px 8px 0',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Stack>
+
+                  {
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.failCountRef || ' '}
+                    </Typography>
+                  }
+                </Box>
             </Grid>
             <Divider />
             {/*Altıncı satır*/}

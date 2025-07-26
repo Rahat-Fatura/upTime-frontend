@@ -22,6 +22,9 @@ import {
   Code as CodeIcon,
   DeveloperBoard as DeveloperBoardIcon,
 } from '@mui/icons-material'
+import { Add, Remove } from '@mui/icons-material'
+import Stack from '@mui/material/Stack'
+import { IconButton } from '@mui/material'
 import ComputerIcon from '@mui/icons-material/Computer'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { INTERVAL_UNITS } from './constants/monitorConstants'
@@ -39,6 +42,14 @@ const KeyWordMonitorPage = (update = false) => {
   const navigate = useNavigate()
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
+
+    const handleIncrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef + 1)
+  }
+
+  const handleDecrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef - 1)
+  }
   useEffect(() => {
     const fetchMonitorData = async () => {
       try {
@@ -66,6 +77,7 @@ const KeyWordMonitorPage = (update = false) => {
         setFieldValue('interval', response.data.monitor.interval)
         setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
         setFieldValue('timeOut', response.data.timeOut)
+        setFieldValue('failCountRef', response.data.monitor.failCountRef)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -133,6 +145,7 @@ const KeyWordMonitorPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = await api.post(
@@ -179,6 +192,7 @@ const KeyWordMonitorPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = await api.put(
@@ -229,6 +243,7 @@ const KeyWordMonitorPage = (update = false) => {
         timeOut: 30,
         interval: 5,
         intervalUnit: 'minutes',
+        failCountRef: 3,
       },
       validationSchema: newKeywordMonitorFormShhema,
       onSubmit: update.update ? updateMonitor : createMonitor,
@@ -1076,17 +1091,21 @@ const KeyWordMonitorPage = (update = false) => {
             <Divider />
             {/*Altıncı satır*/}
             <Grid item md={12} display={'flex'}>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
               <Grid
                 item
-                md={6}
-                padding={2}
+                md={12}
                 display={'flex'}
-                flexDirection={'column'}
+                justifyContent={'space-between'}
               >
-                <Grid item md={12} alignContent={'end'}>
+                <Box sx={{ width: '40%', gap: 2 }}>
                   <Typography gutterBottom>İstek Zaman Aşımı</Typography>
-                </Grid>
-                <Grid item md={12}>
                   <FormControl fullWidth>
                     <Select
                       id="timeOut"
@@ -1125,23 +1144,98 @@ const KeyWordMonitorPage = (update = false) => {
                       </Typography>
                     </FormHelperText>
                   </FormControl>
-                </Grid>
+                </Box>
+                <Box sx={{ width: '50%' }}>
+                  <Typography sx={{ mb: 0.5 }}>
+                    Kaç Hata Sonrası Bildirim Gönderilsin
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton
+                      aria-label="decrease"
+                      onClick={handleDecrementForFailCount}
+                      disabled={values.failCountRef <= 1}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '8px 0 0 8px',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+
+                    <TextField
+                      id="failCountRef"
+                      name="failCountRef"
+                      value={values.failCountRef}
+                      fullWidth
+                      onChange={handleChange}
+                      InputProps={{
+                        sx: {
+                          height: 35,
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          textAlign: 'center',
+                          padding: '8px',
+                        },
+                        type: 'number',
+                      }}
+                    />
+
+                    <IconButton
+                      aria-label="increase"
+                      onClick={handleIncrementForFailCount}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '0 8px 8px 0',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Stack>
+
+                  {
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.failCountRef || ' '}
+                    </Typography>
+                  }
+                </Box>
               </Grid>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
-                <Grid item md={12} alignContent={'end'}>
+            </Grid>
+            <Grid
+              item
+              md={6}
+              padding={2}
+              display={'flex'}
+              flexDirection={'column'}
+            >
+              <Grid item md={12} sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ width: '100%' }}>
                   <Typography gutterBottom>
                     İzin Verilen Durum Kodlar
                   </Typography>
-                </Grid>
-                <Grid item md={12}>
                   <TextField
                     id="allowedStatusCodes"
+                    placeholder="örnek: 200,400,500"
                     required
                     fullWidth
                     InputProps={{
@@ -1155,7 +1249,6 @@ const KeyWordMonitorPage = (update = false) => {
                         fontSize: '0.8rem',
                       },
                     }}
-                    label="İzin Verilen Durum Kodları"
                     name="allowedStatusCodes"
                     value={values.allowedStatusCodes}
                     onChange={handleChange}
@@ -1170,9 +1263,10 @@ const KeyWordMonitorPage = (update = false) => {
                       </Typography>
                     }
                   />
-                </Grid>
+                </Box>
               </Grid>
             </Grid>
+          </Grid>
             <Divider />
             {/*Yedinci satır*/}
             <Grid item md={12} display={'flex'} mt={2} mb={2}>

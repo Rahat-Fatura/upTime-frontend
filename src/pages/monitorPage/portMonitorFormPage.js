@@ -23,6 +23,9 @@ import {
   Code as CodeIcon,
   DeveloperBoard as DeveloperBoardIcon,
 } from '@mui/icons-material'
+import { Add, Remove } from '@mui/icons-material'
+import Stack from '@mui/material/Stack'
+import { IconButton } from '@mui/material'
 import ComputerIcon from '@mui/icons-material/Computer'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { INTERVAL_UNITS } from './constants/monitorConstants'
@@ -57,6 +60,7 @@ const PortMonitorFormPage = (update = false) => {
         setFieldValue('interval', response.data.monitor.interval)
         setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
         setFieldValue('timeOut', response.data.timeOut)
+        setFieldValue('failCountRef', response.data.monitor.failCountRef)
       } catch (error) {
         Swal.fire({
           title: 'Hata',
@@ -107,7 +111,13 @@ const PortMonitorFormPage = (update = false) => {
         return
     }
   }
+  const handleIncrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef + 1)
+  }
 
+  const handleDecrementForFailCount = () => {
+    setFieldValue('failCountRef', values.failCountRef - 1)
+  }
   const createMonitor = async (e) => {
     try {
       const formattedData = {
@@ -119,6 +129,7 @@ const PortMonitorFormPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = await api.post(
@@ -155,6 +166,7 @@ const PortMonitorFormPage = (update = false) => {
         },
         interval: values.interval,
         intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
       }
       console.log(formattedData)
       const response = await api.put(
@@ -200,6 +212,7 @@ const PortMonitorFormPage = (update = false) => {
         timeOut: 30,
         interval: 5,
         intervalUnit: 'minutes',
+        failCountRef: 3,
       },
       validationSchema: newPortMonitorFormShhema,
       onSubmit: update.update ? updateMonitor : createMonitor,
@@ -752,20 +765,11 @@ const PortMonitorFormPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Beşinci satır*/}
-            <Grid item md={12} display={'flex'}>
-              <Grid
-                item
-                md={12}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-                gap={1}
-              >
-                <Grid item md={12} alignContent={'end'}>
-                  <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
-                </Grid>
-                <Grid item md={12} gap={3} display={'flex'}>
-                  <Grid item md={9}>
+            <Grid item md={12} display={'flex'} padding={2} gap={10}>
+              <Box sx={{ width: '70%', gap: 2 }}>
+                <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
+                <Box display={'flex'} gap={2}>
+                  <Grid item md={12}>
                     <FormControl fullWidth>
                       <Slider
                         sx={{
@@ -806,7 +810,7 @@ const PortMonitorFormPage = (update = false) => {
                       </FormHelperText>
                     </FormControl>
                   </Grid>
-                  <Grid item md={3}>
+                  <Grid item md={2}>
                     <FormControl fullWidth>
                       <Select
                         id="intervalUnit"
@@ -830,8 +834,83 @@ const PortMonitorFormPage = (update = false) => {
                       </Select>
                     </FormControl>
                   </Grid>
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
+
+              <Box sx={{ width: '30%' }}>
+                  <Typography sx={{ mb: 0.5 }}>
+                    Kaç Hata Sonrası Bildirim Gönderilsin
+                  </Typography>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <IconButton
+                      aria-label="decrease"
+                      onClick={handleDecrementForFailCount}
+                      disabled={values.failCountRef <= 1}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '8px 0 0 8px',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Remove />
+                    </IconButton>
+
+                    <TextField
+                      id="failCountRef"
+                      name="failCountRef"
+                      value={values.failCountRef}
+                      fullWidth
+                      onChange={handleChange}
+                      InputProps={{
+                        sx: {
+                          height: 35,
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      InputLabelProps={{
+                        sx: {
+                          fontSize: '0.8rem',
+                        },
+                      }}
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          textAlign: 'center',
+                          padding: '8px',
+                        },
+                        type: 'number',
+                      }}
+                    />
+
+                    <IconButton
+                      aria-label="increase"
+                      onClick={handleIncrementForFailCount}
+                      sx={{
+                        border: '1px solid #ddd',
+                        borderRadius: '0 8px 8px 0',
+                        backgroundColor: '#f5f5f5',
+                        '&:hover': {
+                          backgroundColor: '#e0e0e0',
+                        },
+                      }}
+                    >
+                      <Add />
+                    </IconButton>
+                  </Stack>
+
+                  {
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.failCountRef || ' '}
+                    </Typography>
+                  }
+                </Box>
             </Grid>
             <Divider />
             {/*Altıncı satır*/}
