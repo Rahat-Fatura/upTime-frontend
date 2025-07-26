@@ -223,7 +223,7 @@ const ResetPassword = () => {
                 <TextField
                   id="verifyPassword"
                   fullWidth
-                  label="Şifre"
+                  label="Şifre Tekrarı"
                   type={showVerifyPassword ? "text" : "password"}
                   value={values.verifyPassword}
                   onChange={handleChange}

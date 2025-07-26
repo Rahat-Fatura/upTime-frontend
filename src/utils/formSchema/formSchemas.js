@@ -1,7 +1,7 @@
 import * as yup from 'yup'
 
 export const registerFormSchema = yup.object().shape({
-  username: yup.string().required('İsim alanı boş olamaz'),
+  username: yup.string().required('Kullanıcı adınız boş olamaz'),
   email: yup
     .string()
     .email('Lütfen email formatınızı kontrol edin !')
@@ -66,7 +66,7 @@ export const loginFormShcema = yup.object().shape({
 })
 
 export const landingFormSchema = yup.object().shape({
-  name: yup.string().required('İsim alanı boş olamaz'),
+  name: yup.string().required('Adınız belirtilmesi zorunda'),
   email: yup
     .string()
     .email('Lütfen email formatınızı kontrol edin !')
@@ -103,7 +103,7 @@ export const resetPasswordFormSchema = yup.object().shape({
 })
 
 export const newHttpMonitorFormShhema = yup.object().shape({
-  name: yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
+  name: yup.string().required('Ad alanı takip etmeniz için zorunludur !'),
   method: yup
     .string()
     .oneOf(
@@ -114,7 +114,7 @@ export const newHttpMonitorFormShhema = yup.object().shape({
   host: yup
     .string()
     .url('Geçersiz host adresi !')
-    .required('Host alanı zorunludur !'),
+    .required('Url alanı zorunludur !'),
   body: yup
     .string()
     .test('is-json', 'Monitor Gövdesi Json Formatında Değil !', (value) => {
@@ -185,7 +185,7 @@ export const newHttpMonitorFormShhema = yup.object().shape({
 })
 
 export const newKeywordMonitorFormShhema = yup.object().shape({
-  name: yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
+  name: yup.string().required('Ad alanı takip etmeniz için zorunludur !'),
   method: yup
     .string()
     .oneOf(
@@ -195,8 +195,8 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
     .required('İstek atabilmek için önemlidir !'),
   host: yup
     .string()
-    .url('Geçersiz host adresi !')
-    .required('Host alanı zorunludur !'),
+    .url('Geçersiz url adresi !')
+    .required('Url alanı zorunludur !'),
   body: yup
     .string()
     .test('is-json', 'Monitor Gövdesi Json Formatında Değil !', (value) => {
@@ -245,8 +245,8 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
         case 'txt': {
           console.log('Txt a geldi:',schema)
           return schema
-            .min(1, 'Anahtar Kelime Alanı Boş Olamaz !')
-            .required('Anahtar Kelime Alanı Boş Olamaz !')
+            .min(1, 'Anahtar kelime alanı boş olamaz !')
+            .required('Anahtar kelime alanı boş olamaz !')
         }
         case 'html': {
           console.log('Html a geldi:',schema)
@@ -262,13 +262,13 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
                   return true
                 }
             }
-          ).required('Anahtar Kelime Alanı Boş Olamaz !')
+          ).required('Anahtar kelime alanı boş olamaz !')
         }
         case 'json': {
           console.log('Json a geldi:',schema)
           return schema.test(
             'is-json',
-            'Anahtar Kelime Json Formatında Değil !',
+            'Anahtar kelime json formatında değil !',
             (value) => {
               try {
                 if (value.length > 0) {
@@ -288,7 +288,7 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
                 return true
               }
             }
-          ).required('Anahtar Kelime Alanı Boş Olamaz !')
+          ).required('Anahtar kelime alanı boş olamaz !')
         }
         default: {
           return schema
@@ -304,12 +304,12 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
   intervalUnit: yup
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
-    .required('Zaman Birimi Zorunludur!'),
+    .required('Zaman birimi zorunludur!'),
   allowedStatusCodes: yup
     .string()
     .test(
       'is-valid-status-list',
-      'Lütfen Girdinizi Kontrol Ediniz !',
+      'Lütfen girdinizi kontrol ediniz !',
       (value) => {
         try {
           let flag
@@ -329,7 +329,7 @@ export const newKeywordMonitorFormShhema = yup.object().shape({
 })
 
 export const newPingMonitorFormShhema = yup.object().shape({
-  name: yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
+  name: yup.string().required('Ad alanı takip etmeniz için zorunludur !'),
   host: yup
     .string()
     .test('', 'Geçerli bir IP veya URL adresi girin.', (value) => {
@@ -344,11 +344,11 @@ export const newPingMonitorFormShhema = yup.object().shape({
   intervalUnit: yup
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
-    .required('Zaman Birimi Zorunludur!'),
+    .required('Zaman birimi zorunludur!'),
 })
 
 export const newPortMonitorFormShhema = yup.object().shape({
-  name: yup.string().required('İsim alanı takip etmeniz için zorunludur !'),
+  name: yup.string().required('Ad alanı takip etmeniz için zorunludur !'),
   host: yup
     .string()
     .test('', 'Geçerli bir IP veya URL adresi girin.', (value) => {
@@ -378,7 +378,7 @@ export const newPortMonitorFormShhema = yup.object().shape({
   intervalUnit: yup
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
-    .required('Zaman Birimi Zorunludur!'),
+    .required('Zaman birimi zorunludur!'),
 })
 
 export const newCronJobMonitorFormShhema = yup.object().shape({
@@ -398,5 +398,5 @@ export const newCronJobMonitorFormShhema = yup.object().shape({
   intervalUnit: yup
     .string()
     .oneOf(['seconds', 'minutes', 'hours'], 'Geçersiz zaman birimi!')
-    .required('Zaman Birimi Zorunludur!'),
+    .required('Zaman birimi zorunludur!'),
 })

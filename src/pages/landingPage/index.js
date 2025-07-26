@@ -108,7 +108,8 @@ const LandingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const navigate = useNavigate()
-
+  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
+  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
   const loginPage = () => {
     navigate('/login')
   }
@@ -189,9 +190,17 @@ const LandingPage = () => {
       message: ''
     },
     validationSchema: landingFormSchema,
-    onSubmit: handlContactUser
+    onSubmit: handlContactUser,
+    validateOnChange: vaidateOnChangeState,
+    validateOnBlur: vaidateOnBlurState,
   })
 
+   useEffect(() => {
+      if (Object.keys(errors).length > 0) {
+        setValidateOnChangeState(true)
+        setValidateOnBlurState(false)
+      }
+    }, [errors])
   return (
     <Box sx={{ overflow: 'hidden' }}>
       {/* Navbar */}
@@ -279,7 +288,7 @@ const LandingPage = () => {
                   }}
                   onClick={() => loginPage()}
                 >
-                  Hemen Başla
+                  Giriş Yap
                 </Button>
               </Box>
             )}
@@ -717,7 +726,7 @@ const LandingPage = () => {
             sx={{ mt: 2 }}
             onClick={() => setMobileMenuOpen(false)}
           >
-            Hemen Başla
+            Giriş Yap
           </Button>
         </Box>
       </Drawer>

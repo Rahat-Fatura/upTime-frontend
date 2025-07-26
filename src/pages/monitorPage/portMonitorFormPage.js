@@ -621,7 +621,7 @@ const PortMonitorFormPage = (update = false) => {
                 flexDirection={'column'}
               >
                 <Grid item md={12} alignContent={'end'}>
-                  <Typography gutterBottom>Url</Typography>
+                  <Typography gutterBottom>Host</Typography>
                 </Grid>
                 <Grid item md={12}>
                   <TextField

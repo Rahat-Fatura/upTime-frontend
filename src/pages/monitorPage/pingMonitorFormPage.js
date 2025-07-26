@@ -618,7 +618,7 @@ const PingMonitorFormPage = (update = false) => {
                 flexDirection={'column'}
               >
                 <Grid item md={12} alignContent={'end'}>
-                  <Typography gutterBottom>IP</Typography>
+                  <Typography gutterBottom>Host</Typography>
                 </Grid>
                 <Grid item md={12}>
                   <TextField
@@ -636,10 +636,10 @@ const PingMonitorFormPage = (update = false) => {
                         fontSize: '0.8rem',
                       },
                     }}
-                    label={'URL (veya IP)'}
+                    label={'IP veya alan adı'}
                     value={values.host}
                     onChange={handleChange}
-                    placeholder={'8.8.8.8'}
+                    placeholder={'8.8.8.8 veya ornek.com'}
                     helperText={
                       <Typography
                         variant="body2"
