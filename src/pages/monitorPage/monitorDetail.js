@@ -16,12 +16,12 @@ import {
   TableHead,
   TableRow,
   Alert,
-} from '@mui/material'
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import MonitorStatus from '../../components/Animate/monitorStatus'
-import ReportTable from '../../components/reportTable'
-import api from '../../api/auth/axiosInstance'
+} from "@mui/material";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import MonitorStatus from "../../components/Animate/monitorStatus";
+import ReportTable from "../../components/reportTable";
+import api from "../../api/auth/axiosInstance";
 import {
   AccessTime,
   CheckCircle,
@@ -41,153 +41,131 @@ import {
   PlayArrow,
   ArrowDropDown,
   ArrowDropUp,
-} from '@mui/icons-material'
-import TextField from '@mui/material/TextField'
-import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
-import localStorage from 'local-storage'
-import { QuestionMark } from 'tabler-icons-react'
-import { styled } from '@mui/material/styles'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import IconButton from '@mui/material/IconButton'
-import ResponseTimeLineChart from '../../components/reportTable/lineChart'
-import { CodeIcon, TimerIcon } from 'lucide-react'
-import Swal from 'sweetalert2'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
+} from "@mui/icons-material";
+import TextField from "@mui/material/TextField";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import localStorage from "local-storage";
+import { QuestionMark } from "tabler-icons-react";
+import { styled } from "@mui/material/styles";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import ResponseTimeLineChart from "../../components/reportTable/lineChart";
+import { CodeIcon, TimerIcon } from "lucide-react";
+import Swal from "sweetalert2";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialogContent-root': {
+  "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
   },
-  '& .MuiDialogActions-root': {
+  "& .MuiDialogActions-root": {
     padding: theme.spacing(2),
   },
-}))
+}));
 
 export default function MonitorDetail() {
   /*Keyword Dialog*/
-  const [keywordDialogOpen, setKeywordDialogOpen] = useState(false)
-  const navigate = useNavigate()
+  const [keywordDialogOpen, setKeywordDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const handleClickKeywordDialohOpen = () => {
-    setKeywordDialogOpen(true)
-  }
+    setKeywordDialogOpen(true);
+  };
   const handleClickKeywordDialogClose = () => {
-    setKeywordDialogOpen(false)
-  }
-  const [selectOtherMonitor, setSelectOtherMonitor] = useState(null)
-  const [anchorEl, setAnchorEl] = useState(null)
-  const selectOtherMonitorOpen = Boolean(anchorEl)
-  const [knockButton, setKnockButton] = useState(false)
+    setKeywordDialogOpen(false);
+  };
+  const [selectOtherMonitor, setSelectOtherMonitor] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const selectOtherMonitorOpen = Boolean(anchorEl);
+  const [knockButton, setKnockButton] = useState(false);
 
-  const handleClick = (event) => {
-    if (!knockButton) {
-      setAnchorEl(event.currentTarget)
-      getSelectOtherMonitor()
-      setKnockButton(true)
-    } else {
-      setAnchorEl(null)
-      setSelectOtherMonitor(null)
-      setKnockButton(false)
-    }
-  }
-  const handleClose = (id) => {
-    navigate(`/user/monitors/${id}/detail`)
-    setAnchorEl(null)
-  }
-  const handleCloseAndNavigate = (id) => {
-    setAnchorEl(null)
-    setSelectOtherMonitor(null)
-    navigate(`/user/monitors/${id}/detail`)
-  }
-  /*************/
-  const [isOpen, setIsOpen] = useState(false)
-  const theme = useTheme()
-  const [monitor, setMonitor] = useState()
+  const [isOpen, setIsOpen] = useState(false);
+  const theme = useTheme();
+  const [monitor, setMonitor] = useState();
   // const [params, setParams] = useState(useParams())
 
   const getSelectOtherMonitor = async () => {
-    console.log('getSelectOtherMonitor Buraya geldi ')
-    const monitors = await api.get('/monitors/namesAndIds')
-    setSelectOtherMonitor(monitors.data)
-  }
-  const { id } = useParams()
+    const monitors = await api.get("/monitors/namesAndIds");
 
+    setSelectOtherMonitor(monitors.data);
+  };
+  const { id } = useParams();
   const handlDeleteMenu = (monitor) => {
     Swal.fire({
-      title: 'Silmek istediğinizden emin misiniz',
-      icon: 'warning',
-      text: 'İzlemeyi sistemden tamamen silinecektir',
+      title: "Silmek istediğinizden emin misiniz",
+      icon: "warning",
+      text: "İzlemeyi sistemden tamamen silinecektir",
       showCancelButton: true,
       showConfirmButton: true,
-      confirmButtonText: 'Evet silmek istiyorum',
-      cancelButtonText: 'Hayır',
+      confirmButtonText: "Evet silmek istiyorum",
+      cancelButtonText: "Hayır",
     })
       .then(async (result) => {
         if (result.isConfirmed) {
-          await api.delete(`monitors/${monitor.id}`)
+          await api.delete(`monitors/${monitor.id}`);
           Swal.fire({
-            icon: 'success',
-            title: 'İzleme Silindi',
-            text: 'Başarılı şekilde silindi',
-            confirmButtonText: 'Tamam',
-          })
-          navigate('/user/monitors')
+            icon: "success",
+            title: "İzleme Silindi",
+            text: "Başarılı şekilde silindi",
+            confirmButtonText: "Tamam",
+          });
+          navigate("/user/monitors");
         }
       })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
         Swal.fire({
-          icon: 'error',
-          title: 'Hatalı İşlem',
+          icon: "error",
+          title: "Hatalı İşlem",
           text: error.response.data.message,
-          confirmButtonText: 'Tamam',
-        })
-      })
-  }
+          confirmButtonText: "Tamam",
+        });
+      });
+  };
 
   const handleEditButton = (monitor) => {
     switch (monitor.monitorType) {
-      case 'HttpMonitor':
-        navigate(`/user/monitors/${monitor.id}/http`)
+      case "HttpMonitor":
+        navigate(`/user/monitors/${monitor.id}/http`);
         //handleClose()
-        break
-      case 'PingMonitor':
-        navigate(`/user/monitors/${monitor.id}/ping`)
+        break;
+      case "PingMonitor":
+        navigate(`/user/monitors/${monitor.id}/ping`);
         //handleClose()
-        break
-      case 'CronJobMonitor':
-        navigate(`/user/monitors/${monitor.id}/cronjob`)
+        break;
+      case "CronJobMonitor":
+        navigate(`/user/monitors/${monitor.id}/cronjob`);
         //handleClose()
-        break
-      case 'PortMonitor':
-        navigate(`/user/monitors/${monitor.id}/port`)
+        break;
+      case "PortMonitor":
+        navigate(`/user/monitors/${monitor.id}/port`);
         //handleClose()
-        break
-      case 'KeywordMonitor':
-        navigate(`/user/monitors/${monitor.id}/keyword`)
+        break;
+      case "KeywordMonitor":
+        navigate(`/user/monitors/${monitor.id}/keyword`);
         //handleClose()
-        break
+        break;
       default:
-        console.error('Unknow monitor type ! :', monitor.monitorType)
+        console.error("Unknow monitor type ! :", monitor.monitorType);
         //handleClose()
-        break
+        break;
     }
-  }
+  };
 
   const handleTestButton = async (monitor) => {
     try {
-      let timerInterval
+      let timerInterval;
 
       Swal.fire({
-        title: 'İzleme test ediliyor!',
-        html: 'Cevap bekleniyor lütfen bekleyiniz.',
+        title: "İzleme test ediliyor!",
+        html: "Cevap bekleniyor lütfen bekleyiniz.",
         allowOutsideClick: false,
         showConfirmButton: false,
         didOpen: async () => {
-          Swal.showLoading()
+          Swal.showLoading();
 
           /*const timer = Swal.getPopup().querySelector('b')
             timerInterval = setInterval(() => {
@@ -198,7 +176,7 @@ export default function MonitorDetail() {
           try {
             const response = await api.get(
               `monitors/instant-Control/${monitor.id}`
-            )
+            );
 
             //clearInterval(timerInterval)
 
@@ -208,17 +186,17 @@ export default function MonitorDetail() {
               isError: response.data.isError,
               message: response.data.message,
               timestamp: new Date().toLocaleTimeString(),
-            }
+            };
 
             Swal.fire({
-              title: 'Cevap Detayları',
+              title: "Cevap Detayları",
               html: `
           <div style="text-align: left; font-size: 16px; padding: 10px; border-radius: 8px;">
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="font-weight: bold; padding: 6px;">Durum:</td>
                 <td style="color: ${
-                  result.isError ? 'red' : 'green'
+                  result.isError ? "red" : "green"
                 }; padding: 6px;">
                   ${result.status}
                 </td>
@@ -230,15 +208,15 @@ export default function MonitorDetail() {
               <tr>
                 <td style="font-weight: bold; padding: 6px;">Hata:</td>
                 <td style="padding: 6px; color: ${
-                  result.isError ? 'red' : 'green'
+                  result.isError ? "red" : "green"
                 };">
-                  ${result.isError ? 'HATA VAR' : 'YOK'}
+                  ${result.isError ? "HATA VAR" : "YOK"}
                 </td>
               </tr>
               <tr>
                 <td style="font-weight: bold; padding: 6px;">Mesaj:</td>
                 <td style="padding: 6px;">${
-                  result.message === 'success' ? 'Başarılı' : 'Başarısız'
+                  result.message === "success" ? "Başarılı" : "Başarısız"
                 }</td>
               </tr>
               <tr>
@@ -248,143 +226,146 @@ export default function MonitorDetail() {
             </table>
           </div>
         `,
-              icon: result.isError ? 'error' : 'success',
-              confirmButtonText: 'Tamam',
-            })
+              icon: result.isError ? "error" : "success",
+              confirmButtonText: "Tamam",
+            });
           } catch (error) {
-            console.error('İstek hatası:', error)
-            clearInterval(timerInterval)
+            console.error("İstek hatası:", error);
+            clearInterval(timerInterval);
             Swal.fire({
-              title: 'Hata!',
-              text: 'Sunucudan yanıt alınamadı.',
-              icon: 'error',
-              confirmButtonText: 'Tamam',
-            })
+              title: "Hata!",
+              text: "Sunucudan yanıt alınamadı.",
+              icon: "error",
+              confirmButtonText: "Tamam",
+            });
           }
         },
-      })
+      });
 
       //handleClose()
     } catch (error) {
-      console.error('İstek hatası:', error)
+      console.error("İstek hatası:", error);
       //handleClose()
     } finally {
       //handleClose()
     }
-  }
+  };
 
   const handlePauseMonitorButton = async (monitor) => {
     try {
-      const response = await api.put(`monitors/${monitor.id}/pause`, {})
+      const response = await api.put(`monitors/${monitor.id}/pause`, {});
       Swal.fire({
-        icon: 'success',
-        title: 'İzleme Durduruldu',
-        text: 'İzleme başarıyla durduruldu.',
-        confirmButtonText: 'Tamam',
-      })
-      setMonitor({ ...monitor, isActiveByOwner: false, status: 'uncertain' })
+        icon: "success",
+        title: "İzleme Durduruldu",
+        text: "İzleme başarıyla durduruldu.",
+        confirmButtonText: "Tamam",
+      });
+      setMonitor({ ...monitor, isActiveByOwner: false, status: "uncertain" });
     } catch (error) {
-      console.error('Sunucu durdurulurken hata oluştu:', error)
+      console.error("Sunucu durdurulurken hata oluştu:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Hata',
-        text: 'İzleme durdurulamadı. Lütfen tekrar deneyin.',
-        confirmButtonText: 'Tamam',
-      })
+        icon: "error",
+        title: "Hata",
+        text: "İzleme durdurulamadı. Lütfen tekrar deneyin.",
+        confirmButtonText: "Tamam",
+      });
     }
-  }
+  };
 
   const handlePlayMonitorButton = async (monitor) => {
     try {
-      const res = await api.put(`monitors/${monitor.id}/play`, {})
+      const res = await api.put(`monitors/${monitor.id}/play`, {});
       Swal.fire({
-        icon: 'success',
-        title: 'İzleme Çalıştırıldı',
-        text: 'İzleme başarıyla başlatıldı.',
-        confirmButtonText: 'Tamam',
-      })
-      setMonitor({ ...monitor, isActiveByOwner: true, status: 'uncertain' })
+        icon: "success",
+        title: "İzleme Çalıştırıldı",
+        text: "İzleme başarıyla başlatıldı.",
+        confirmButtonText: "Tamam",
+      });
+      setMonitor({ ...monitor, isActiveByOwner: true, status: "uncertain" });
     } catch (error) {
-      console.error('Sunucu çalıştırılırken hata oluştu:', error)
+      console.error("Sunucu çalıştırılırken hata oluştu:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Hata',
-        text: 'İzleme çalıştırılamadı. Lütfen tekrar deneyin.',
-        confirmButtonText: 'Tamam',
-      })
+        icon: "error",
+        title: "Hata",
+        text: "İzleme çalıştırılamadı. Lütfen tekrar deneyin.",
+        confirmButtonText: "Tamam",
+      });
     }
-  }
+  };
 
   const handleDeleteButton = (monitor) => {
     try {
       Swal.fire({
-        title: 'Silmek istediğinizden emin misiniz',
-        icon: 'warning',
-        text: 'İzlemeyi sistemden tamamen silinecektir',
+        title: "Silmek istediğinizden emin misiniz",
+        icon: "warning",
+        text: "İzlemeyi sistemden tamamen silinecektir",
         showCancelButton: true,
         showConfirmButton: true,
-        confirmButtonText: 'Evet silmek istiyorum',
-        cancelButtonText: 'Hayır',
+        confirmButtonText: "Evet silmek istiyorum",
+        cancelButtonText: "Hayır",
       })
         .then(async (result) => {
           if (result.isConfirmed) {
-            await api.delete(`monitors/${monitor.id}`)
+            await api.delete(`monitors/${monitor.id}`);
             Swal.fire({
-              icon: 'success',
-              title: 'İzleme Silindi',
-              text: 'Başarılı şekilde silindi',
-              confirmButtonText: 'Tamam',
-            })
-            navigate('/user/monitors')
+              icon: "success",
+              title: "İzleme Silindi",
+              text: "Başarılı şekilde silindi",
+              confirmButtonText: "Tamam",
+            });
+            navigate("/user/monitors");
           }
         })
         .catch((error) => {
-          console.log(error)
+          console.log(error);
           Swal.fire({
-            icon: 'error',
-            title: 'Hatalı İşlem',
+            icon: "error",
+            title: "Hatalı İşlem",
             text: error.response.data.message,
-            confirmButtonText: 'Tamam',
-          })
-        })
+            confirmButtonText: "Tamam",
+          });
+        });
     } catch (error) {}
-  }
-
-  useEffect(() => {
-    setInterval(() => {
-      getMonitorById(id)
-    }, 60000)
-  }, [])
+  };
 
   const getMonitorById = async (monitorId) => {
     try {
-      const monitor = await api.get(`monitors/${monitorId}`)
-      console.log(monitor.data)
-      setMonitor(monitor.data)
+      const monitor = await api.get(`monitors/${monitorId}`);
+      setSelectedOption({
+        id: monitor.data.id,
+        name: monitor.data.name,
+        monitorType: monitor.data.monitorType,
+      });
+      setMonitor(monitor.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    getMonitorById(id)
-  }, [id])
+    getMonitorById(id);
+  }, [id]);
 
   // İstatistik hesaplamaları
   const calculateStats = () => {
-    if (!monitor?.logs) return {}
+    if (!monitor?.logs) return {};
     let logs = monitor.logs.sort(function (a, b) {
-      return a.id - b.id
-    })
-    const totalLogs = monitor.logs.length
-    const upLogs = monitor.logs.filter((log) => log.status === 'up').length
-    const downLogs = monitor.logs.filter((log) => log.status === 'down').length
-    const uptime = totalLogs > 0 ? ((upLogs / totalLogs) * 100).toFixed(2) : 0
-    const lastLogs = logs.length > 250 ? logs.slice(-250) : monitor.logs
+      return a.id - b.id;
+    });
+    const totalLogs = monitor.logs.length;
+    const upLogs = monitor.logs.filter((log) => log.status === "up").length;
+    const downLogs = monitor.logs.filter((log) => log.status === "down").length;
+    const uptime = totalLogs > 0 ? ((upLogs / totalLogs) * 100).toFixed(2) : 0;
+    const lastLogs = logs.length > 250 ? logs.slice(-250) : monitor.logs;
     const avgResponseTime =
-      lastLogs.reduce((sum, log) => sum + log.responseTime, 0) / lastLogs.length
-    const maxResponseTime = Math.max(...lastLogs.map((log) => log.responseTime))
-    const minResponseTime = Math.min(...lastLogs.map((log) => log.responseTime))
+      lastLogs.reduce((sum, log) => sum + log.responseTime, 0) /
+      lastLogs.length;
+    const maxResponseTime = Math.max(
+      ...lastLogs.map((log) => log.responseTime)
+    );
+    const minResponseTime = Math.min(
+      ...lastLogs.map((log) => log.responseTime)
+    );
 
     return {
       totalLogs,
@@ -395,414 +376,263 @@ export default function MonitorDetail() {
       avgResponseTime: avgResponseTime.toFixed(2),
       maxResponseTime,
       minResponseTime,
-    }
-  }
+    };
+  };
 
-  const stats = calculateStats()
+  const stats = calculateStats();
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('tr-TR')
-  }
+    return new Date(dateString).toLocaleString("tr-TR");
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'up':
-        return 'success'
-      case 'down':
-        return 'error'
-      case 'uncertain':
-        return 'warning'
-      case 'maintanance':
-        return 'info'
+      case "up":
+        return "success";
+      case "down":
+        return "error";
+      case "uncertain":
+        return "warning";
+      case "maintanance":
+        return "info";
       default:
-        return 'default'
+        return "default";
     }
-  }
+  };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'up':
-        return <CheckCircle fontSize="small" />
-      case 'down':
-        return <Error fontSize="small" />
-      case 'uncertain':
-        return <QuestionMark fontSize="small" />
-      case 'maintanance':
-        return <Build fontSize="small" />
+      case "up":
+        return <CheckCircle fontSize="small" />;
+      case "down":
+        return <Error fontSize="small" />;
+      case "uncertain":
+        return <QuestionMark fontSize="small" />;
+      case "maintanance":
+        return <Build fontSize="small" />;
       default:
-        return <Warning fontSize="small" />
+        return <Warning fontSize="small" />;
     }
-  }
+  };
 
   useEffect(() => {
+    setInterval(() => {
+      getMonitorById(id);
+    }, 60000);
+    getSelectOtherMonitor();
+
     const cleanupLocalStorage = () => {
-      localStorage.clear()
-    }
-    window.addEventListener('beforeunload', cleanupLocalStorage)
+      localStorage.clear();
+    };
+    window.addEventListener("beforeunload", cleanupLocalStorage);
     return () => {
-      window.removeEventListener('beforeunload', cleanupLocalStorage)
-    }
-  }, [])
+      window.removeEventListener("beforeunload", cleanupLocalStorage);
+    };
+  }, []);
 
-  useEffect(() => {
-    getSelectOtherMonitor()
-  }, [])
-  const [value, setValue] = useState(null)
-  const filter = createFilterOptions()
-
+  const [value, setValue] = useState(null);
+  const filter = createFilterOptions();
+  const [selectedOption, setSelectedOption] = useState(null);
   return monitor ? (
     <Grid container mt={2}>
       <Grid
         item
         xs={11.5}
         md={12}
-        sx={{ backgroundColor: '#f8f9fa', width: '100%' }}
+        sx={{ backgroundColor: "#f8f9fa", width: "100%" }}
       >
-        <Grid item md={12} sx={{ mb: 2 }}>
-          <Grid item md={12} sx={{ display: 'flex' }}>
-            <Grid md={6.5} sx={{ display: 'flex', alignItems: 'self-start' }}>
-              <Grid gap={4} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Grid item md={1} justifyItems={'start'}>
-                  <Box>
-                    <MonitorStatus
-                      sx={{
-                        width: 25,
-                        height: 25,
-                        animeWidth: 18,
-                        animeHeight: 18,
-                      }}
-                      status={monitor?.status || ''}
-                      iconSize={16}
-                    />
-                  </Box>
-                </Grid>
-                <Grid
-                  item
-                  md={11}
-                  sx={{ display: 'flex', alignItems: 'center' }}
-                >
-                  <Grid justifyItems={'start'} alignItems={'start'}>
-                    {/* <Autocomplete
-                      value={value}
-                      onChange={(event, newValue) => {
-                        if (typeof newValue === 'string') {
-                          setValue({
-                            title: newValue,
-                          })
-                        } else if (newValue && newValue.inputValue) {
-                          // Create a new value from the user input
-                          setValue({
-                            title: newValue.inputValue,
-                          })
-                        } else {
-                          setValue(newValue)
-                        }
-                      }}
-                      filterOptions={(options, params) => {
-                        const filtered = filter(options, params)
-
-                        const { inputValue } = params
-                        // Suggest the creation of a new value
-                        const isExisting = options.some(
-                          (option) => inputValue === option.title
-                        )
-                        if (inputValue !== '' && !isExisting) {
-                          filtered.push({
-                            inputValue,
-                            title: `Add "${inputValue}"`,
-                          })
-                        }
-
-                        return filtered
-                      }}
-                      selectOnFocus
-                      clearOnBlur
-                      handleHomeEndKeys
-                      id="free-solo-with-text-demo"
-                      options={selectOtherMonitor || []}
-                      getOptionLabel={(option) => {
-                        // Value selected with enter, right from the input
-                        if (typeof option === 'string') {
-                          return option
-                        }
-                        // Add "xxx" option created dynamically
-                        if (option.inputValue) {
-                          return option.inputValue
-                        }
-                        // Regular option
-                        return option.name
-                      }}
-                      renderOption={(props, option) => {
-                        const { key, ...optionProps } = props
-                        return (
-                          <li key={key} {...optionProps}>
-                            {option.name}
-                          </li>
-                        )
-                      }}
-                      sx={{ width: 300 }}
-                      freeSolo
-                      renderInput={(params) => knockButton?(
-
-                        <Typography
-                      variant="h5"
-                      sx={{
-                        fontSize: {
-                          xs: '0.8rem',
-                          sm: '0.8rem',
-                          md: '1rem',
-                          lg: '1rem',
-                          xlg: '1.2rem',
-                        },
-                      }}
-                    >
-                      {monitor?.name || ''}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: 'text.secondary',
-                        fontSize: {
-                          xs: '0.6rem',
-                          sm: '0.6rem',
-                          md: '0.8rem',
-                          lg: '0.8rem',
-                          xlg: '1rem',
-                        },
-                      }}
-                    >
-                      {monitor?.monitorType || ''}
-                     </Typography>
-                        
-                      ):(
-                        <TextField
-                          {...params}
-                          label="Free solo with text demo"
-                        />
-                      )}
-                    /> */}
-                  <Typography
-                      variant="h5"
-                      sx={{
-                        fontSize: {
-                          xs: '0.8rem',
-                          sm: '0.8rem',
-                          md: '1rem',
-                          lg: '1rem',
-                          xlg: '1.2rem',
-                        },
-                      }}
-                    >
-                      {monitor?.name || ''}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        color: 'text.secondary',
-                        fontSize: {
-                          xs: '0.6rem',
-                          sm: '0.6rem',
-                          md: '0.8rem',
-                          lg: '0.8rem',
-                          xlg: '1rem',
-                        },
-                      }}
-                    >
-                      {monitor?.monitorType || ''}
-                     </Typography>
-                  </Grid>
-                  <Grid justifyItems={'center'} alignItems={'center'}>
-                    <IconButton
-                      id="basic-button"
-                      aria-controls={
-                        selectOtherMonitorOpen ? 'basic-menu' : undefined
-                      }
-                      aria-haspopup="true"
-                      aria-expanded={
-                        selectOtherMonitorOpen ? 'true' : undefined
-                      }
-                      onClick={handleClick}
-                    >
-                      {knockButton ? <ArrowDropUp /> : <ArrowDropDown />}
-                      {selectOtherMonitor != null ? (
-                        <Menu
-                          id="basic-menu"
-                          anchorEl={anchorEl}
-                          open={selectOtherMonitorOpen}
-                          onClose={handleClose}
-                          anchorOrigin={{
-    vertical: 'bottom',
-    horizontal: 'left', // menüyü sol hizada açar
-  }}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'left', // menüyü sol hizada açar
-  }}
-                          PaperProps={{
-                            sx: {
-                              maxHeight: 250, // İstediğin kadar sınır koyabilirsin (örnek: 5 item yüksekliği kadar)
-                              overflowY: 'auto',
-                              ml: -16, 
-                            },
-                          }}
-                          slotProps={{
-                            list: {
-                              'aria-labelledby': 'basic-button',
-                            },
-                          }}
-                          sx={{
-                            '& .MuiPaper-root': {
-                              backgroundColor: '#ffffff',
-                              mt: 1.5,
-                              
-                            },
-                          }}
-                        > 
-                        
-                          {selectOtherMonitor.map((monitor) => (
-                            <MenuItem
-                              key={monitor.id}
-                              onClick={() => {
-                                handleCloseAndNavigate(monitor.id)
-                              }}
-                            >
-                              {monitor.name}
-                            </MenuItem>
-                          ))}
-                        </Menu>
-                      ) : (
-                        <div></div>
-                      )}
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid
-              item
-              md={5.5}
+        <Grid container md={12} sx={{ mb: 1 }}>
+          <Grid
+            item
+            xs={12}
+            md={5}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <MonitorStatus
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'end',
+                width: 28,
+                height: 28,
+                animeWidth: 18,
+                animeHeight: 18,
+              }}
+              status={monitor?.status || ""}
+              iconSize={16}
+            />
+            <Box
+              sx={{
+                width: { xs: "100%", sm: "70%", lg: "50%" },
               }}
             >
-              <Grid
-                item
-                md={12}
+              <Autocomplete
+                disablePortal
+                disableClearable
+                options={selectOtherMonitor}
+                getOptionLabel={(option) => option.name}
+                value={selectedOption}
+                onChange={(event, newValue) =>
+                  navigate(`/user/monitors/${newValue.id}/detail`)
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        paddingTop: "1px",
+                        paddingBottom: "1px",
+                        paddingLeft: "6px",
+                        height: "30px", // Daha kompakt bir yükseklik
+                      },
+                    }}
+                  />
+                )}
+              />
+              {selectedOption && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    mt: 0.2,
+                    ml: 2,
+                    color: "text.secondary",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  {selectedOption?.monitorType || ""}
+                </Typography>
+              )}
+            </Box>
+          </Grid>
+          <Grid
+            item
+            xs={12}
+            md={7}
+            sx={{
+              display: "flex",
+              justifyContent: "end",
+              flexDirection: "column",
+            }}
+          >
+            <Grid
+              sx={{
+                height: "100%",
+                display: "flex",
+                justifyContent: "end",
+                justifyItems: "end",
+                alignItems: "center",
+              }}
+              gap={1}
+            >
+              <IconButton
+                variant="contained"
                 sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-
-                  justifyItems: 'end',
-                  padding: 1,
-                  pr: 5,
+                  bgcolor: theme.palette.secondary.dark,
+                  borderRadius: "10%",
+                  height: 30,
+                  fontSize: "0.80rem",
+                  color: "white",
+                  ":hover": {
+                    bgcolor: theme.palette.secondary.main,
+                  },
                 }}
-                gap={1}
+                onClick={() => handleEditButton(monitor)}
               >
-                <IconButton
-                  variant="contained"
-                  sx={{
-                    bgcolor: theme.palette.secondary.dark,
-                    borderRadius: '10%',
-                    height: 25,
-                    fontSize: '0.75rem',
-                    color: 'white',
-                    ':hover': {
-                      bgcolor: theme.palette.secondary.main,
-                    },
-                  }}
-                  onClick={() => handleEditButton(monitor)}
-                >
-                  <Edit fontSize="small" color="#ffff"></Edit>
-                  Düzenle
-                </IconButton>
-                <IconButton
-                  variant="contained"
-                  sx={{
-                    bgcolor: theme.palette.primary.dark,
-                    borderRadius: '10%',
-                    height: 25,
-                    fontSize: '0.75rem',
-                    color: 'white',
-                    ':hover': {
-                      bgcolor: theme.palette.primary.main,
-                    },
-                  }}
-                  onClick={() => handleTestButton(monitor)}
-                >
-                  <NotificationsPaused fontSize="small" color="#ffff" />
-                  Test et
-                </IconButton>
-
-                <IconButton
-                  variant="contained"
-                  sx={{
+                <Edit fontSize="small" color="#ffff"></Edit>
+                Düzenle
+              </IconButton>
+              <IconButton
+                variant="contained"
+                sx={{
+                  bgcolor: theme.palette.primary.dark,
+                  borderRadius: "10%",
+                  height: 30,
+                  fontSize: "0.80rem",
+                  color: "white",
+                  ":hover": {
                     bgcolor: theme.palette.primary.main,
-                    borderRadius: '10%',
-                    height: 25,
-                    fontSize: '0.75rem',
-                    color: 'white',
-                    ':hover': {
-                      bgcolor: theme.palette.primary.dark,
-                    },
-                  }}
-                  onClick={() => {
-                    if (monitor.isActiveByOwner) {
-                      handlePauseMonitorButton(monitor)
-                    } else {
-                      handlePlayMonitorButton(monitor)
-                    }
-                  }}
-                >
-                  {monitor.isActiveByOwner ? (
-                    <Pause color="#ffff" fontSize="small" />
-                  ) : (
-                    <PlayArrow color="#ffff" fontSize="small" />
-                  )}
-                  {monitor.isActiveByOwner ? 'Durdur' : 'Çalıştır'}
-                </IconButton>
-                <IconButton
-                  variant="contained"
-                  sx={{
-                    bgcolor: theme.palette.error.main,
-                    borderRadius: '10%',
-                    height: 25,
-                    fontSize: '0.75rem',
-                    color: 'white',
-                    ':hover': {
-                      bgcolor: theme.palette.error.dark,
-                    },
-                  }}
-                  onClick={() => handleDeleteButton(monitor)}
-                >
-                  <Delete color="#ffff" fontSize="small" />
-                  Sil
-                </IconButton>
-              </Grid>
+                  },
+                }}
+                onClick={() => handleTestButton(monitor)}
+              >
+                <NotificationsPaused fontSize="small" color="#ffff" />
+                Test et
+              </IconButton>
+
+              <IconButton
+                variant="contained"
+                sx={{
+                  bgcolor: theme.palette.primary.main,
+                  borderRadius: "10%",
+                  height: 30,
+                  fontSize: "0.80rem",
+                  color: "white",
+                  ":hover": {
+                    bgcolor: theme.palette.primary.dark,
+                  },
+                }}
+                onClick={() => {
+                  if (monitor.isActiveByOwner) {
+                    handlePauseMonitorButton(monitor);
+                  } else {
+                    handlePlayMonitorButton(monitor);
+                  }
+                }}
+              >
+                {monitor.isActiveByOwner ? (
+                  <Pause color="#ffff" fontSize="small" />
+                ) : (
+                  <PlayArrow color="#ffff" fontSize="small" />
+                )}
+                {monitor.isActiveByOwner ? "Durdur" : "Çalıştır"}
+              </IconButton>
+              <IconButton
+                variant="contained"
+                sx={{
+                  bgcolor: theme.palette.error.main,
+                  borderRadius: "10%",
+                  height: 30,
+                  fontSize: "0.80rem",
+                  color: "white",
+                  ":hover": {
+                    bgcolor: theme.palette.error.dark,
+                  },
+                }}
+                onClick={() => handleDeleteButton(monitor)}
+              >
+                <Delete color="#ffff" fontSize="small" />
+                Sil
+              </IconButton>
             </Grid>
           </Grid>
-          <Divider />
         </Grid>
-        <Grid container spacing={2} alignItems={'flex-start'}>
+
+        <Divider sx={{ mb: 2 }} />
+        <Grid container spacing={2} alignItems={"flex-start"}>
           <Grid
             item
             md={8}
-            sx={{ display: 'flex', flexDirection: 'column' }}
+            sx={{ display: "flex", flexDirection: "column" }}
             gap={2}
           >
             {/* Monitor Detay Kartları */}
             <Grid container spacing={2}>
               {/* Genel Bilgiler */}
-              <Grid item md={6}>
-                <Card sx={{ height: '100%', bgcolor: 'white' }}>
+              <Grid item xs={12} md={6}>
+                <Card sx={{ height: "100%", bgcolor: "white" }}>
                   <CardContent>
                     <Typography
                       variant="h6"
                       gutterBottom
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 1,
-                        fontSize: '1rem',
+                        fontSize: "1rem",
                       }}
                     >
                       <InfoOutlined color="primary" />
@@ -814,91 +644,91 @@ export default function MonitorDetail() {
                           <Typography
                             variant="body2"
                             color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: "0.8rem" }}
                           >
                             Monitor Adı
                           </Typography>
                           <Typography
                             variant="body1"
                             fontWeight="bold"
-                            sx={{ fontSize: '0.7rem' }}
+                            sx={{ fontSize: "0.7rem" }}
                           >
-                            {monitor?.name.substring(0, 36) || '-'}
+                            {monitor?.name.substring(0, 36) || "-"}
                           </Typography>
                         </Grid>
                         <Grid item xs={6}>
                           <Typography
                             variant="body2"
                             color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: "0.8rem" }}
                           >
                             Tip
                           </Typography>
                           <Chip
-                            label={monitor?.monitorType || '-'}
+                            label={monitor?.monitorType || "-"}
                             size="small"
                             color="primary"
                             variant="outlined"
-                            sx={{ fontSize: '0.75rem', height: 22 }}
+                            sx={{ fontSize: "0.75rem", height: 22 }}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Typography
                             variant="body2"
                             color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: "0.8rem" }}
                           >
                             Durum
                           </Typography>
                           <Chip
                             icon={getStatusIcon(monitor?.status)}
                             label={
-                              monitor?.status === 'up'
-                                ? 'Çalışıyor'
-                                : monitor?.status === 'down'
-                                ? 'Çalışmıyor'
-                                : monitor?.status === 'uncertain'
-                                ? 'Belirsiz'
-                                : monitor?.status === 'maintanance'
-                                ? 'Bakım'
-                                : '-' || '-'
+                              monitor?.status === "up"
+                                ? "Çalışıyor"
+                                : monitor?.status === "down"
+                                ? "Çalışmıyor"
+                                : monitor?.status === "uncertain"
+                                ? "Belirsiz"
+                                : monitor?.status === "maintanance"
+                                ? "Bakım"
+                                : "-" || "-"
                             }
                             size="small"
                             color={getStatusColor(monitor?.status)}
-                            sx={{ fontSize: '0.75rem', height: 22 }}
+                            sx={{ fontSize: "0.75rem", height: 22 }}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Typography
                             variant="body2"
                             color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: "0.8rem" }}
                           >
                             Aktif
                           </Typography>
                           <Chip
-                            label={monitor?.isActiveByOwner ? 'Evet' : 'Hayır'}
+                            label={monitor?.isActiveByOwner ? "Evet" : "Hayır"}
                             size="small"
                             color={
-                              monitor?.isActiveByOwner ? 'success' : 'error'
+                              monitor?.isActiveByOwner ? "success" : "error"
                             }
-                            sx={{ fontSize: '0.75rem', height: 22 }}
+                            sx={{ fontSize: "0.75rem", height: 22 }}
                           />
                         </Grid>
                         <Grid item xs={6}>
                           <Typography
                             variant="body2"
                             color="text.secondary"
-                            sx={{ fontSize: '0.8rem' }}
+                            sx={{ fontSize: "0.8rem" }}
                           >
                             Oluşturulma Tarihi
                           </Typography>
                           <Typography
                             variant="body1"
                             fontWeight="bold"
-                            sx={{ fontSize: '0.7rem' }}
+                            sx={{ fontSize: "0.7rem" }}
                           >
-                            {monitor?.createdAt.split('T')[0] || '-'}
+                            {monitor?.createdAt.split("T")[0] || "-"}
                           </Typography>
                           {/* <Chip
                             label=
@@ -916,17 +746,17 @@ export default function MonitorDetail() {
 
               {/* Http Monitor Detayları */}
               {monitor?.httpMonitor && (
-                <Grid item md={6}>
-                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: "100%", bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <Monitor color="primary" />
@@ -938,14 +768,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Host
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.httpMonitor.host.substring(0, 24)}
                             </Typography>
@@ -954,14 +784,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Method
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.httpMonitor.method}
                             </Typography>
@@ -970,31 +800,31 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               İzin Verilen Statuslar
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.httpMonitor.allowedStatusCodes.toString() ||
-                                '[]'}
+                                "[]"}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Timeout
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.httpMonitor.timeOut}sn
                             </Typography>
@@ -1003,23 +833,23 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Kontrol Aralığı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
-                              {monitor?.interval}{' '}
-                              {monitor.intervalUnit === 'minutes'
-                                ? 'dakika'
-                                : monitor.intervalUnit === 'seconds'
-                                ? 'saniye'
-                                : monitor.intervalUnit === 'hours'
-                                ? 'saat'
-                                : ''}
+                              {monitor?.interval}{" "}
+                              {monitor.intervalUnit === "minutes"
+                                ? "dakika"
+                                : monitor.intervalUnit === "seconds"
+                                ? "saniye"
+                                : monitor.intervalUnit === "hours"
+                                ? "saat"
+                                : ""}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -1031,17 +861,17 @@ export default function MonitorDetail() {
 
               {/* Ping Monitor Detayları */}
               {monitor?.pingMonitor && (
-                <Grid item md={6}>
-                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: "100%", bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <Computer color="primary" />
@@ -1053,14 +883,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Host
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.pingMonitor.host.substring(0, 24)}
                             </Typography>
@@ -1070,23 +900,23 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Kontrol Aralığı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
-                              {monitor?.interval}{' '}
-                              {monitor.intervalUnit === 'minutes'
-                                ? 'dakika'
-                                : monitor.intervalUnit === 'seconds'
-                                ? 'saniye'
-                                : monitor.intervalUnit === 'hours'
-                                ? 'saat'
-                                : ''}
+                              {monitor?.interval}{" "}
+                              {monitor.intervalUnit === "minutes"
+                                ? "dakika"
+                                : monitor.intervalUnit === "seconds"
+                                ? "saniye"
+                                : monitor.intervalUnit === "hours"
+                                ? "saat"
+                                : ""}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -1098,17 +928,17 @@ export default function MonitorDetail() {
 
               {/* Port Monitor Detayları */}
               {monitor?.portMonitor && (
-                <Grid item md={6}>
-                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: "100%", bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <DeveloperBoard color="secondary" />
@@ -1120,14 +950,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Host
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.portMonitor.host.substring(0, 24)}
                             </Typography>
@@ -1136,14 +966,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Port
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.portMonitor.port}
                             </Typography>
@@ -1152,14 +982,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Timeout
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.portMonitor.timeOut}s
                             </Typography>
@@ -1168,23 +998,23 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Kontrol Aralığı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
-                              {monitor?.interval}{' '}
-                              {monitor.intervalUnit === 'minutes'
-                                ? 'dakika'
-                                : monitor.intervalUnit === 'seconds'
-                                ? 'saniye'
-                                : monitor.intervalUnit === 'hours'
-                                ? 'saat'
-                                : ''}
+                              {monitor?.interval}{" "}
+                              {monitor.intervalUnit === "minutes"
+                                ? "dakika"
+                                : monitor.intervalUnit === "seconds"
+                                ? "saniye"
+                                : monitor.intervalUnit === "hours"
+                                ? "saat"
+                                : ""}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -1196,17 +1026,17 @@ export default function MonitorDetail() {
 
               {/* Keyword Monitor Detayları */}
               {monitor?.keyWordMonitor && (
-                <Grid item md={6}>
-                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: "100%", bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <CodeIcon color="green" />
@@ -1218,14 +1048,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Host
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.keyWordMonitor.host.substring(0, 24)}
                             </Typography>
@@ -1234,14 +1064,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Method
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.keyWordMonitor.method}
                             </Typography>
@@ -1250,24 +1080,24 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               İzin Verilen Statuslar
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.keyWordMonitor.allowedStatusCodes.toString() ||
-                                '[]'}
+                                "[]"}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Monitor Anahatar Kelime
                             </Typography>
@@ -1297,8 +1127,8 @@ export default function MonitorDetail() {
                                   onClick={() => {
                                     navigator.clipboard.writeText(
                                       monitor.keyWordMonitor.keyWord
-                                    )
-                                    handleClickKeywordDialogClose()
+                                    );
+                                    handleClickKeywordDialogClose();
                                   }}
                                 >
                                   Kopyala
@@ -1316,14 +1146,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Timeout
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
                               {monitor.keyWordMonitor.timeOut}sn
                             </Typography>
@@ -1332,23 +1162,23 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Kontrol Aralığı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.75rem' }}
+                              sx={{ fontSize: "0.75rem" }}
                             >
-                              {monitor?.interval}{' '}
-                              {monitor.intervalUnit === 'minutes'
-                                ? 'dakika'
-                                : monitor.intervalUnit === 'seconds'
-                                ? 'saniye'
-                                : monitor.intervalUnit === 'hours'
-                                ? 'saat'
-                                : ''}
+                              {monitor?.interval}{" "}
+                              {monitor.intervalUnit === "minutes"
+                                ? "dakika"
+                                : monitor.intervalUnit === "seconds"
+                                ? "saniye"
+                                : monitor.intervalUnit === "hours"
+                                ? "saat"
+                                : ""}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -1360,17 +1190,17 @@ export default function MonitorDetail() {
 
               {/* Cronjob Monitor Detayları */}
               {monitor?.cronJobMonitor && (
-                <Grid item md={6}>
-                  <Card sx={{ height: '100%', bgcolor: 'white' }}>
+                <Grid item xs={12} md={6}>
+                  <Card sx={{ height: "100%", bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <TimerIcon />
@@ -1382,24 +1212,24 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Host
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.cronJobMonitor.host.substring(0, 20) +
-                                '...'}
+                                "..."}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Bağlantıyı Görüntüle
                             </Typography>
@@ -1429,8 +1259,8 @@ export default function MonitorDetail() {
                                   onClick={() => {
                                     navigator.clipboard.writeText(
                                       monitor.cronJobMonitor.host
-                                    )
-                                    handleClickKeywordDialogClose()
+                                    );
+                                    handleClickKeywordDialogClose();
                                   }}
                                 >
                                   Kopyala
@@ -1448,14 +1278,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Sapma Zamanı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {monitor.cronJobMonitor.devitionTime} dakika
                             </Typography>
@@ -1464,41 +1294,41 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Kontrol Aralığı
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
-                              {monitor?.interval}{' '}
-                              {monitor.intervalUnit === 'minutes'
-                                ? 'dakika'
-                                : monitor.intervalUnit === 'seconds'
-                                ? 'saniye'
-                                : monitor.intervalUnit === 'hours'
-                                ? 'saat'
-                                : ''}
+                              {monitor?.interval}{" "}
+                              {monitor.intervalUnit === "minutes"
+                                ? "dakika"
+                                : monitor.intervalUnit === "seconds"
+                                ? "saniye"
+                                : monitor.intervalUnit === "hours"
+                                ? "saat"
+                                : ""}
                             </Typography>
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Son gelen istek tarihi
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {
                                 monitor.cronJobMonitor.lastRequestTime?.split(
-                                  'T'
+                                  "T"
                                 )[0]
                               }
                             </Typography>
@@ -1507,19 +1337,19 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Son gelen istek saati
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {
                                 monitor.cronJobMonitor.lastRequestTime
-                                  ?.split('T')[1]
-                                  .split('.')[0]
+                                  ?.split("T")[1]
+                                  .split(".")[0]
                               }
                             </Typography>
                           </Grid>
@@ -1533,16 +1363,16 @@ export default function MonitorDetail() {
               {/* Response Time İstatistikleri */}
               {!monitor.cronJobMonitor && (
                 <Grid item md={12}>
-                  <Card sx={{ bgcolor: 'white' }}>
+                  <Card sx={{ bgcolor: "white", width: "100%" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '1rem',
+                          fontSize: "1rem",
                         }}
                       >
                         <AccessTime color="info" />
@@ -1550,76 +1380,76 @@ export default function MonitorDetail() {
                       </Typography>
                       <Grid container spacing={3} sx={{ mt: 1 }}>
                         <Grid item md={3}>
-                          <Box sx={{ textAlign: 'center' }}>
+                          <Box sx={{ textAlign: "center" }}>
                             <Typography
                               variant="h4"
                               color="info.main"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {stats.avgResponseTime}ms
                             </Typography>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Ortalama
                             </Typography>
                           </Box>
                         </Grid>
                         <Grid item md={3}>
-                          <Box sx={{ textAlign: 'center' }}>
+                          <Box sx={{ textAlign: "center" }}>
                             <Typography
                               variant="h4"
                               color="success.main"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {stats.minResponseTime}ms
                             </Typography>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               En Hızlı
                             </Typography>
                           </Box>
                         </Grid>
                         <Grid item md={3}>
-                          <Box sx={{ textAlign: 'center' }}>
+                          <Box sx={{ textAlign: "center" }}>
                             <Typography
                               variant="h4"
                               color="warning.main"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {stats.maxResponseTime}ms
                             </Typography>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               En Yavaş
                             </Typography>
                           </Box>
                         </Grid>
                         <Grid item md={3}>
-                          <Box sx={{ textAlign: 'center' }}>
+                          <Box sx={{ textAlign: "center" }}>
                             <Typography
                               variant="h4"
                               color="primary.main"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.9rem' }}
+                              sx={{ fontSize: "0.9rem" }}
                             >
                               {stats?.lastLogs?.length || 0}
                             </Typography>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Log Sayısı
                             </Typography>
@@ -1738,17 +1568,17 @@ export default function MonitorDetail() {
               </Grid> */}
 
               {/* Son Loglar */}
-              <Grid item md={12}>
-                <Card sx={{ bgcolor: 'white' }}>
+              <Grid item xs={12} md={12}>
+                <Card sx={{ bgcolor: "white" }}>
                   <CardContent>
                     <Typography
                       variant="h6"
                       gutterBottom
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         gap: 1,
-                        fontSize: '1rem',
+                        fontSize: "1rem",
                       }}
                     >
                       <Schedule color="warning" />
@@ -1761,16 +1591,16 @@ export default function MonitorDetail() {
                       <Table stickyHeader size="small">
                         <TableHead>
                           <TableRow>
-                            <TableCell sx={{ fontSize: '0.8rem' }}>
+                            <TableCell sx={{ fontSize: "0.8rem" }}>
                               Tarih
                             </TableCell>
-                            <TableCell sx={{ fontSize: '0.8rem' }}>
+                            <TableCell sx={{ fontSize: "0.8rem" }}>
                               Durum
                             </TableCell>
-                            <TableCell sx={{ fontSize: '0.8rem' }}>
+                            <TableCell sx={{ fontSize: "0.8rem" }}>
                               Yanıt Süresi
                             </TableCell>
-                            <TableCell sx={{ fontSize: '0.8rem' }}>
+                            <TableCell sx={{ fontSize: "0.8rem" }}>
                               Hata
                             </TableCell>
                           </TableRow>
@@ -1778,32 +1608,32 @@ export default function MonitorDetail() {
                         <TableBody>
                           {monitor?.logs
                             ?.sort(function (a, b) {
-                              return a.id - b.id
+                              return a.id - b.id;
                             })
                             ?.slice(-10)
                             .map((log) => (
                               <TableRow key={log.id} hover>
-                                <TableCell sx={{ fontSize: '0.8rem' }}>
+                                <TableCell sx={{ fontSize: "0.8rem" }}>
                                   {formatDate(log.createdAt)}
                                 </TableCell>
-                                <TableCell sx={{ fontSize: '0.8rem' }}>
+                                <TableCell sx={{ fontSize: "0.8rem" }}>
                                   <Chip
                                     icon={getStatusIcon(log.status)}
                                     label={log.status.toUpperCase()}
                                     size="small"
                                     color={getStatusColor(log.status)}
-                                    sx={{ fontSize: '0.75rem', height: 22 }}
+                                    sx={{ fontSize: "0.75rem", height: 22 }}
                                   />
                                 </TableCell>
-                                <TableCell sx={{ fontSize: '0.8rem' }}>
+                                <TableCell sx={{ fontSize: "0.8rem" }}>
                                   {log.responseTime}ms
                                 </TableCell>
-                                <TableCell sx={{ fontSize: '0.8rem' }}>
+                                <TableCell sx={{ fontSize: "0.8rem" }}>
                                   <Chip
-                                    label={log.isError ? 'Evet' : 'Hayır'}
+                                    label={log.isError ? "Evet" : "Hayır"}
                                     size="small"
-                                    color={log.isError ? 'error' : 'success'}
-                                    sx={{ fontSize: '0.75rem', height: 22 }}
+                                    color={log.isError ? "error" : "success"}
+                                    sx={{ fontSize: "0.75rem", height: 22 }}
                                   />
                                 </TableCell>
                               </TableRow>
@@ -1820,28 +1650,29 @@ export default function MonitorDetail() {
           {monitor !== null && (
             <Grid
               item
+              xs={12}
               md={4}
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
+                display: "flex",
+                flexDirection: "column",
                 pr: 0,
-                alignItems: 'center',
+                alignItems: "center",
               }}
               gap={0}
             >
-              <Grid md={12} sx={{ mr: 3 }}>
+              <Grid sx={{ width: "100%" }}>
                 <ReportTable stats={stats} />
                 {monitor?.serverOwner && (
-                  <Card sx={{ mt: 2, bgcolor: 'white' }}>
+                  <Card sx={{ mt: 2, bgcolor: "white" }}>
                     <CardContent>
                       <Typography
                         variant="h6"
                         gutterBottom
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
-                          fontSize: '0.9rem',
+                          fontSize: "0.9rem",
                         }}
                       >
                         <Person color="primary" />
@@ -1853,14 +1684,14 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Ad Soyad
                             </Typography>
                             <Typography
                               variant="body1"
                               fontWeight="bold"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               {monitor.serverOwner.name}
                             </Typography>
@@ -1869,13 +1700,13 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               E-posta
                             </Typography>
                             <Typography
                               variant="body1"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               {monitor.serverOwner.email}
                             </Typography>
@@ -1884,7 +1715,7 @@ export default function MonitorDetail() {
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Rol
                             </Typography>
@@ -1892,66 +1723,66 @@ export default function MonitorDetail() {
                               label={monitor.serverOwner.role}
                               size="small"
                               color="info"
-                              sx={{ fontSize: '0.75rem', height: 22 }}
+                              sx={{ fontSize: "0.75rem", height: 22 }}
                             />
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Durum
                             </Typography>
                             <Chip
                               label={
-                                monitor.serverOwner.status ? 'Aktif' : 'Pasif'
+                                monitor.serverOwner.status ? "Aktif" : "Pasif"
                               }
                               size="small"
                               color={
-                                monitor.serverOwner.status ? 'success' : 'error'
+                                monitor.serverOwner.status ? "success" : "error"
                               }
-                              sx={{ fontSize: '0.75rem', height: 22 }}
+                              sx={{ fontSize: "0.75rem", height: 22 }}
                             />
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               E-posta Doğrulama
                             </Typography>
                             <Chip
                               label={
                                 monitor.serverOwner.isEmailVerified
-                                  ? 'Doğrulandı'
-                                  : 'Doğrulanmadı'
+                                  ? "Doğrulandı"
+                                  : "Doğrulanmadı"
                               }
                               size="small"
                               color={
                                 monitor.serverOwner.isEmailVerified
-                                  ? 'success'
-                                  : 'warning'
+                                  ? "success"
+                                  : "warning"
                               }
-                              sx={{ fontSize: '0.75rem', height: 22 }}
+                              sx={{ fontSize: "0.75rem", height: 22 }}
                             />
                           </Grid>
                           <Grid item xs={6}>
                             <Typography
                               variant="body2"
                               color="text.secondary"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               Oluşturulma
                             </Typography>
                             <Typography
                               variant="body2"
-                              sx={{ fontSize: '0.8rem' }}
+                              sx={{ fontSize: "0.8rem" }}
                             >
                               {new Date(
                                 monitor.serverOwner.created_at
-                              ).toLocaleString('tr-TR')}
+                              ).toLocaleString("tr-TR")}
                             </Typography>
                           </Grid>
                         </Grid>
@@ -2027,5 +1858,5 @@ export default function MonitorDetail() {
     </Grid>
   ) : (
     <div></div>
-  )
+  );
 }

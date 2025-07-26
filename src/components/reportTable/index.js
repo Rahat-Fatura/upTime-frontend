@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Grid,
   Card,
@@ -8,15 +8,15 @@ import {
   CardActions,
   useTheme,
   LinearProgress,
-} from '@mui/material'
-import { styled } from '@mui/material/styles'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell, { tableCellClasses } from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'   
-import Paper from '@mui/material/Paper'
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell, { tableCellClasses } from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import {
   BarChart,
   Bar,
@@ -26,80 +26,79 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
-} from 'recharts'
+} from "recharts";
 
 const ReportTable = ({ stats }) => {
-  const theme = useTheme()
+  const theme = useTheme();
 
   const chartData = () => [
-    { name: 'Başarılı', value: stats.upLogs, color: '#4caf50' },
-    { name: 'Başarısız', value: stats.downLogs, color: '#f44336' },
-  ]
+    { name: "Başarılı", value: stats.upLogs, color: "#4caf50" },
+    { name: "Başarısız", value: stats.downLogs, color: "#f44336" },
+  ];
   const StatCard = styled(Card)(({ theme }) => ({
     borderRadius: 11,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-    transition: 'transform 0.2s',
-    '&:hover': {
-      transform: 'translateY(-5px)',
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    transition: "transform 0.2s",
+    "&:hover": {
+      transform: "translateY(-5px)",
     },
-  }))
+  }));
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: theme.palette.primary.main,
       color: theme.palette.common.white,
-      fontWeight: 'bold',
-      fontSize:13
+      fontWeight: "bold",
+      fontSize: 13,
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 11,
     },
-  }))
+  }));
 
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
+    "&:nth-of-type(odd)": {
       backgroundColor: theme.palette.action.hover,
     },
-    '&:last-child td, &:last-child th': {
+    "&:last-child td, &:last-child th": {
       border: 0,
     },
-    '&:hover': {
+    "&:hover": {
       //backgroundColor: theme.palette.action.selected,
-      backgroundColor: '#7296f7bd'
+      backgroundColor: "#7296f7bd",
     },
-  }))
+  }));
 
-
-  const turnHost= (monitor) =>{
-    switch(monitor.monitorType){
-      case 'httpMonitor':{
-        return monitor.httpMonitor.host
+  const turnHost = (monitor) => {
+    switch (monitor.monitorType) {
+      case "httpMonitor": {
+        return monitor.httpMonitor.host;
       }
-      case 'pingMonitor':{
-        return monitor.httpMonitor.host
+      case "pingMonitor": {
+        return monitor.httpMonitor.host;
       }
-      case 'portMonitor':{
-        return monitor.httpMonitor.host
+      case "portMonitor": {
+        return monitor.httpMonitor.host;
       }
-      case 'keywordMonitor':{
-        return monitor.httpMonitor.host
+      case "keywordMonitor": {
+        return monitor.httpMonitor.host;
       }
-      case 'cronjobMonitor':{
-        return monitor.httpMonitor.host
+      case "cronjobMonitor": {
+        return monitor.httpMonitor.host;
       }
-      default:{
+      default: {
         break;
       }
     }
-  }
+  };
 
-  return stats?(
-    <Grid container /*spacing={{ xs: 2, sm: 3, md: 4, lg: 8 }}*/>
-      <Grid md={12}>
+  return stats ? (
+    <Grid container>
+      <Grid item md={12}>
         <Card
           sx={{
-           backgroundColor: '#ffff',
-           width: '100%'
+            backgroundColor: "#ffff",
+            width: "100%",
           }}
         >
           <CardContent>
@@ -108,11 +107,11 @@ const ReportTable = ({ stats }) => {
               component="div"
               gutterBottom
               sx={{
-                fontWeight: 'bold',
+                fontWeight: "bold",
                 fontSize: {
-                  xs: '0.8rem',
-                  sm: '0.8rem',
-                  xlg: '1rem',
+                  xs: "0.8rem",
+                  sm: "0.8rem",
+                  xlg: "1rem",
                 },
               }}
             >
@@ -124,17 +123,23 @@ const ReportTable = ({ stats }) => {
               gutterBottom
               sx={{
                 fontSize: {
-                  xs: '0.8rem',
-                  sm: '0.8rem',
-                  xlg: '1rem',
+                  xs: "0.8rem",
+                  sm: "0.8rem",
+                  xlg: "1rem",
                 },
-                wordBreak: 'break-all',
+                wordBreak: "break-all",
               }}
             >
               {/*turnHost(monitor)*/}
             </Typography>
 
-            <Box sx={{ height: 180, mt: 1, justifyContent: 'start' }}>
+            <Box
+              sx={{
+                height: 180,
+                mt: 1,
+                justifyContent: "start",
+              }}
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -188,8 +193,8 @@ const ReportTable = ({ stats }) => {
                     <StyledTableCell align="right">
                       <Box
                         sx={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: "flex",
+                          alignItems: "center",
                           gap: 1,
                         }}
                       >
@@ -198,15 +203,13 @@ const ReportTable = ({ stats }) => {
                           value={parseFloat(stats.uptime)}
                           sx={{
                             flexGrow: 1,
-                            backgroundColor: '#ffcdd2',
-                            '& .MuiLinearProgress-bar': {
-                              backgroundColor: '#4caf50',
+                            backgroundColor: "#ffcdd2",
+                            "& .MuiLinearProgress-bar": {
+                              backgroundColor: "#4caf50",
                             },
                           }}
                         />
-                        <Typography variant="body2">
-                          {stats.uptime}%
-                        </Typography>
+                        <Typography variant="body2">{stats.uptime}%</Typography>
                       </Box>
                     </StyledTableCell>
                   </StyledTableRow>
@@ -214,11 +217,15 @@ const ReportTable = ({ stats }) => {
               </Table>
             </TableContainer>
           </CardContent>
-          <CardActions sx={{ justifyContent: 'flex-end', p: 0.5 }}></CardActions>
+          <CardActions
+            sx={{ justifyContent: "flex-end", p: 0.5 }}
+          ></CardActions>
         </Card>
       </Grid>
     </Grid>
-  ):(<div></div>)
-}
+  ) : (
+    <div></div>
+  );
+};
 
-export default ReportTable
+export default ReportTable;
