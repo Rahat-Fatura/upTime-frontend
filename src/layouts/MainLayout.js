@@ -40,7 +40,7 @@ const MainLayout = () => {
 
       <Box
         sx={{
-          marginLeft: { xs: "90px", sm: isOpen ? "275px" : "95px" },
+          marginLeft: { xs: "85px", sm: isOpen ? "275px" : "90px" },
           width: {
             xs: "calc(100% - 70px)",
             sm: isOpen ? "calc(100% - 275px)" : "calc(100% - 95px)",
@@ -51,7 +51,12 @@ const MainLayout = () => {
           transition: "margin-left 0.3s ease, width 0.3s ease",
         }}
       >
-        <Box sx={{ width: {xs:"95%",md:"100%"}, paddingRight: { xs: "10px", sm: "20px" } }}>
+        <Box
+          sx={{
+            width: { xs: "95.8%", md: "100%" },
+            paddingRight: { xs: "10px" },
+          }}
+        >
           {/* <Navbar /> */}
           <Outlet />
         </Box>

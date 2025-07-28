@@ -77,23 +77,25 @@ export default function MonitorDetail() {
     setKeywordDialogOpen(false);
   };
   const [selectOtherMonitor, setSelectOtherMonitor] = useState([]);
-  const [params, setParams] = useState(useParams());
-  const [id, setId] = useState();
+  const params = useParams();
   const theme = useTheme();
   const [monitor, setMonitor] = useState();
 
-  const getSelectOtherMonitor = async () => {
+  const getSelectOtherMonitor = async (monitorData) => {
     const monitors = await api.get("/monitors/namesAndIds");
     let array = monitors.data;
-    let newArray = array.filter(m => m.id!==Number(monitor.id));
-    setSelectOtherMonitor(newArray);
+    setSelectOtherMonitor(array);
   };
 
-  useEffect(()=>{
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+  const [selectedOption, setSelectedOption] = useState(null);
+  useEffect(() => {
     getMonitorById(params.id);
-  },[])
-  
+  }, []);
+  useEffect(() => {
+    if (params.id) {
+      getMonitorById(params.id);
+    }
+  }, [params.id]);
   const handlDeleteMenu = (monitor) => {
     Swal.fire({
       title: "Silmek istediğinizden emin misiniz",
@@ -332,13 +334,13 @@ export default function MonitorDetail() {
   const getMonitorById = async (monitorId) => {
     try {
       const monitor = await api.get(`monitors/${monitorId}`);
-      setMonitor(monitor.data)
+      setMonitor(monitor.data);
       setSelectedOption({
         id: monitor.data.id,
         name: monitor.data.name,
         monitorType: monitor.data.monitorType,
       });
-      getSelectOtherMonitor();
+      getSelectOtherMonitor(monitor.data);
     } catch (error) {
       console.log(error);
     }
@@ -413,7 +415,6 @@ export default function MonitorDetail() {
   };
 
   const filter = createFilterOptions();
-  const [selectedOption, setSelectedOption] = useState(null);
   return monitor ? (
     <Grid container mt={2}>
       <Grid
@@ -451,14 +452,16 @@ export default function MonitorDetail() {
               <Autocomplete
                 disablePortal
                 disableClearable
-                options={selectOtherMonitor}
+                options={selectOtherMonitor.filter(
+                  (item) => item.id !== selectedOption?.id
+                )}
                 getOptionLabel={(option) => option.name}
                 value={selectedOption}
-                onChange={(event, newValue) =>{
-                  navigate(`/user/monitors/${newValue.id}/detail`)
-                }
-                  
-                }
+                onChange={(event, newValue) => {
+                  setSelectedOption(newValue);
+                  getMonitorById(newValue.id);
+                  navigate(`/user/monitors/${newValue.id}/detail`);
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
