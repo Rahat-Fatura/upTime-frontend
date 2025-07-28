@@ -51,7 +51,7 @@ const MainLayout = () => {
           transition: "margin-left 0.3s ease, width 0.3s ease",
         }}
       >
-        <Box sx={{ width: "100%", paddingRight: { xs: "10px", sm: "20px" } }}>
+        <Box sx={{ width: {xs:"95%",md:"100%"}, paddingRight: { xs: "10px", sm: "20px" } }}>
           {/* <Navbar /> */}
           <Outlet />
         </Box>

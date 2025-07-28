@@ -15,6 +15,11 @@ import {
   FormHelperText,
   Slider,
   useTheme,
+  InputLabel,
+  Accordion,
+  AccordionActions,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material'
 import {
   Timer as TimerIcon,
@@ -22,6 +27,7 @@ import {
   Code as CodeIcon,
   DeveloperBoard as DeveloperBoardIcon,
 } from '@mui/icons-material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Add, Remove } from '@mui/icons-material'
 import Stack from '@mui/material/Stack'
 import { IconButton } from '@mui/material'
@@ -43,7 +49,7 @@ const KeyWordMonitorPage = (update = false) => {
   const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
   const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
 
-    const handleIncrementForFailCount = () => {
+  const handleIncrementForFailCount = () => {
     setFieldValue('failCountRef', values.failCountRef + 1)
   }
 
@@ -63,17 +69,26 @@ const KeyWordMonitorPage = (update = false) => {
         setFieldValue('name', response.data.monitor.name)
         setFieldValue('host', response.data.host)
         setFieldValue('method', response.data.method)
-        setFieldValue('headers', response.data.headers.length > 0
+        setFieldValue(
+          'headers',
+          response.data.headers.length > 0
             ? JSON.stringify(response.data.headers)
-            : '')   
-        setFieldValue('body', response.data.body.length > 0
+            : ''
+        )
+        setFieldValue(
+          'body',
+          response.data.body.length > 0
             ? JSON.stringify(response.data.body)
-            : '')
+            : ''
+        )
         setFieldValue('keyWordType', response.data.keyWordType || 'txt')
         setFieldValue('keyWord', response.data.keyWord)
-        setFieldValue('allowedStatusCodes', response.data.allowedStatusCodes
-          ? response.data.allowedStatusCodes.join(',')
-          : '')
+        setFieldValue(
+          'allowedStatusCodes',
+          response.data.allowedStatusCodes
+            ? response.data.allowedStatusCodes.join(',')
+            : ''
+        )
         setFieldValue('interval', response.data.monitor.interval)
         setFieldValue('intervalUnit', response.data.monitor.intervalUnit)
         setFieldValue('timeOut', response.data.timeOut)
@@ -323,15 +338,11 @@ const KeyWordMonitorPage = (update = false) => {
               borderRadius: '12px',
             }}
             mb={1}
+            padding={2}
+            gap={2}
           >
             {/*Alert */}
-            <Grid
-              item
-              md={12}
-              padding={2}
-              display={'flex'}
-              flexDirection={'column'}
-            >
+            <Grid item md={12} display={'flex'} flexDirection={'column'}>
               <Grid item md={12} alignContent={'end'}>
                 <Typography variant="subtitle1" gutterBottom></Typography>
               </Grid>
@@ -340,15 +351,21 @@ const KeyWordMonitorPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/http`
+                        )
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/ping`
+                        )
                     : monitorType === 'port'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/port')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/port`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/port`
+                        )
                     : monitorType === 'keyword'
                     ? `Anahtar Kelime Monitörü, belirli bir web sayfasının
                            içeriğinde sizin belirlediğiniz kelimelerin var olup
@@ -359,20 +376,16 @@ const KeyWordMonitorPage = (update = false) => {
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/cronjob`
+                        )
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>
             </Grid>
             {/*Birinci satır*/}
-            <Grid item md={12} gap={1} display={'flex'}>
-              <Grid
-                item
-                md={12}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+            <Grid item display={'flex'}>
+              <Grid item md={12} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} /*alignContent={'end'}*/>
                   <Typography gutterBottom>Monitoring Tipi</Typography>
                 </Grid>
@@ -613,16 +626,9 @@ const KeyWordMonitorPage = (update = false) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Divider />
             {/*İkincii satır*/}
-            <Grid item md={12} display={'flex'}>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+            <Grid item md={12} display={'flex'} gap={4}>
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'end'}>
                   <Typography gutterBottom>Ad</Typography>
                 </Grid>
@@ -656,13 +662,7 @@ const KeyWordMonitorPage = (update = false) => {
                   />
                 </Grid>
               </Grid>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'end'}>
                   <Typography gutterBottom>Url</Typography>
                 </Grid>
@@ -700,11 +700,10 @@ const KeyWordMonitorPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Üçüncü satır*/}
-            <Grid item md={12} display={'flex'}>
+            <Grid item md={12} display={'flex'} gap={4}>
               <Grid
                 item
                 md={6}
-                padding={2}
                 display={'flex'}
                 flexDirection={'column'}
                 gap={1}
@@ -783,7 +782,6 @@ const KeyWordMonitorPage = (update = false) => {
               <Grid
                 item
                 md={6}
-                padding={2}
                 display={'flex'}
                 flexDirection={'column'}
                 gap={1}
@@ -859,125 +857,157 @@ const KeyWordMonitorPage = (update = false) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Divider />
-            <Grid item md={12} display={'flex'} flexDirection={'column'}>
-              {/*Dördüncü satır*/}
-              <Grid item md={12} display={'flex'}>
-                <Grid
-                  item
-                  md={6}
-                  padding={2}
-                  display={'flex'}
-                  flexDirection={'column'}
-                  gap={1}
+
+            {/*Dördüncü satır*/}
+            <Accordion
+              sx={{
+                width: '100%',
+                bgcolor: 'white',
+                boxShadow: 'none',
+                borderBlockStart: '0.5px solid rgba(0, 0, 0, 0.1)', // Çok ince ve soluk siyah
+                borderBlockEnd: '0.5px solid rgba(0, 0, 0, 0.3)',
+                mt: 1,
+                mb: 4,
+              }}
+            >
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel2-content"
+                id="panel2-header"
+                sx={{
+                  paddingLeft: 0,
+                  '& .MuiAccordionSummary-expandIconWrapper': {
+                    marginLeft: 0,
+                    paddingLeft: 0,
+                  },
+                  '& .MuiTypography-root': {
+                    marginLeft: 0,
+                    paddingLeft: 0,
+                  },
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ fontWeight: 'bold', marginLeft: 0, paddingLeft: 0 }}
                 >
-                  <Grid item md={12} alignContent={'start'}>
-                    <Typography gutterBottom>Başlık</Typography>
-                  </Grid>
-                  <Grid item md={12}>
-                    <TextField
-                      id="headers"
-                      fullWidth
-                      label="Özel HTTP Başlıkları (JSON)"
-                      multiline
-                      rows={9}
-                      helperText={
-                        <Typography
-                          variant="body2"
-                          sx={{ color: 'red', minHeight: '1.5em' }}
-                        >
-                          {errors.headers}
-                        </Typography>
-                      }
-                      sx={{
-                        mb: 0,
-                      }}
-                      name="headers"
-                      value={values.headers}
-                      onChange={(e) => setFieldValue('headers', e.target.value)}
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                          '& textarea': {
-                            maxHeight: '200px', // yüksekliği sınırla
-                            overflowY: 'auto', // dikey scroll bar
+                  Gönderilecek istek detayı
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid item display={'flex'} gap={4}>
+                  <Grid
+                    item
+                    md={6}
+                    display={'flex'}
+                    flexDirection={'column'}
+                    gap={1}
+                  >
+                    <Grid item md={12} alignContent={'end'}>
+                      <Typography gutterBottom>Başlık</Typography>
+                    </Grid>
+                    <Grid item md={12}>
+                      <TextField
+                        id="headers"
+                        fullWidth
+                        label="Özel HTTP Başlıkları (JSON)"
+                        multiline
+                        rows={7}
+                        helperText={
+                          <Typography
+                            variant="body2"
+                            sx={{ color: 'red', minHeight: '1.5em' }}
+                          >
+                            {errors.headers}
+                          </Typography>
+                        }
+                        sx={{
+                          mb: 2,
+                        }}
+                        name="headers"
+                        value={values.headers}
+                        onChange={handleChange}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          sx: {
+                            fontSize: '0.8rem',
+                            '& textarea': {
+                              maxHeight: '200px', // yüksekliği sınırla
+                              overflowY: 'auto', // dikey scroll bar
+                            },
                           },
-                        },
-                        startAdornment: (
-                          <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                        ),
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                    />
+                          startAdornment: (
+                            <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
+                          ),
+                        }}
+                        InputLabelProps={{
+                          sx: {
+                            fontSize: '0.8rem',
+                          },
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid
+                    item
+                    md={6}
+                    display={'flex'}
+                    flexDirection={'column'}
+                    gap={1}
+                  >
+                    <Grid item md={12} alignContent={'end'}>
+                      <Typography gutterBottom>Gövde</Typography>
+                    </Grid>
+                    <Grid item md={12}>
+                      <TextField
+                        id="body"
+                        name="body"
+                        fullWidth
+                        label="Özel HTTP Gövdesi (JSON)"
+                        multiline
+                        rows={7}
+                        helperText={
+                          <Typography
+                            variant="body2"
+                            sx={{ color: 'red', minHeight: '1.5em' }}
+                          >
+                            {errors.body}
+                          </Typography>
+                        }
+                        sx={{ mb: 2 }}
+                        value={values.body}
+                        onChange={(e) => setFieldValue('body', e.target.value)}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          sx: {
+                            fontSize: '0.8rem',
+                            '& textarea': {
+                              maxHeight: '200px', // yüksekliği sınırla
+                              overflowY: 'auto', // dikey scroll bar
+                            },
+                          },
+                          startAdornment: (
+                            <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
+                          ),
+                        }}
+                        InputLabelProps={{
+                          sx: {
+                            fontSize: '0.8rem',
+                          },
+                        }}
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
-                <Grid
-                  item
-                  md={6}
-                  padding={2}
-                  display={'flex'}
-                  flexDirection={'column'}
-                  gap={1}
-                >
-                  <Grid item md={12} alignContent={'end'}>
-                    <Typography gutterBottom>Gövde</Typography>
-                  </Grid>
-                  <Grid item md={12}>
-                    <TextField
-                      id="body"
-                      fullWidth
-                      label="Özel HTTP Gövdesi (JSON)"
-                      multiline
-                      rows={9}
-                      helperText={
-                        <Typography
-                          variant="body2"
-                          sx={{ color: 'red', minHeight: '1.5em' }}
-                        >
-                          {errors.body}
-                        </Typography>
-                      }
-                      sx={{ mb: 0 }}
-                      name="body"
-                      value={values.body}
-                      onChange={(e) => setFieldValue('body', e.target.value)}
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                          '& textarea': {
-                            maxHeight: '200px', // yüksekliği sınırla
-                            overflowY: 'auto', // dikey scroll bar
-                          },
-                        },
-                        startAdornment: (
-                          <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
-                        ),
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>{' '}
-            </Grid>
-            <Divider />
+              </AccordionDetails>
+            </Accordion>
+
             {/*Beşinci satır*/}
-            <Grid item md={12} display={'flex'}>
+            <Grid item md={12} display={'flex'} gap={4}>
               <Grid
                 item
                 md={6}
-                padding={2}
                 display={'flex'}
                 flexDirection={'column'}
                 gap={1}
@@ -1025,13 +1055,7 @@ const KeyWordMonitorPage = (update = false) => {
                   />
                 </Grid>
               </Grid>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'start'}>
                   <Typography gutterBottom>Anahtar Kelime Tipi</Typography>
                 </Grid>
@@ -1090,158 +1114,87 @@ const KeyWordMonitorPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Altıncı satır*/}
-            <Grid item md={12} display={'flex'}>
-            <Grid
-              item
-              md={6}
-              padding={2}
-              display={'flex'}
-              flexDirection={'column'}
-            >
-              <Grid
-                item
-                md={12}
-                display={'flex'}
-                justifyContent={'space-between'}
-              >
-                <Box sx={{ width: '40%', gap: 2 }}>
-                  <Typography gutterBottom>İstek Zaman Aşımı</Typography>
-                  <FormControl fullWidth>
-                    <Select
-                      id="timeOut"
-                      name="timeOut"
-                      value={values.timeOut}
-                      onChange={(e) => setFieldValue('timeOut', e.target.value)}
-                      sx={{
-                        fontSize: '0.8rem',
-                      }}
-                    >
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
-                        10 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
-                        20 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
-                        30 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
-                        40 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
-                        50 saniye
-                      </MenuItem>
-                      <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
-                        60 saniye
-                      </MenuItem>
-                    </Select>
-                    <FormHelperText>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: 'red', minHeight: '1.5em' }}
-                      >
-                        {errors.timeOut}
-                      </Typography>
-                    </FormHelperText>
-                  </FormControl>
-                </Box>
-                <Box sx={{ width: '50%' }}>
-                  <Typography sx={{ mb: 0.5 }}>
-                    Kaç Hata Sonrası Bildirim Gönderilsin
-                  </Typography>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <IconButton
-                      aria-label="decrease"
-                      onClick={handleDecrementForFailCount}
-                      disabled={values.failCountRef <= 1}
-                      sx={{
-                        border: '1px solid #ddd',
-                        borderRadius: '8px 0 0 8px',
-                        backgroundColor: '#f5f5f5',
-                        '&:hover': {
-                          backgroundColor: '#e0e0e0',
-                        },
-                      }}
-                    >
-                      <Remove />
-                    </IconButton>
-
-                    <TextField
-                      id="failCountRef"
-                      name="failCountRef"
-                      value={values.failCountRef}
-                      fullWidth
-                      onChange={handleChange}
-                      InputProps={{
-                        sx: {
-                          height: 35,
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                      variant="outlined"
-                      size="small"
-                      inputProps={{
-                        style: {
-                          textAlign: 'center',
-                          padding: '8px',
-                        },
-                        type: 'number',
-                      }}
-                    />
-
-                    <IconButton
-                      aria-label="increase"
-                      onClick={handleIncrementForFailCount}
-                      sx={{
-                        border: '1px solid #ddd',
-                        borderRadius: '0 8px 8px 0',
-                        backgroundColor: '#f5f5f5',
-                        '&:hover': {
-                          backgroundColor: '#e0e0e0',
-                        },
-                      }}
-                    >
-                      <Add />
-                    </IconButton>
-                  </Stack>
-
-                  {
+            <Grid item display={'flex'} gap={4}>
+              <Box sx={{ width: '35%' }}>
+                <Typography gutterBottom>İstek Zaman Aşımı</Typography>
+                <FormControl fullWidth>
+                  <Select
+                    id="timeOut"
+                    name="timeOut"
+                    value={values.timeOut}
+                    onChange={(e) => setFieldValue('timeOut', e.target.value)}
+                    sx={{
+                      fontSize: '0.8rem',
+                    }}
+                  >
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
+                      10 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
+                      20 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
+                      30 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
+                      40 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
+                      50 saniye
+                    </MenuItem>
+                    <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
+                      60 saniye
+                    </MenuItem>
+                  </Select>
+                  <FormHelperText>
                     <Typography
                       variant="body2"
                       sx={{ color: 'red', minHeight: '1.5em' }}
                     >
-                      {errors.failCountRef || ' '}
+                      {errors.timeOut}
                     </Typography>
-                  }
-                </Box>
-              </Grid>
-            </Grid>
-            <Grid
-              item
-              md={6}
-              padding={2}
-              display={'flex'}
-              flexDirection={'column'}
-            >
-              <Grid item md={12} sx={{ display: 'flex', gap: 2 }}>
-                <Box sx={{ width: '100%' }}>
-                  <Typography gutterBottom>
-                    İzin Verilen Durum Kodlar
-                  </Typography>
+                  </FormHelperText>
+                </FormControl>
+              </Box>
+              <Box sx={{ width: '30%' }}>
+                <Typography sx={{ mb: 0.5 }}>
+                  Kaç Hata Sonrası Bildirim Gönderilsin
+                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <IconButton
+                    aria-label="decrease"
+                    onClick={handleDecrementForFailCount}
+                    disabled={values.failCountRef <= 1}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '8px 0 0 8px',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Remove />
+                  </IconButton>
+
                   <TextField
-                    id="allowedStatusCodes"
-                    placeholder="örnek: 200,400,500"
-                    required
+                    id="failCountRef"
+                    name="failCountRef"
+                    value={values.failCountRef}
                     fullWidth
+                    onChange={handleChange}
                     InputProps={{
                       sx: {
                         height: 35,
                         fontSize: '0.8rem',
+                        '& input::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                        '& input::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
                       },
                     }}
                     InputLabelProps={{
@@ -1249,24 +1202,76 @@ const KeyWordMonitorPage = (update = false) => {
                         fontSize: '0.8rem',
                       },
                     }}
-                    name="allowedStatusCodes"
-                    value={values.allowedStatusCodes}
-                    onChange={handleChange}
                     variant="outlined"
                     size="small"
-                    helperText={
-                      <Typography
-                        variant="body2"
-                        sx={{ color: 'red', minHeight: '1.5em' }}
-                      >
-                        {errors.allowedStatusCodes || ' '}
-                      </Typography>
-                    }
+                    inputProps={{
+                      style: {
+                        textAlign: 'center',
+                        padding: '8px',
+                      },
+                      type: 'number',
+                    }}
                   />
-                </Box>
-              </Grid>
+
+                  <IconButton
+                    aria-label="increase"
+                    onClick={handleIncrementForFailCount}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '0 8px 8px 0',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Stack>
+
+                {
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'red', minHeight: '1.5em' }}
+                  >
+                    {errors.failCountRef || ' '}
+                  </Typography>
+                }
+              </Box>
+              <Box sx={{ width: '35%' }}>
+                <Typography gutterBottom>İzin Verilen Durum Kodlar</Typography>
+                <TextField
+                  id="allowedStatusCodes"
+                  placeholder="örnek: 200,400,500"
+                  required
+                  fullWidth
+                  InputProps={{
+                    sx: {
+                      height: 35,
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  InputLabelProps={{
+                    sx: {
+                      fontSize: '0.8rem',
+                    },
+                  }}
+                  name="allowedStatusCodes"
+                  value={values.allowedStatusCodes}
+                  onChange={handleChange}
+                  variant="outlined"
+                  size="small"
+                  helperText={
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'red', minHeight: '1.5em' }}
+                    >
+                      {errors.allowedStatusCodes || ' '}
+                    </Typography>
+                  }
+                />
+              </Box>
             </Grid>
-          </Grid>
             <Divider />
             {/*Yedinci satır*/}
             <Grid item md={12} display={'flex'} mt={2} mb={2}>

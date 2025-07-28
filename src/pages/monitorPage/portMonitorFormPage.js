@@ -87,21 +87,24 @@ const PortMonitorFormPage = (update = false) => {
   const getIntervalLimits = (unit) => {
     switch (unit) {
       case 'seconds':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval >= 20 && values.interval < 60 ? values.interval : 20
         )
         setMin(20)
         setMax(59)
         return { min: 20, max: 59 }
       case 'minutes':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval > 0 && values.interval < 60 ? values.interval : 0
         )
         setMin(1)
         setMax(59)
         return { min: 1, max: 59 }
       case 'hours':
-        setFieldValue("interval",
+        setFieldValue(
+          'interval',
           values.interval > 0 && values.interval < 24 ? values.interval : 1
         )
         setMin(1)
@@ -292,15 +295,11 @@ const PortMonitorFormPage = (update = false) => {
               borderRadius: '12px',
             }}
             mb={4}
+            padding={2}
+            gap={2}
           >
             {/*Alert */}
-            <Grid
-              item
-              md={12}
-              padding={2}
-              display={'flex'}
-              flexDirection={'column'}
-            >
+            <Grid item md={12} display={'flex'} flexDirection={'column'}>
               <Grid item md={12} alignContent={'end'}>
                 <Typography variant="subtitle1" gutterBottom></Typography>
               </Grid>
@@ -309,11 +308,15 @@ const PortMonitorFormPage = (update = false) => {
                   {monitorType === 'http'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/http')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/http`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/http`
+                        )
                     : monitorType === 'ping'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/ping')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/ping`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/ping`
+                        )
                     : monitorType === 'port'
                     ? `Port Monitörü, belirli bir IP adresinde ya da alan
                           adında tanımladığınız ağ portunun (örneğin 21, 22, 80, 443 gibi)
@@ -325,28 +328,26 @@ const PortMonitorFormPage = (update = false) => {
                     : monitorType === 'keyword'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/keyword')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/keyword`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/keyword`
+                        )
                     : monitorType === 'cronjob'
                     ? role === 'user'
                       ? navigate('/user/monitors/new/cronjob')
-                      : navigate(`/admin/userMonitors/${params.userId}/new/cronjob`)
+                      : navigate(
+                          `/admin/userMonitors/${params.userId}/new/cronjob`
+                        )
                     : 'Select a monitor type to get started.'}
                 </Alert>
               </Grid>
             </Grid>
             {/*Birinci satır*/}
             <Grid item md={12} gap={1} display={'flex'}>
-              <Grid
-                item
-                md={12}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
-                <Grid item md={12} /*alignContent={'end'}*/>
+              <Grid item md={12} display={'flex'} flexDirection={'column'}>
+                <Grid item /*alignContent={'end'}*/>
                   <Typography gutterBottom>Monitoring Tipi</Typography>
                 </Grid>
-                <Grid item md={12}>
+                <Grid item>
                   <FormControl sx={{ width: '100%' }}>
                     <Select
                       fullWidth
@@ -583,17 +584,10 @@ const PortMonitorFormPage = (update = false) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Divider />
             {/*İkincii satır*/}
-            <Grid item md={12} display={'flex'}>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
-                <Grid item md={12} alignContent={'end'}>
+            <Grid item display={'flex'} gap={4}>
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
+                <Grid item alignContent={'end'}>
                   <Typography gutterBottom>Ad</Typography>
                 </Grid>
                 <Grid item md={12}>
@@ -626,13 +620,7 @@ const PortMonitorFormPage = (update = false) => {
                   />
                 </Grid>
               </Grid>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'end'}>
                   <Typography gutterBottom>Host</Typography>
                 </Grid>
@@ -669,14 +657,8 @@ const PortMonitorFormPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Üçüncü satır*/}
-            <Grid item md={12} display={'flex'}>
-              <Grid
-                item
-                md={6}
-                padding={2}
-                display={'flex'}
-                flexDirection={'column'}
-              >
+            <Grid item md={12} display={'flex'} gap={4}>
+              <Grid item md={6} display={'flex'} flexDirection={'column'}>
                 <Grid item md={12} alignContent={'end'}>
                   <Typography gutterBottom>İstek Zaman Aşımı</Typography>
                 </Grid>
@@ -724,7 +706,6 @@ const PortMonitorFormPage = (update = false) => {
               <Grid
                 item
                 md={6}
-                padding={2}
                 display={'flex'}
                 flexDirection={'column'}
                 gap={0}
@@ -765,8 +746,8 @@ const PortMonitorFormPage = (update = false) => {
             </Grid>
             <Divider />
             {/*Beşinci satır*/}
-            <Grid item md={12} display={'flex'} padding={2} gap={10}>
-              <Box sx={{ width: '70%', gap: 2 }}>
+            <Grid item md={12} display={'flex'} gap={4}>
+              <Box sx={{ width: '50%', gap: 2 }}>
                 <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
                 <Box display={'flex'} gap={2}>
                   <Grid item md={12}>
@@ -837,80 +818,102 @@ const PortMonitorFormPage = (update = false) => {
                 </Box>
               </Box>
 
-              <Box sx={{ width: '30%' }}>
-                  <Typography sx={{ mb: 0.5 }}>
-                    Kaç Hata Sonrası Bildirim Gönderilsin
+              <Box
+                sx={{
+                  width: '50%',
+                  height: 'fit-content',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Typography sx={{ mb: 0.5 }}>
+                  Kaç Hata Sonrası Bildirim Gönderilsin
+                </Typography>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  sx={{ width: '50%' }}
+                  spacing={1}
+                >
+                  <IconButton
+                    aria-label="decrease"
+                    onClick={handleDecrementForFailCount}
+                    disabled={values.failCountRef <= 1}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '8px 0 0 8px',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Remove />
+                  </IconButton>
+
+                  <TextField
+                    id="failCountRef"
+                    name="failCountRef"
+                    value={values.failCountRef}
+                    fullWidth
+                    onChange={handleChange}
+                    InputProps={{
+                      sx: {
+                        height: 35,
+                        fontSize: '0.8rem',
+                        '& input::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                        '& input::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      },
+                    }}
+                    InputLabelProps={{
+                      sx: {
+                        fontSize: '0.8rem',
+                      },
+                    }}
+                    variant="outlined"
+                    size="small"
+                    inputProps={{
+                      style: {
+                        textAlign: 'center',
+                        padding: '8px',
+                      },
+                      type: 'number',
+                    }}
+                  />
+
+                  <IconButton
+                    aria-label="increase"
+                    onClick={handleIncrementForFailCount}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '0 8px 8px 0',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Stack>
+
+                {
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'red', minHeight: '1.5em' }}
+                  >
+                    {errors.failCountRef || ' '}
                   </Typography>
-                  <Stack direction="row" alignItems="center" spacing={1}>
-                    <IconButton
-                      aria-label="decrease"
-                      onClick={handleDecrementForFailCount}
-                      disabled={values.failCountRef <= 1}
-                      sx={{
-                        border: '1px solid #ddd',
-                        borderRadius: '8px 0 0 8px',
-                        backgroundColor: '#f5f5f5',
-                        '&:hover': {
-                          backgroundColor: '#e0e0e0',
-                        },
-                      }}
-                    >
-                      <Remove />
-                    </IconButton>
-
-                    <TextField
-                      id="failCountRef"
-                      name="failCountRef"
-                      value={values.failCountRef}
-                      fullWidth
-                      onChange={handleChange}
-                      InputProps={{
-                        sx: {
-                          height: 35,
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                      InputLabelProps={{
-                        sx: {
-                          fontSize: '0.8rem',
-                        },
-                      }}
-                      variant="outlined"
-                      size="small"
-                      inputProps={{
-                        style: {
-                          textAlign: 'center',
-                          padding: '8px',
-                        },
-                        type: 'number',
-                      }}
-                    />
-
-                    <IconButton
-                      aria-label="increase"
-                      onClick={handleIncrementForFailCount}
-                      sx={{
-                        border: '1px solid #ddd',
-                        borderRadius: '0 8px 8px 0',
-                        backgroundColor: '#f5f5f5',
-                        '&:hover': {
-                          backgroundColor: '#e0e0e0',
-                        },
-                      }}
-                    >
-                      <Add />
-                    </IconButton>
-                  </Stack>
-
-                  {
-                    <Typography
-                      variant="body2"
-                      sx={{ color: 'red', minHeight: '1.5em' }}
-                    >
-                      {errors.failCountRef || ' '}
-                    </Typography>
-                  }
-                </Box>
+                }
+              </Box>
             </Grid>
             <Divider />
             {/*Altıncı satır*/}

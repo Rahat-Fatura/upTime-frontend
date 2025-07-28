@@ -23,7 +23,7 @@ import { AddressBook, HandThreeFingers, Trees } from "tabler-icons-react";
 
 const UserProfileInfoPage = ({ userInfo}) => {
   return (
-    <Grid item  className="grid-area">
+    <Grid item md={12}  className="grid-area">
       <Card>
         <CardContent>
           <Grid container spacing={2}>

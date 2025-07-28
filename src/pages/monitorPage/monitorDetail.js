@@ -68,7 +68,6 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export default function MonitorDetail() {
-  /*Keyword Dialog*/
   const [keywordDialogOpen, setKeywordDialogOpen] = useState(false);
   const navigate = useNavigate();
   const handleClickKeywordDialohOpen = () => {
@@ -78,21 +77,23 @@ export default function MonitorDetail() {
     setKeywordDialogOpen(false);
   };
   const [selectOtherMonitor, setSelectOtherMonitor] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const selectOtherMonitorOpen = Boolean(anchorEl);
-  const [knockButton, setKnockButton] = useState(false);
-
-  const [isOpen, setIsOpen] = useState(false);
+  const [params, setParams] = useState(useParams());
+  const [id, setId] = useState();
   const theme = useTheme();
   const [monitor, setMonitor] = useState();
-  // const [params, setParams] = useState(useParams())
 
   const getSelectOtherMonitor = async () => {
     const monitors = await api.get("/monitors/namesAndIds");
-
-    setSelectOtherMonitor(monitors.data);
+    let array = monitors.data;
+    let newArray = array.filter(m => m.id!==Number(monitor.id));
+    setSelectOtherMonitor(newArray);
   };
-  const { id } = useParams();
+
+  useEffect(()=>{
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+    getMonitorById(params.id);
+  },[])
+  
   const handlDeleteMenu = (monitor) => {
     Swal.fire({
       title: "Silmek istediğinizden emin misiniz",
@@ -331,21 +332,17 @@ export default function MonitorDetail() {
   const getMonitorById = async (monitorId) => {
     try {
       const monitor = await api.get(`monitors/${monitorId}`);
+      setMonitor(monitor.data)
       setSelectedOption({
         id: monitor.data.id,
         name: monitor.data.name,
         monitorType: monitor.data.monitorType,
       });
-      setMonitor(monitor.data);
+      getSelectOtherMonitor();
     } catch (error) {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    getMonitorById(id);
-  }, [id]);
-
   // İstatistik hesaplamaları
   const calculateStats = () => {
     if (!monitor?.logs) return {};
@@ -415,22 +412,6 @@ export default function MonitorDetail() {
     }
   };
 
-  useEffect(() => {
-    setInterval(() => {
-      getMonitorById(id);
-    }, 60000);
-    getSelectOtherMonitor();
-
-    const cleanupLocalStorage = () => {
-      localStorage.clear();
-    };
-    window.addEventListener("beforeunload", cleanupLocalStorage);
-    return () => {
-      window.removeEventListener("beforeunload", cleanupLocalStorage);
-    };
-  }, []);
-
-  const [value, setValue] = useState(null);
   const filter = createFilterOptions();
   const [selectedOption, setSelectedOption] = useState(null);
   return monitor ? (
@@ -473,8 +454,10 @@ export default function MonitorDetail() {
                 options={selectOtherMonitor}
                 getOptionLabel={(option) => option.name}
                 value={selectedOption}
-                onChange={(event, newValue) =>
+                onChange={(event, newValue) =>{
                   navigate(`/user/monitors/${newValue.id}/detail`)
+                }
+                  
                 }
                 renderInput={(params) => (
                   <TextField

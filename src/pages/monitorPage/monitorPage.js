@@ -1033,12 +1033,7 @@ export default function Dashboard() {
   ]
   return (
     <Grid container>
-      <Grid
-        item
-        xs={11.5}
-        md={12}
-        sx={{  backgroundColor: '#f8f9fa', width: '100%' }}
-      >
+      
   
           <Box
             sx={{
@@ -1069,10 +1064,11 @@ export default function Dashboard() {
               Monitoring Sayfası
             </Typography>
           </Box>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, width: '100%' }} />
 
           <Box
             sx={{
+              width:"100%",
               // border: 'solid 0.5px gray',
               // borderColor: '#5c5554',
               //backgroundColor: '#ffff',
@@ -1581,7 +1577,7 @@ export default function Dashboard() {
             </Paper>
           </Box>
       
-      </Grid>
+      
     </Grid>
   )
 }
