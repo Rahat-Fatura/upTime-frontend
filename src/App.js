@@ -25,22 +25,11 @@ import { jwtDecode } from "jwt-decode";
 
 import { cookies } from "./utils/cookie";
 import Dashboard from "./pages/monitorPage/monitorPage.js";
-import MaintanancePage from "./pages/maintanancePage/maintanancePage.js";
-import TeamMembersPage from "./pages/teamMembersPage/teamMembersPage.js";
-import IntegrationsPage from "./pages/inegrationsPage/inegrationsPage.js";
 import ResetPassword from "./pages/resetPasswordPage/resetPassword.js";
-import MonitoringReportsPage from "./pages/monitoringReportsPage/monitoringReportsPage.js";
-import InstantControlPage from "./pages/instantControlPage/instantControlPage.js";
 import NewMonitorPage from "./pages/monitorPage/newMonitorPage.js";
-import PingMonitorFormPage from "./pages/monitorPage/pingMonitorFormPage.js";
-import KeyWordMonitorFormPage from "./pages/monitorPage/keyWordMonitorFormPage.js";
-import PortMonitorFormPage from "./pages/monitorPage/portMonitorFormPage.js";
-import CronJobMonitorFormPage from "./pages/monitorPage/cronJobMonitorForm.js";
 import NewUser from "./pages/adminPage/newUser.js";
 import UserDetail from "./pages/adminPage/userDetail.js";
 import AdmimMonitors from "./pages/adminPage/adminMonitorPage.js";
-import AdminMaintance from "./pages/adminPage/adminMaintanance/maintanancePage.js";
-import AdminMonitoringReportsPage from "./pages/adminPage/adminMonitoringReportsPage.js";
 import VerifyEmailPage from "./pages/verifyEmailPage/verifyEmailPage.js";
 import MonitorDetail from "./pages/monitorPage/monitorDetail.js";
 import AdminLayout from "./layouts/AdminLayout.js";
@@ -127,54 +116,11 @@ function AppRoutes() {
         <Route path="/user/" element={<Dashboard />} />
         <Route path="/user/monitors" element={<Dashboard />} />
         <Route path="/user/monitors/:id/detail" element={<MonitorDetail />} />
-        <Route path="/user/monitors/new/http" element={<NewMonitorPage />} />
+        <Route path="/user/monitors/new/monitor" element={<NewMonitorPage />} />
         <Route
-          path="/user/monitors/:id/http"
+          path="/user/monitors/:id/monitor"
           element={<NewMonitorPage update={true} />}
         />
-        <Route
-          path="/user/monitors/new/ping"
-          element={<PingMonitorFormPage />}
-        />
-        <Route
-          path="/user/monitors/:id/ping"
-          element={<PingMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/user/monitors/new/port"
-          element={<PortMonitorFormPage />}
-        />
-        <Route
-          path="/user/monitors/:id/port"
-          element={<PortMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/user/monitors/new/keyword"
-          element={<KeyWordMonitorFormPage />}
-        />
-        <Route
-          path="/user/monitors/:id/keyword"
-          element={<KeyWordMonitorFormPage update={true} />}
-        />
-
-        <Route
-          path="/user/monitors/new/cronjob"
-          element={<CronJobMonitorFormPage />}
-        />
-        <Route
-          path="/user/monitors/:id/cronjob"
-          element={<CronJobMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/user/monitoringReports"
-          element={<MonitoringReportsPage />}
-        />
-        <Route path="/user/instantControl" element={<InstantControlPage />} />
-        <Route path="/user/maintanance" element={<MaintanancePage />} />
-        <Route path="/user/teamMembers" element={<TeamMembersPage />} />
-        <Route path="/user/integrationsApi" element={<IntegrationsPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
 
@@ -191,45 +137,12 @@ function AppRoutes() {
 
         <Route path="/admin/newUser" element={<NewUser />} />
         <Route
-          path="/admin/userMonitors/:userId/new/http"
+          path="/admin/userMonitors/:userId/new/monitor"
           element={<NewMonitorPage />}
         />
         <Route
-          path="/admin/userMonitors/:userId/new/ping"
-          element={<PingMonitorFormPage />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/new/port"
-          element={<PortMonitorFormPage />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/new/keyword"
-          element={<KeyWordMonitorFormPage />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/new/cronjob"
-          element={<CronJobMonitorFormPage />}
-        />
-
-        <Route
-          path="/admin/userMonitors/:userId/:id/http"
+          path="/admin/userMonitors/:userId/:id/monitor"
           element={<NewMonitorPage update={true} />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/:id/ping"
-          element={<PingMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/:id/port"
-          element={<PortMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/:id/keyword"
-          element={<KeyWordMonitorFormPage update={true} />}
-        />
-        <Route
-          path="/admin/userMonitors/:userId/:id/cronjob"
-          element={<CronJobMonitorFormPage update={true} />}
         />
       </Route>
     </Routes>

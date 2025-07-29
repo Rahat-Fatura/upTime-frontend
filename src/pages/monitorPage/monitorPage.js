@@ -21,6 +21,7 @@ import {
   InputAdornment,
   useTheme,
   Checkbox,
+  useMediaQuery
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -318,7 +319,8 @@ export default function Dashboard() {
   const [currentStats, setCurrentStats] = useState(INITIAL_STATS)
   const theme = useTheme()
   const navigate = useNavigate()
-
+  const isSm = useMediaQuery(theme.breakpoints.down('md'))
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'))
   function PositionedMenu({ selectMonitors, setSelectMonitors }) {
     const [anchorEl, setAnchorEl] = useState(null)
     const open = Boolean(anchorEl)
@@ -524,7 +526,7 @@ export default function Dashboard() {
   }
 
   const handleSubmit = async (e) => {
-    navigate('new/http')
+    navigate('new/monitor')
   }
 
   const calculateStats = () => {
@@ -714,7 +716,7 @@ export default function Dashboard() {
       flex: 1.5,
       renderCell: (params) => (
         <Box sx={{ display: 'flex', gap: 1, margin: '5' }}>
-          <Typography>{params.value}</Typography>
+          <Typography fontSize="11.2px !important">{params.value}</Typography>
         </Box>
       ),
     },
@@ -722,6 +724,7 @@ export default function Dashboard() {
       field: 'host',
       headerName: 'Host',
       flex: 3,
+  
       renderCell: (params) => {
         switch (params.row.monitorType) {
           case 'HttpMonitor':
@@ -730,10 +733,10 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 0.5 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.httpMonitor.host}</Typography>
+                  <Typography fontSize="11.2px !important">{params.row.httpMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.monitorType}</Typography>
+                  <Typography  fontSize="10px !important">{params.row.monitorType}</Typography>
                   {/*<Typography  backgroundColor={
                 params.row.httpMonitor.method==="GET"
                 ? "green" : params.row.httpMonitor.method==="POST"
@@ -753,10 +756,10 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.pingMonitor.host}</Typography>
+                  <Typography fontSize="11.2px !important">{params.row.pingMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.monitorType}</Typography>
+                  <Typography fontSize="10px !important">{params.row.monitorType}</Typography>
                 </Box>
               </Box>
             )
@@ -765,10 +768,10 @@ export default function Dashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex-column', gap: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography>{params.row.name}</Typography>
+                    <Typography fontSize="11.2px !important">{params.row.name}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Typography>{params.row.monitorType}</Typography>
+                    <Typography fontSize="10px !important">{params.row.monitorType}</Typography>
                   </Box>
                 </Box>
                 <Button
@@ -796,10 +799,10 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.portMonitor.host}</Typography>
+                  <Typography fontSize="11.2px !important">{params.row.portMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.monitorType}</Typography>
+                  <Typography fontSize="10px !important">{params.row.monitorType}</Typography>
                   {/*<Typography borderRadius={0.1}  backgroundColor={"orange"} fontSize={"80%"}>{params.row.portMonitor.port}</Typography>*/}
                 </Box>
               </Box>
@@ -810,10 +813,10 @@ export default function Dashboard() {
                 sx={{ display: 'flex-column', alignItems: 'center', gap: 1 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.keyWordMonitor.host}</Typography>
+                  <Typography fontSize="11.2px !important">{params.row.keyWordMonitor.host}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography>{params.row.monitorType}</Typography>
+                  <Typography fontSize="10px !important">{params.row.monitorType}</Typography>
                   {/*<Typography  backgroundColor={
                 params.row.keyWordMonitor.method==="GET"
                 ? "green" : params.row.keyWordMonitor.method==="POST"
@@ -858,12 +861,17 @@ export default function Dashboard() {
       disableColumnMenu: true,
       sortable: false,
       headerName: 'Başarı Oranı',
-      flex: 2.1,
+      flex: isSm? 1:2.1,
       renderCell: (params) => {
         let logs = params.row.logs.sort(function (a, b) {
           return a.id - b.id
         })
-        logs = logs.slice(-25) || []
+        if(isSm){
+          logs = logs.slice(-15) || []
+        }else{
+          logs = logs.slice(-25) || []
+        }
+        
         const size = logs.length
         for (let i = size; i < 25; i++) {
           logs[i] = {
@@ -1032,7 +1040,7 @@ export default function Dashboard() {
     },
   ]
   return (
-    <Grid container>
+    <Grid container width={'100%'}>
       
   
           <Box
@@ -1559,11 +1567,9 @@ export default function Dashboard() {
                   },
                   '& .MuiDataGrid-columnHeader': {
                     fontSize: {
-                      xs: '0.3rem',
-                      sm: '0.4rem',
-                      md: '0.5rem',
-                      lg: '0.7rem',
-                      xlg: '0.9rem',
+                      xs: '0.7rem',
+                      md: '0.8rem',
+                      xlg: '1rem',
                     },
 
                     '&::-webkit-scrollbar': {
@@ -1573,6 +1579,11 @@ export default function Dashboard() {
                   },
                 }}
                 disableColumnFilter
+                columnVisibilityModel={{
+                  name: !isSm,
+                  detail: !isSm,
+                  logs: !isXs,
+                }}
               />
             </Paper>
           </Box>

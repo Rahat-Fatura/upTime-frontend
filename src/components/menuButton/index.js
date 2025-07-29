@@ -37,9 +37,10 @@ import {
   Search as SearchIcon,
   Menu as MenuIcon,
   Build,
+  Visibility,
 } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fontSize, margin } from '@mui/system'
+import { fontSize, margin, maxHeight } from '@mui/system'
 import { Alert, IconButton } from '@mui/material'
 import MonitorDetail from '../../pages/monitorPage/monitorDetail'
 import { pink } from '@mui/material/colors'
@@ -66,7 +67,8 @@ const StyledMenu = styled((props) => (
   '& .MuiPaper-root': {
     borderRadius: 6,
     marginTop: theme.spacing(1),
-    minWidth: 120,
+    minWidth: 120,            // En az bu kadar genişlik
+    maxHeight: 188,
     transform: 'translateY(-5px)',
     color: 'rgb(55, 65, 81)',
     boxShadow:
@@ -75,6 +77,10 @@ const StyledMenu = styled((props) => (
       padding: '4px 0',
     },
     '& .MuiMenuItem-root': {
+      minWidth: 120,
+      maxWidth: 120,
+      minHeight:30,
+      maxHeight:30,
       '& .MuiSvgIcon-root': {
         fontSize: 15,
         color: theme.palette.text.secondary,
@@ -119,61 +125,29 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
   const handleEditDetails = (monitor) => {
+    
     let token = cookies.get('jwt-access')
     let role = jwtDecode(token).role
-    switch (monitor.monitorType) {
-      case 'HttpMonitor':
-        if (role === 'admin') {
-          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/http`)
+    if (role === 'admin') {
+          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/monitor`)
         }
-        else{
-          navigate(`/user/monitors/${monitor.id}/http`)
+    else{
+          navigate(`/user/monitors/${monitor.id}/monitor`)
         }
-        handleClose()
-        break
-      case 'PingMonitor':
-        if (role === 'admin') {
-          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/ping`)
-        }
-        else{
-          navigate(`/user/monitors/${monitor.id}/ping`)
-        }
-        handleClose()
-        break
-      case 'CronJobMonitor':
-        if (role === 'admin') {
-          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/cronjob`)
-        }
-        else{
-          navigate(`/user/monitors/${monitor.id}/cronjob`)
-        }
-        handleClose()
-        break
-      case 'PortMonitor':
-        if (role === 'admin') {
-          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/port`)
-        }
-        else{
-          navigate(`/user/monitors/${monitor.id}/port`)
-        }
-        handleClose()
-        break
-      case 'KeywordMonitor':
-        if (role === 'admin') {
-          navigate(`/admin/userMonitors/${params.userId}/${monitor.id}/keyword`)
-        }
-        else{
-          navigate(`/user/monitors/${monitor.id}/keyword`)
-        }
-        handleClose()
-        break
-      default:
-        console.error('Unknow monitor type ! :', monitor.monitorType)
-        handleClose()
-        break
-    }
+    handleClose()
   }
 
+
+  const handleDetailButton = async (page) => {
+    let token = cookies.get('jwt-access')
+    let role = jwtDecode(token).role
+    if (role === 'admin') {
+     navigate(`/admin/monitors/${page.id}/detail`)
+    }
+    else{
+      navigate(`/user/monitors/${page.id}/detail`)
+    }
+  }
   const handleTestButton = async (page) => {
     try {
       let timerInterval
@@ -497,6 +471,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        
       >
         <MenuItem
           sx={{
@@ -538,6 +513,18 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           sx={{
             fontSize: 12,
             weight: 'auto',
+            color: '#413ef8f3',
+          }}
+          onClick={() => handleDetailButton(monitor)}
+          disableRipple
+        >
+          <Visibility fontSize="small" color="#ffff" />
+          Detay
+        </MenuItem>
+        <MenuItem
+          sx={{
+            fontSize: 12,
+            weight: 'auto',
             color: '#f533bb',
           }}
           onClick={() => handleWorkMonitorMenu(monitor)}
@@ -561,14 +548,14 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
       </StyledMenu>
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle fontSize={'1rem'}>{monitor.maintanance?.status?
-        `\"${monitor.name.substring(
+        `"${monitor.name.substring(
           0,
           50
-        )}\" Monitörü Bakım Durumundan Çıkart`:
-        `\"${monitor.name.substring(
+        )}" Monitörü Bakım Durumundan Çıkart`:
+        `"${monitor.name.substring(
           0,
           50
-        )}\" Monitörü Bakım Durumuna Geçir`}</DialogTitle>
+        )}" Monitörü Bakım Durumuna Geçir`}</DialogTitle>
         <DialogContent sx={{ paddingBottom: 0 }}>
           <DialogContentText sx={{ marginBottom: 2 }}>
             <Alert severity={monitor.maintanance?.status?"warning":"info"}>{monitor.maintanance?.status?
@@ -645,11 +632,6 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                               fontSize: '0.7rem',
                             },
                           },
-                          /*endAdornment: (
-                                        <InputAdornment position="start">
-                                          <AccessTimeIcon sx={{ fontSize: '16px'}} />
-                                        </InputAdornment>
-                                      ),*/
                         },
                         InputLabelProps: {
                           sx: {
@@ -673,12 +655,12 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                           {
                             name: 'offset',
                             options: {
-                              offset: [0, -300], // yukarı kaydırma
+                              offset: [0, -300],
                             },
                           },
                         ],
                         sx: {
-                          zIndex: 1500, // popup görünürlüğü garanti
+                          zIndex: 1500, 
                         },
                       },
                       textField: {
@@ -718,11 +700,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                               fontSize: '0.7rem',
                             },
                           },
-                          /*endAdornment: (
-                                        <InputAdornment position="start">
-                                          <AccessTimeIcon sx={{ fontSize: '16px'}} />
-                                        </InputAdornment>
-                                      ),*/
+                          
                         },
                         InputLabelProps: {
                           sx: {

@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import api from "../../api/auth/axiosInstance";
-import Swal from "sweetalert2";
+import { useState, useEffect } from 'react'
+import api from '../../api/auth/axiosInstance'
+import Swal from 'sweetalert2'
 import {
   Box,
   Typography,
@@ -22,9 +22,9 @@ import {
   AccordionActions,
   AccordionSummary,
   AccordionDetails,
-} from "@mui/material";
+} from '@mui/material'
 
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
   Timer as TimerIcon,
   Public as PublicIcon,
@@ -33,23 +33,30 @@ import {
   Menu as MenuIcon,
   Add,
   Remove,
-} from "@mui/icons-material";
-import ComputerIcon from "@mui/icons-material/Computer";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { INTERVAL_UNITS } from "./constants/monitorConstants";
-import { cookies } from "../../utils/cookie";
-import { jwtDecode } from "jwt-decode";
-import { useFormik } from "formik";
-import { newHttpMonitorFormShhema } from "../../utils/formSchema/formSchemas";
+} from '@mui/icons-material'
+import ComputerIcon from '@mui/icons-material/Computer'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { INTERVAL_UNITS } from './constants/monitorConstants'
+import { cookies } from '../../utils/cookie'
+import { jwtDecode } from 'jwt-decode'
+import { useFormik } from 'formik'
+import {
+  newHttpMonitorFormShhema,
+  newPingMonitorFormShhema,
+  newPortMonitorFormShhema,
+  newKeywordMonitorFormShhema,
+  newCronJobMonitorFormShhema,
+} from '../../utils/formSchema/formSchemas'
+
 
 const monitorAlertMessages = [
   {
-    monitorType: "http",
+    monitorType: 'http',
     message:
-      "HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.ornek.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar.",
+      'HTTPS Monitörü, belirlediğiniz bir web adresine (örneğin https://www.ornek.com) belirli aralıklarla istekte bulunarak sitenin erişilebilirliğini ve düzgün yanıt verip vermediğini kontrol eder. Sunucudan gelen HTTP durum kodunu (200, 404, 500 gibi) ve sayfanın yanıt süresini izler. Site yanıt veremediğinde, belirttiğiniz  kodlarla eğer eşleşmediğinde  sizi bilgilendirir. Bu monitör, web sitelerinin genel durumu ve performansı hakkında düzenli izleme sağlar.',
   },
   {
-    monitorType: "ping",
+    monitorType: 'ping',
     message: `Ping Monitörü, bir sunucunun çevrimiçi (erişilebilir)
                            olup olmadığını kontrol etmek için ICMP protokolünü kullanarak
                            düzenli aralıklarla sinyal gönderir. Gönderilen bu 'ping' sinyallerine
@@ -60,7 +67,7 @@ const monitorAlertMessages = [
                            etkili bir çözümdür.`,
   },
   {
-    monitorType: "port",
+    monitorType: 'port',
     message: `Port Monitörü, belirli bir IP adresinde ya da alan
                           adında tanımladığınız ağ portunun (örneğin 21, 22, 80, 443 gibi)
                           açık ve ulaşılabilir olup olmadığını düzenli olarak kontrol eder.
@@ -70,7 +77,7 @@ const monitorAlertMessages = [
                           uygulama servisinin çalışıp çalışmadığını anlık olarak takip edebilirsiniz.`,
   },
   {
-    monitorType: "keyword",
+    monitorType: 'keyword',
     message: `Anahtar Kelime Monitörü, belirli bir web sayfasının
                            içeriğinde sizin belirlediğiniz kelimelerin var olup
                            olmadığını düzenli aralıklarla kontrol eder. Belirttiğiniz
@@ -79,288 +86,616 @@ const monitorAlertMessages = [
                            içerik değişikliği gibi durumları hızlıca fark edebilirsiniz.`,
   },
   {
-    monitorType: "cronjob",
+    monitorType: 'cronjob',
     message: `Cron Job Monitörü, zamanlanmış görevlerin (cron job'ların) düzgün şekilde çalışıp çalışmadığını takip eder. Genellikle sunucu tarafında arka planda belirli aralıklarla çalışan bu görevler,monitöre entegre edilen özel bir URL’ye her çalıştıklarında istek
 gönderir. Eğer belirlenen süre içinde bu istek gelmezse, yani görev çalışmazsa veya hata alırsa sizi bilgilendirir. Bu sayede otomatik yedekleme,
   e-posta gönderimi veya veri işleme gibi kritik zamanlanmış görevlerin sorunsuz çalıştığından emin olabilirsiniz.`,
   },
-];
+]
 
 const monitorTypes = [
   {
-    id: "http",
-    icon: <PublicIcon sx={{ color: "white" }} />,
-    bgcolor: "#3f51b5",
-    title: "HTTP(S)",
+    id: 'http',
+    icon: <PublicIcon sx={{ color: 'white' }} />,
+    bgcolor: '#3f51b5',
+    title: 'HTTP(S)',
     info: "Web sitelerini ve web API'lerini izleyin",
   },
   {
-    id: "ping",
-    icon: <ComputerIcon sx={{ color: "white" }} />,
-    bgcolor: "#4caf50",
-    title: "PING",
-    info: "Ağ bağlantısından ICMP protokolünden izleyin",
+    id: 'ping',
+    icon: <ComputerIcon sx={{ color: 'white' }} />,
+    bgcolor: '#4caf50',
+    title: 'PING',
+    info: 'Ağ bağlantısından ICMP protokolünden izleyin',
   },
   {
-    id: "port",
-    icon: <DeveloperBoardIcon sx={{ color: "white" }} />,
-    bgcolor: "#ff9800",
-    title: "PORT",
-    info: "Belirli bağlantı portları izleyin",
+    id: 'port',
+    icon: <DeveloperBoardIcon sx={{ color: 'white' }} />,
+    bgcolor: '#ff9800',
+    title: 'PORT',
+    info: 'Belirli bağlantı portları izleyin',
   },
   {
-    id: "keyword",
-    icon: <CodeIcon sx={{ color: "white" }} />,
-    bgcolor: "#e91e63",
-    title: "KEYWORD",
-    info: "Web servislerdeki belirli anahtar kelimeleri izleyin",
+    id: 'keyword',
+    icon: <CodeIcon sx={{ color: 'white' }} />,
+    bgcolor: '#e91e63',
+    title: 'KEYWORD',
+    info: 'Web servislerdeki belirli anahtar kelimeleri izleyin',
   },
   {
-    id: "cronjob",
-    icon: <TimerIcon sx={{ color: "white" }} />,
-    bgcolor: "#3f51b5",
-    title: "CRON JOB",
-    info: "Tekrarlanan işleri izleyin",
+    id: 'cronjob',
+    icon: <TimerIcon sx={{ color: 'white' }} />,
+    bgcolor: '#3f51b5',
+    title: 'CRON JOB',
+    info: 'Tekrarlanan işleri izleyin',
   },
-];
+]
 
 const NewMonitorPage = (update = false) => {
-  const [params, setParams] = useState(useParams());
-  const [monitorType, setMonitorType] = useState("http");
-  const [min, setMin] = useState();
-  const [max, setMax] = useState();
-  const [role, setRole] = useState("");
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false);
-  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true);
+  const [params, setParams] = useState(useParams())
+  const [monitorType, setMonitorType] = useState('http')
+  const [min, setMin] = useState()
+  const [max, setMax] = useState()
+  const [role, setRole] = useState('')
+  const navigate = useNavigate()
+  const theme = useTheme()
+  const [vaidateOnChangeState, setValidateOnChangeState] = useState(false)
+  const [vaidateOnBlurState, setValidateOnBlurState] = useState(true)
+
+  const getFormikConfig = () => {
+    const baseConfig = {
+      isInitialValid: false,
+      validateOnChange: vaidateOnChangeState,
+      validateOnBlur: vaidateOnBlurState,
+      onSubmit: update.update ? updateMonitor : createMonitor,
+    }
+
+    switch (monitorType) {
+      case 'http':
+        return {
+          ...baseConfig,
+          initialValues: {
+            name: '',
+            host: '',
+            method: 'GET',
+            body: '',
+            headers: '',
+            allowedStatusCodes: '',
+            timeOut: 30,
+            interval: 5,
+            intervalUnit: 'minutes',
+            failCountRef: 3,
+          },
+          validationSchema: newHttpMonitorFormShhema,
+        }
+      case 'keyword':
+        return {
+          ...baseConfig,
+          initialValues: {
+            name: '',
+            host: '',
+            method: 'GET',
+            body: '',
+            headers: '',
+            keyWord: '',
+            keyWordType: 'txt',
+            allowedStatusCodes: '',
+            timeOut: 30,
+            interval: 5,
+            intervalUnit: 'minutes',
+            failCountRef: 3,
+          },
+          validationSchema: newKeywordMonitorFormShhema,
+        }
+      case 'ping':
+        return {
+          ...baseConfig,
+          initialValues: {
+            name: '',
+            host: '',
+            interval: 5,
+            intervalUnit: 'minutes',
+            failCountRef: 3,
+          },
+          validationSchema: newPingMonitorFormShhema,
+        }
+      case 'port':
+        return {
+          ...baseConfig,
+          initialValues: {
+            name: '',
+            host: '',
+            port: '',
+            timeOut: 30,
+            interval: 5,
+            intervalUnit: 'minutes',
+            failCountRef: 3,
+          },
+          validationSchema: newPortMonitorFormShhema,
+        }
+      case 'cronjob':
+        return {
+          ...baseConfig,
+          initialValues: {
+            name: '',
+            divitionTime: '',
+            interval: 5,
+            intervalUnit: 'minutes',
+            failCountRef: 3,
+          },
+          validationSchema: newCronJobMonitorFormShhema,
+        }
+      // diğer case'ler...
+      default:
+        return {
+          ...baseConfig,
+          initialValues: {},
+          validationSchema: null,
+        }
+    }
+  }
 
   const handleIncrementForFailCount = () => {
-    setFieldValue("failCountRef", values.failCountRef + 1);
-  };
+    setFieldValue('failCountRef', values.failCountRef + 1)
+  }
 
   const handleDecrementForFailCount = () => {
-    setFieldValue("failCountRef", values.failCountRef - 1);
-  };
+    setFieldValue('failCountRef', values.failCountRef - 1)
+  }
 
   const alertContent = monitorAlertMessages.find(
     (item) => item.monitorType === monitorType
-  )?.message;
+  )?.message
 
   useEffect(() => {
     const fetchMonitorData = async () => {
       try {
-        const jwtToken = cookies.get("jwt-access");
+        const jwtToken = cookies.get('jwt-access')
         if (jwtToken) {
-          const decodedToken = jwtDecode(jwtToken);
-          setRole(decodedToken.role);
+          const decodedToken = jwtDecode(jwtToken)
+          setRole(decodedToken.role)
         }
-        const response = await api.get(`monitors/http/${params.id}`);
-        console.log(response.data);
-        setFieldValue("name", response.data.monitor.name);
-        setFieldValue("host", response.data.host);
-        setFieldValue("method", response.data.method);
-        setFieldValue("headers", JSON.stringify(response.data.headers));
-        setFieldValue("body", JSON.stringify(response.data.body));
-        setFieldValue(
-          "allowedStatusCodes",
-          response.data.allowedStatusCodes
-            ? response.data.allowedStatusCodes.join(",")
-            : ""
-        );
-        setFieldValue("interval", response.data.monitor.interval);
-        setFieldValue("intervalUnit", response.data.monitor.intervalUnit);
-        setFieldValue("timeOut", response.data.timeOut);
-        setFieldValue("failCountRef", response.data.monitor.failCountRef);
+        const response = await api.get(`monitors/update/${params.id}`)
+        console.log(response.data)
+        switch (response.data.monitorType) {
+          case 'HttpMonitor': {
+            setMonitorType('http')
+            setFieldValue('name', response.data.name)
+            setFieldValue('host', response.data.httpMonitor.host)
+            setFieldValue('method', response.data.httpMonitor.method)
+            setFieldValue(
+              'headers',
+              JSON.stringify(response.data.httpMonitor.headers)
+            )
+            setFieldValue(
+              'body',
+              JSON.stringify(response.data.httpMonitor.body)
+            )
+            setFieldValue(
+              'allowedStatusCodes',
+              response.data.httpMonitor.allowedStatusCodes
+                ? response.data.httpMonitor.allowedStatusCodes.join(',')
+                : ''
+            )
+            setFieldValue('interval', response.data.interval)
+            setFieldValue('intervalUnit', response.data.intervalUnit)
+            setFieldValue('timeOut', response.data.httpMonitor.timeOut)
+            setFieldValue('failCountRef', response.data.failCountRef)
+            break
+          }
+          case 'PingMonitor': {
+            setMonitorType('ping')
+            setFieldValue('name', response.data.name)
+            setFieldValue('host', response.data.pingMonitor.host)
+            setFieldValue('interval', response.data.interval)
+            setFieldValue('intervalUnit', response.data.intervalUnit)
+            setFieldValue('failCountRef', response.data.failCountRef)
+            break
+          }
+          case 'PortMonitor': {
+            setMonitorType('port')
+            setFieldValue('name', response.data.name)
+            setFieldValue('host', response.data.portMonitor.host)
+            setFieldValue('port', response.data.portMonitor.port)
+            setFieldValue('timeOut', response.data.portMonitor.timeOut)
+            setFieldValue('interval', response.data.interval)
+            setFieldValue('intervalUnit', response.data.intervalUnit)
+            setFieldValue('failCountRef', response.data.failCountRef)
+            break
+          }
+          case 'KeywordMonitor': {
+            setMonitorType('keyword')
+            setFieldValue('name', response.data.name)
+            setFieldValue('host', response.data.keyWordMonitor.host)
+            setFieldValue('method', response.data.keyWordMonitor.method)
+            setFieldValue(
+              'headers',
+              response.data.keyWordMonitor.headers.length > 0
+                ? JSON.stringify(response.data.keyWordMonitor.headers)
+                : ''
+            )
+            setFieldValue(
+              'body',
+              response.data.keyWordMonitor.body.length > 0
+                ? JSON.stringify(response.data.keyWordMonitor.body)
+                : ''
+            )
+            setFieldValue(
+              'keyWordType',
+              response.data.keyWordMonitor.keyWordType || 'txt'
+            )
+            setFieldValue('keyWord', response.data.keyWordMonitor.keyWord)
+            setFieldValue(
+              'allowedStatusCodes',
+              response.data.keyWordMonitor.allowedStatusCodes
+                ? response.data.keyWordMonitor.allowedStatusCodes.join(',')
+                : ''
+            )
+            setFieldValue('interval', response.data.interval)
+            setFieldValue('intervalUnit', response.data.intervalUnit)
+            setFieldValue('timeOut', response.data.keyWordMonitor.timeOut)
+            setFieldValue('failCountRef', response.data.failCountRef)
+            break
+          }
+          case 'CronJobMonitor': {
+            setMonitorType('cronjob')
+            setFieldValue('name', response.data.name)
+            setFieldValue(
+              'divitionTime',
+              response.data.cronJobMonitor.devitionTime
+            )
+            setFieldValue('interval', response.data.interval)
+            setFieldValue('intervalUnit', response.data.intervalUnit)
+            setFieldValue('failCountRef', response.data.failCountRef)
+            break
+          }
+          default: {
+            break
+          }
+        }
       } catch (error) {
         Swal.fire({
-          title: "Hata",
-          text: "Monitor bilgileri alınırken bir hata oluştu.",
-          icon: "error",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
-        console.error("Monitor bilgileri alınırken hata oluştu:", error);
-      }
-    };
-    if (update.update) {
-      fetchMonitorData();
-    } else {
-      const jwtToken = cookies.get("jwt-access");
-      console.log("JWT Token:", jwtToken);
-      if (jwtToken) {
-        const decodedToken = jwtDecode(jwtToken);
-        setRole(decodedToken.role);
+          title: 'Hata',
+          text: 'Monitor bilgileri alınırken bir hata oluştu.',
+          icon: 'error',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
+        console.error('Monitor bilgileri alınırken hata oluştu:', error)
       }
     }
-  }, []);
+    if (update.update) {
+      fetchMonitorData()
+    } else {
+      const jwtToken = cookies.get('jwt-access')
+      console.log('JWT Token:', jwtToken)
+      if (jwtToken) {
+        const decodedToken = jwtDecode(jwtToken)
+        setRole(decodedToken.role)
+      }
+    }
+  }, [])
   const getIntervalLimits = (unit) => {
     switch (unit) {
-      case "seconds":
+      case 'seconds':
         values.interval =
-          values.interval >= 20 && values.interval < 60 ? values.interval : 20;
-        setMin(20);
-        setMax(59);
-        return { min: 20, max: 59 };
-      case "minutes":
+          values.interval >= 20 && values.interval < 60 ? values.interval : 20
+        setMin(20)
+        setMax(59)
+        return { min: 20, max: 59 }
+      case 'minutes':
         values.interval =
-          values.interval > 0 && values.interval < 60 ? values.interval : 1;
-        setMin(1);
-        setMax(59);
-        return { min: 1, max: 59 };
-      case "hours":
+          values.interval > 0 && values.interval < 60 ? values.interval : 1
+        setMin(1)
+        setMax(59)
+        return { min: 1, max: 59 }
+      case 'hours':
         values.interval =
-          values.interval > 0 && values.interval < 24 ? values.interval : 1;
-        setMin(1);
-        setMax(23);
-        return { min: 1, max: 23 };
+          values.interval > 0 && values.interval < 24 ? values.interval : 1
+        setMin(1)
+        setMax(23)
+        return { min: 1, max: 23 }
       default:
-        return;
+        return
     }
-  };
+  }
 
   const createMonitor = async (values, actions) => {
     try {
-      console.log(values.allowedStatusCodes.length);
-      console.log(values.allowedStatusCodes);
-      const formattedData = {
-        name: values.name,
-        httpMonitor: {
-          host: values.host,
-          method: values.method,
-          body: values.body.length > 0 ? JSON.parse(values.body) : {},
-          headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
-          allowedStatusCodes:
-            values.allowedStatusCodes.length > 0
-              ? values.allowedStatusCodes.split(",").map((code) => code.trim())
-              : [],
-          timeOut: values.timeOut,
-        },
-        interval: values.interval,
-        intervalUnit: values.intervalUnit,
-        failCountRef: values.failCountRef,
-      };
-      console.log(formattedData);
-      const response = await api.post(
-        role === "admin" ? `monitors/http/${params.userId}` : `monitors/http/`,
-        formattedData
-      );
+      let url = ''
+      let formattedData = {}
+      switch (monitorType) {
+        case 'http': {
+          formattedData = {
+            name: values.name,
+            httpMonitor: {
+              host: values.host,
+              method: values.method,
+              body: values.body.length > 0 ? JSON.parse(values.body) : {},
+              headers:
+                values.headers.length > 0 ? JSON.parse(values.headers) : {},
+              allowedStatusCodes:
+                values.allowedStatusCodes.length > 0
+                  ? values.allowedStatusCodes
+                      .split(',')
+                      .map((code) => code.trim())
+                  : [],
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url =
+            role === 'admin'
+              ? `monitors/http/${params.userId}`
+              : `monitors/http/`
+          break
+        }
+        case 'ping': {
+          formattedData = {
+            name: values.name,
+            pingMonitor: {
+              host: values.host,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url =
+            role === 'admin'
+              ? `monitors/ping/${params.userId}`
+              : `monitors/ping/`
+          break
+        }
+        case 'port': {
+          formattedData = {
+            name: values.name,
+            portMonitor: {
+              host: values.host,
+              port: Number(values.port),
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url =
+            role === 'admin'
+              ? `monitors/port/${params.userId}`
+              : `monitors/port/`
+          break
+        }
+        case 'keyword': {
+          formattedData = {
+            name: values.name,
+            keyWordMonitor: {
+              host: values.host,
+              method: values.method,
+              body: values.body.length > 0 ? JSON.parse(values.body) : {},
+              headers:
+                values.headers.length > 0 ? JSON.parse(values.headers) : {},
+              keyWordType: values.keyWordType,
+              keyWord: values.keyWord,
+              allowedStatusCodes:
+                values.allowedStatusCodes.length > 0
+                  ? values.allowedStatusCodes
+                      .split(',')
+                      .map((code) => code.trim())
+                  : [],
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url =
+            role === 'admin'
+              ? `monitors/keyword/${params.userId}`
+              : `monitors/keyword/`
+          break
+        }
+        case 'cronjob': {
+          formattedData = {
+            name: values.name,
+            cronJobMonitor: {
+              devitionTime: Number(values.divitionTime),
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url =
+            role === 'admin'
+              ? `monitors/cronjob/${params.userId}`
+              : `monitors/cronjob/`
+          break
+        }
+        default: {
+          break
+        }
+      }
+
+      console.log(formattedData)
+      const response = await api.post(url, formattedData)
       if (response.data) {
         Swal.fire({
-          title: "İzleme Başarılı Şekilde Oluşturuldu",
-          icon: "success",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
+          title: 'İzleme Başarılı Şekilde Oluşturuldu',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
         title: error.response.data.message,
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
-      console.error("Sunucu eklenirken hata oluştu:", error);
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
+      console.error('Sunucu eklenirken hata oluştu:', error)
     }
-  };
+  }
 
   const updateMonitor = async (e) => {
     try {
-      const formattedData = {
-        name: values.name,
-        httpMonitor: {
-          host: values.host,
-          method: values.method,
-          body: values.body.length > 0 ? JSON.parse(values.body) : {},
-          headers: values.headers.length > 0 ? JSON.parse(values.headers) : {},
-          allowedStatusCodes:
-            values.allowedStatusCodes.length > 0
-              ? values.allowedStatusCodes.split(",").map((code) => code.trim())
-              : [],
-          timeOut: values.timeOut,
-        },
-        interval: values.interval,
-        intervalUnit: values.intervalUnit,
-        failCountRef: values.failCountRef,
-      };
-      console.log(formattedData);
+      let url = ''
+      let formattedData = {}
+      switch (monitorType) {
+        case 'http': {
+          formattedData = {
+            name: values.name,
+            httpMonitor: {
+              host: values.host,
+              method: values.method,
+              body: values.body.length > 0 ? JSON.parse(values.body) : {},
+              headers:
+                values.headers.length > 0 ? JSON.parse(values.headers) : {},
+              allowedStatusCodes:
+                values.allowedStatusCodes.length > 0
+                  ? values.allowedStatusCodes
+                      .split(',')
+                      .map((code) => code.trim())
+                  : [],
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url = `monitors/http/${params.id}`
+          break
+        }
+        case 'ping': {
+          formattedData = {
+            name: values.name,
+            pingMonitor: {
+              host: values.host,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url = `monitors/ping/${params.id}`
+          break
+        }
+        case 'port': {
+          formattedData = {
+            name: values.name,
+            portMonitor: {
+              host: values.host,
+              port: Number(values.port),
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url = `monitors/port/${params.id}`
+          break
+        }
+        case 'keyword': {
+          formattedData = {
+            name: values.name,
+            keyWordMonitor: {
+              host: values.host,
+              method: values.method,
+              body: values.body.length > 0 ? JSON.parse(values.body) : {},
+              headers:
+                values.headers.length > 0 ? JSON.parse(values.headers) : {},
+              keyWordType: values.keyWordType,
+              keyWord: values.keyWord,
+              allowedStatusCodes:
+                values.allowedStatusCodes.length > 0
+                  ? values.allowedStatusCodes
+                      .split(',')
+                      .map((code) => code.trim())
+                  : [],
+              timeOut: values.timeOut,
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url = `monitors/keyword/${params.id}`
+          break
+        }
+        case 'cronjob': {
+          formattedData = {
+            name: values.name,
+            cronJobMonitor: {
+              devitionTime: Number(values.divitionTime),
+            },
+            interval: values.interval,
+            intervalUnit: values.intervalUnit,
+            failCountRef: values.failCountRef,
+          }
+          url = `monitors/cronjob/${params.id}`
+          break
+        }
+        default: {
+          break
+        }
+      }
+
+      console.log(formattedData)
       const response = await api.put(
-        `monitors/http/${params.id}`,
+        url,
         formattedData
-      );
+      )
       if (response.data) {
         Swal.fire({
-          title: "İzleme Başarılı Şekilde Güncellendi",
-          icon: "success",
-          confirmButtonText: "Tamam",
-        });
-        turnMonitorPage();
+          title: 'İzleme Başarılı Şekilde Güncellendi',
+          icon: 'success',
+          confirmButtonText: 'Tamam',
+        })
+        turnMonitorPage()
       }
     } catch (error) {
       Swal.fire({
         title: error.response.data.message,
-        icon: "error",
-        confirmButtonText: "Tamam",
-      });
-      console.error("Monitor update error :", error);
+        icon: 'error',
+        confirmButtonText: 'Tamam',
+      })
+      console.error('Monitor update error :', error)
     }
-  };
+  }
 
   const handleMonitorTypeChange = (event) => {
-    console.log(event.target, "sadasdas");
-    setMonitorType(event.target.value);
-  };
+    setMonitorType(event.target.value)
+  }
 
   const turnMonitorPage = () => {
-    role === "user"
-      ? navigate("/user/monitors/")
-      : navigate(`/admin/userMonitors/${params.userId}`);
-  };
+    role === 'user'
+      ? navigate('/user/monitors/')
+      : navigate(`/admin/userMonitors/${params.userId}`)
+  }
 
   const { values, errors, isValid, handleChange, handleSubmit, setFieldValue } =
-    useFormik({
-      isInitialValid: false,
-      initialValues: {
-        name: "",
-        host: "",
-        method: "GET",
-        body: "",
-        headers: "",
-        allowedStatusCodes: "",
-        timeOut: 30,
-        interval: 5,
-        intervalUnit: "minutes",
-        failCountRef: 3,
-      },
-      validationSchema: newHttpMonitorFormShhema,
-      onSubmit: update.update ? updateMonitor : createMonitor,
-
-      validateOnChange: vaidateOnChangeState,
-      validateOnBlur: vaidateOnBlurState,
-    });
+    useFormik(getFormikConfig())
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
-      setValidateOnChangeState(true);
-      setValidateOnBlurState(false);
+      setValidateOnChangeState(true)
+      setValidateOnBlurState(false)
     }
-  }, [errors]);
+  }, [errors])
 
   useEffect(() => {
-    console.log("Interval Unit:", values.intervalUnit);
-    console.log("Interval Value:", values.interval);
-    getIntervalLimits(values.intervalUnit);
-  }, [values.intervalUnit]);
+    console.log('Interval Unit:', values.intervalUnit)
+    console.log('Interval Value:', values.interval)
+    getIntervalLimits(values.intervalUnit)
+  }, [values.intervalUnit])
 
   return (
-    <Grid container className="grid-area" width={"100%"}>
+    <Grid container className="grid-area" width={'100%'}>
       <Grid
         item
         xs={12}
         sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { xs: "flex-start", sm: "center" },
-          justifyContent: "space-between",
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          justifyContent: 'space-between',
           mb: 2,
           gap: 1,
         }}
@@ -369,34 +704,34 @@ const NewMonitorPage = (update = false) => {
           variant="h4"
           component="h1"
           sx={{
-            fontWeight: "bold",
+            fontWeight: 'bold',
             color: theme.palette.primary.main,
             fontSize: {
-              xs: "0.8rem",
-              sm: "0.8rem",
-              md: "1rem",
-              lg: "1.2rem",
-              xlg: "1.5rem",
+              xs: '0.8rem',
+              sm: '0.8rem',
+              md: '1rem',
+              lg: '1.2rem',
+              xlg: '1.5rem',
             },
           }}
         >
-          {update.update ? "Http(s) Monitor Güncelle" : "Http(s) Monitor Ekle"}
+          {update.update ? `Monitor Güncelle` : `Monitor Ekle`}
         </Typography>
       </Grid>
-      <Divider sx={{ mb: 2, width: "100%" }} />
+      <Divider sx={{ mb: 2, width: '100%' }} />
       <Grid item xs={12}>
         {alertContent && (
-          <Alert severity="info" sx={{ width: "fit-content" }}>
+          <Alert severity="info" sx={{ width: 'fit-content' }}>
             {alertContent}
           </Alert>
         )}
       </Grid>
       {/* Monitor Type Selection */}
       {/*Birinci satır*/}
-      <Grid item xs={12} gap={1}>
+      <Grid item xs={12} gap={1} mt={2}>
         <Typography gutterBottom>Monitoring Tipi</Typography>
 
-        <FormControl sx={{ display: "flex" }}>
+        <FormControl sx={{ display: 'flex' }}>
           <Select
             fullWidth
             value={monitorType}
@@ -405,29 +740,29 @@ const NewMonitorPage = (update = false) => {
             MenuProps={{
               PaperProps: {
                 sx: {
-                  bgcolor: "white",
+                  bgcolor: 'white',
                 },
               },
             }}
             sx={{
-              "& .MuiSelect-select": {
-                display: "flex",
-                alignItems: "center",
+              '& .MuiSelect-select': {
+                display: 'flex',
+                alignItems: 'center',
                 gap: 0,
                 py: 0.6,
               },
             }}
           >
             {monitorTypes.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
-                {" "}
+              <MenuItem key={item.id} value={item.id} disabled={update.update && item.id!==monitorType}>
+                {' '}
                 {/* value burada önemli! */}
-                <Box
+                <Box  
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 2,
-                    width: "100%",
+                    width: '100%',
                   }}
                 >
                   <Box
@@ -435,9 +770,9 @@ const NewMonitorPage = (update = false) => {
                       bgcolor: item.bgcolor,
                       p: 0.6,
                       borderRadius: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       minWidth: 48,
                     }}
                   >
@@ -451,8 +786,8 @@ const NewMonitorPage = (update = false) => {
                       variant="body2"
                       color="text.secondary"
                       sx={{
-                        display: "block",
-                        width: { xs: "100%", sm: "auto" },
+                        display: 'block',
+                        width: { xs: '100%', sm: 'auto' },
                         mt: { xs: 0.5, sm: 0 },
                       }}
                     >
@@ -467,8 +802,8 @@ const NewMonitorPage = (update = false) => {
           </Select>
           <FormHelperText
             sx={{
-              justifyContent: "start",
-              alignItems: "center",
+              justifyContent: 'start',
+              alignItems: 'center',
               //bgcolor: '#99a7fa',
             }}
           ></FormHelperText>
@@ -479,13 +814,13 @@ const NewMonitorPage = (update = false) => {
       <Grid
         container
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
+          display: 'flex',
+          justifyContent: 'space-between',
           mt: 2,
         }}
       >
-        <Grid item xs={12} md={5.9} display={"flex"} flexDirection={"column"}>
-          <Grid item alignContent={"end"}>
+        <Grid item xs={12} md={5.9} display={'flex'} flexDirection={'column'}>
+          <Grid item alignContent={'end'}>
             <Typography gutterBottom>Ad</Typography>
           </Grid>
           <Grid item md={12}>
@@ -496,12 +831,12 @@ const NewMonitorPage = (update = false) => {
               InputProps={{
                 sx: {
                   height: 35,
-                  fontSize: "0.8rem",
+                  fontSize: '0.8rem',
                 },
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "0.8rem",
+                  fontSize: '0.8rem',
                 },
               }}
               label="Tanımlayıcı ad"
@@ -510,18 +845,18 @@ const NewMonitorPage = (update = false) => {
               helperText={
                 <Typography
                   variant="body2"
-                  sx={{ color: "red", minHeight: "1.5em" }}
+                  sx={{ color: 'red', minHeight: '1.5em' }}
                 >
-                  {errors.name || " "}
+                  {errors.name || ' '}
                 </Typography>
               }
             />
           </Grid>
         </Grid>
 
-        {monitorType === "cronjob" && (
-          <Grid item xs={12} md={5.9} display={"flex"} flexDirection={"column"}>
-            <Grid alignContent={"end"}>
+        {monitorType === 'cronjob' && (
+          <Grid item xs={12} md={5.9} display={'flex'} flexDirection={'column'}>
+            <Grid alignContent={'end'}>
               <Typography gutterBottom>Sapma Zamanı</Typography>
             </Grid>
             <Grid>
@@ -532,23 +867,23 @@ const NewMonitorPage = (update = false) => {
                 InputProps={{
                   sx: {
                     height: 35,
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
-                label={"Sapma zamanı dakika cinsinden"}
+                label={'Sapma zamanı dakika cinsinden'}
                 value={values.divitionTime}
                 onChange={handleChange}
                 helperText={
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
-                    {errors.divitionTime || " "}
+                    {errors.divitionTime || ' '}
                   </Typography>
                 }
               />
@@ -556,9 +891,9 @@ const NewMonitorPage = (update = false) => {
           </Grid>
         )}
 
-        {monitorType !== "cronjob" && (
-          <Grid item xs={12} md={5.9} display={"flex"} flexDirection={"column"}>
-            <Grid item md={12} alignContent={"end"}>
+        {monitorType !== 'cronjob' && (
+          <Grid item xs={12} md={5.9} display={'flex'} flexDirection={'column'}>
+            <Grid item md={12} alignContent={'end'}>
               <Typography gutterBottom>Host</Typography>
             </Grid>
             <Grid item md={12}>
@@ -569,24 +904,24 @@ const NewMonitorPage = (update = false) => {
                 InputProps={{
                   sx: {
                     height: 35,
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
-                label={"URL (veya IP)"}
+                label={'URL (veya IP)'}
                 value={values.host}
                 onChange={handleChange}
-                placeholder={"https://rahatup.com"}
+                placeholder={'https://rahatup.com'}
                 helperText={
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
-                    {errors.host || " "}
+                    {errors.host || ' '}
                   </Typography>
                 }
               />
@@ -599,34 +934,34 @@ const NewMonitorPage = (update = false) => {
       {/*Üçüncü satır*/}
       <Grid
         container
-        sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
+        sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}
       >
         <Grid
           item
           xs={12}
           md={5.9}
-          display={"flex"}
-          flexDirection={"column"}
+          display={'flex'}
+          flexDirection={'column'}
           gap={1}
         >
-          <Grid alignContent={"end"}>
+          <Grid alignContent={'end'}>
             <Typography gutterBottom>Kontrol Zaman Aralığı</Typography>
           </Grid>
-          <Grid gap={3} display={"flex"}>
-            <Grid width={"100%"}>
+          <Grid gap={3} display={'flex'}>
+            <Grid width={'100%'}>
               <FormControl fullWidth>
                 <Slider
                   sx={{
-                    color: "#1976d2",
+                    color: '#1976d2',
                     height: 4, // Track kalınlığı
-                    "& .MuiSlider-thumb": {
+                    '& .MuiSlider-thumb': {
                       width: 10,
                       height: 10,
                     },
-                    "& .MuiSlider-track": {
-                      border: "none", // varsa kalın kenar çizgilerini kapatır
+                    '& .MuiSlider-track': {
+                      border: 'none', // varsa kalın kenar çizgilerini kapatır
                     },
-                    "& .MuiSlider-rail": {
+                    '& .MuiSlider-rail': {
                       opacity: 0.5,
                       height: 4,
                     },
@@ -647,7 +982,7 @@ const NewMonitorPage = (update = false) => {
                 <FormHelperText>
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
                     {errors.interval}
                   </Typography>
@@ -659,16 +994,16 @@ const NewMonitorPage = (update = false) => {
                 <Select
                   id="intervalUnit"
                   name="intervalUnit"
-                  value={values.intervalUnit || "dakika"}
+                  value={values.intervalUnit || 'dakika'}
                   onChange={handleChange}
                   variant="outlined"
                   sx={{
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   }}
                 >
                   {INTERVAL_UNITS.map((unit) => (
                     <MenuItem
-                      sx={{ fontSize: "0.8rem" }}
+                      sx={{ fontSize: '0.8rem' }}
                       key={unit.value}
                       value={unit.value}
                     >
@@ -684,13 +1019,13 @@ const NewMonitorPage = (update = false) => {
           item
           xs={12}
           md={5.9}
-          display={"flex"}
-          flexDirection={"column"}
+          display={'flex'}
+          flexDirection={'column'}
           gap={1}
         >
-          {(monitorType === "http" || monitorType === "keyword") && (
+          {(monitorType === 'http' || monitorType === 'keyword') && (
             <>
-              <Grid item md={12} alignContent={"end"}>
+              <Grid item md={12} alignContent={'end'}>
                 <Typography gutterBottom>Method</Typography>
               </Grid>
               <Grid item md={12}>
@@ -701,58 +1036,58 @@ const NewMonitorPage = (update = false) => {
                   label="HTTP Metot"
                   select
                   value={values.method}
-                  onChange={(e) => setFieldValue("method", e.target.value)}
+                  onChange={(e) => setFieldValue('method', e.target.value)}
                   helperText={
                     <Typography
                       variant="body2"
-                      sx={{ color: "red", minHeight: "2rem" }}
+                      sx={{ color: 'red', minHeight: '2rem' }}
                     >
                       {errors.method}
                     </Typography>
                   }
                   InputProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                   InputLabelProps={{
                     sx: {
-                      fontSize: "0.8rem",
+                      fontSize: '0.8rem',
                     },
                   }}
                 >
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="GET"
                   >
                     GET
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="POST"
                   >
                     POST
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="PUT"
                   >
                     PUT
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="DELETE"
                   >
                     DELETE
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="PATCH"
                   >
                     PATCH
                   </MenuItem>
                   <MenuItem
-                    sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                    sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                     value="HEAD"
                   >
                     HEAD
@@ -761,15 +1096,15 @@ const NewMonitorPage = (update = false) => {
               </Grid>
             </>
           )}
-          {(monitorType === "ping" ||
-            monitorType === "port" ||
-            monitorType === "cronjob") && (
+          {(monitorType === 'ping' ||
+            monitorType === 'port' ||
+            monitorType === 'cronjob') && (
             <>
               <Grid
                 sx={{
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
                 <Typography gutterBottom sx={{ mb: 1.5 }}>
@@ -781,11 +1116,11 @@ const NewMonitorPage = (update = false) => {
                     onClick={handleDecrementForFailCount}
                     disabled={values.failCountRef <= 1}
                     sx={{
-                      border: "1px solid #ddd",
-                      borderRadius: "8px 0 0 8px",
-                      backgroundColor: "#f5f5f5",
-                      "&:hover": {
-                        backgroundColor: "#e0e0e0",
+                      border: '1px solid #ddd',
+                      borderRadius: '8px 0 0 8px',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
                       },
                     }}
                   >
@@ -801,30 +1136,30 @@ const NewMonitorPage = (update = false) => {
                     InputProps={{
                       sx: {
                         height: 35,
-                        fontSize: "0.8rem",
-                        "& input::-webkit-outer-spin-button": {
-                          WebkitAppearance: "none",
+                        fontSize: '0.8rem',
+                        '& input::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
                           margin: 0,
                         },
-                        "& input::-webkit-inner-spin-button": {
-                          WebkitAppearance: "none",
+                        '& input::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
                           margin: 0,
                         },
                       },
                     }}
                     InputLabelProps={{
                       sx: {
-                        fontSize: "0.8rem",
+                        fontSize: '0.8rem',
                       },
                     }}
                     variant="outlined"
                     size="small"
                     inputProps={{
                       style: {
-                        textAlign: "center",
-                        padding: "8px",
+                        textAlign: 'center',
+                        padding: '8px',
                       },
-                      type: "number",
+                      type: 'number',
                     }}
                   />
 
@@ -832,11 +1167,11 @@ const NewMonitorPage = (update = false) => {
                     aria-label="increase"
                     onClick={handleIncrementForFailCount}
                     sx={{
-                      border: "1px solid #ddd",
-                      borderRadius: "0 8px 8px 0",
-                      backgroundColor: "#f5f5f5",
-                      "&:hover": {
-                        backgroundColor: "#e0e0e0",
+                      border: '1px solid #ddd',
+                      borderRadius: '0 8px 8px 0',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
                       },
                     }}
                   >
@@ -847,9 +1182,9 @@ const NewMonitorPage = (update = false) => {
                 {
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
-                    {errors.failCountRef || " "}
+                    {errors.failCountRef || ' '}
                   </Typography>
                 }
               </Grid>
@@ -859,15 +1194,15 @@ const NewMonitorPage = (update = false) => {
       </Grid>
       {/* <Divider /> */}
       {/*Dördüncü satır*/}
-      {(monitorType === "http" || monitorType === "keyword") && (
+      {(monitorType === 'http' || monitorType === 'keyword') && (
         <Grid item xs={12}>
           <Accordion
             sx={{
-              width: "100%",
-              bgcolor: "white",
-              boxShadow: "none",
-              borderBlockStart: "0.5px solid rgba(0, 0, 0, 0.3)", // Çok ince ve soluk siyah
-              borderBlockEnd: "0.5px solid rgba(0, 0, 0, 0.3)",
+              width: '100%',
+              bgcolor: 'white',
+              boxShadow: 'none',
+              borderBlockStart: '0.5px solid rgba(0, 0, 0, 0.3)', // Çok ince ve soluk siyah
+              borderBlockEnd: '0.5px solid rgba(0, 0, 0, 0.3)',
               mt: 1,
               mb: 4,
             }}
@@ -878,11 +1213,11 @@ const NewMonitorPage = (update = false) => {
               id="panel2-header"
               sx={{
                 paddingLeft: 0,
-                "& .MuiAccordionSummary-expandIconWrapper": {
+                '& .MuiAccordionSummary-expandIconWrapper': {
                   marginLeft: 0,
                   paddingLeft: 0,
                 },
-                "& .MuiTypography-root": {
+                '& .MuiTypography-root': {
                   marginLeft: 0,
                   paddingLeft: 0,
                 },
@@ -890,7 +1225,7 @@ const NewMonitorPage = (update = false) => {
             >
               <Typography
                 component="span"
-                sx={{ fontWeight: "bold", marginLeft: 0, paddingLeft: 0 }}
+                sx={{ fontWeight: 'bold', marginLeft: 0, paddingLeft: 0 }}
               >
                 Gönderilecek istek detayı
               </Typography>
@@ -898,17 +1233,17 @@ const NewMonitorPage = (update = false) => {
             <AccordionDetails>
               <Grid
                 container
-                sx={{ display: "flex", justifyContent: "space-between" }}
+                sx={{ display: 'flex', justifyContent: 'space-between' }}
               >
                 <Grid
                   item
                   xs={12}
                   md={5.9}
-                  display={"flex"}
-                  flexDirection={"column"}
+                  display={'flex'}
+                  flexDirection={'column'}
                   gap={1}
                 >
-                  <Grid item md={12} alignContent={"end"}>
+                  <Grid item md={12} alignContent={'end'}>
                     <Typography gutterBottom>Başlık</Typography>
                   </Grid>
                   <Grid item md={12}>
@@ -921,7 +1256,7 @@ const NewMonitorPage = (update = false) => {
                       helperText={
                         <Typography
                           variant="body2"
-                          sx={{ color: "red", minHeight: "1.5em" }}
+                          sx={{ color: 'red', minHeight: '1.5em' }}
                         >
                           {errors.headers}
                         </Typography>
@@ -936,19 +1271,19 @@ const NewMonitorPage = (update = false) => {
                       size="small"
                       InputProps={{
                         sx: {
-                          fontSize: "0.8rem",
-                          "& textarea": {
-                            maxHeight: "200px", // yüksekliği sınırla
-                            overflowY: "auto", // dikey scroll bar
+                          fontSize: '0.8rem',
+                          '& textarea': {
+                            maxHeight: '200px', // yüksekliği sınırla
+                            overflowY: 'auto', // dikey scroll bar
                           },
                         },
                         startAdornment: (
-                          <CodeIcon sx={{ mr: 1, color: "#1976d2" }} />
+                          <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
                         ),
                       }}
                       InputLabelProps={{
                         sx: {
-                          fontSize: "0.8rem",
+                          fontSize: '0.8rem',
                         },
                       }}
                     />
@@ -958,11 +1293,11 @@ const NewMonitorPage = (update = false) => {
                   item
                   xs={12}
                   md={5.9}
-                  display={"flex"}
-                  flexDirection={"column"}
+                  display={'flex'}
+                  flexDirection={'column'}
                   gap={1}
                 >
-                  <Grid item md={12} alignContent={"end"}>
+                  <Grid item md={12} alignContent={'end'}>
                     <Typography gutterBottom>Gövde</Typography>
                   </Grid>
                   <Grid item md={12}>
@@ -976,31 +1311,31 @@ const NewMonitorPage = (update = false) => {
                       helperText={
                         <Typography
                           variant="body2"
-                          sx={{ color: "red", minHeight: "1.5em" }}
+                          sx={{ color: 'red', minHeight: '1.5em' }}
                         >
                           {errors.body}
                         </Typography>
                       }
                       sx={{ mb: 2 }}
                       value={values.body}
-                      onChange={(e) => setFieldValue("body", e.target.value)}
+                      onChange={(e) => setFieldValue('body', e.target.value)}
                       variant="outlined"
                       size="small"
                       InputProps={{
                         sx: {
-                          fontSize: "0.8rem",
-                          "& textarea": {
-                            maxHeight: "200px", // yüksekliği sınırla
-                            overflowY: "auto", // dikey scroll bar
+                          fontSize: '0.8rem',
+                          '& textarea': {
+                            maxHeight: '200px', // yüksekliği sınırla
+                            overflowY: 'auto', // dikey scroll bar
                           },
                         },
                         startAdornment: (
-                          <CodeIcon sx={{ mr: 1, color: "#1976d2" }} />
+                          <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />
                         ),
                       }}
                       InputLabelProps={{
                         sx: {
-                          fontSize: "0.8rem",
+                          fontSize: '0.8rem',
                         },
                       }}
                     />
@@ -1011,10 +1346,10 @@ const NewMonitorPage = (update = false) => {
           </Accordion>
         </Grid>
       )}
-      {monitorType === "keyword" && (
+      {monitorType === 'keyword' && (
         <>
-          <Grid item xs={12} display={"flex"} gap={4}>
-            <Grid alignContent={"end"} width={"50%"}>
+          <Grid item xs={12} display={'flex'} gap={4}>
+            <Grid alignContent={'end'} width={'50%'}>
               <Typography gutterBottom mb={1}>
                 Anahtar Kelime
               </Typography>
@@ -1028,35 +1363,35 @@ const NewMonitorPage = (update = false) => {
                 helperText={
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
                     {errors.keyWord}
                   </Typography>
                 }
                 name="keyWord"
                 value={values.keyWord}
-                onChange={(e) => setFieldValue("keyWord", e.target.value)}
+                onChange={(e) => setFieldValue('keyWord', e.target.value)}
                 variant="outlined"
                 size="small"
                 InputProps={{
                   sx: {
-                    fontSize: "0.8rem",
-                    "& textarea": {
-                      maxHeight: "200px", // yüksekliği sınırla
-                      overflowY: "auto", // dikey scroll bar
+                    fontSize: '0.8rem',
+                    '& textarea': {
+                      maxHeight: '200px', // yüksekliği sınırla
+                      overflowY: 'auto', // dikey scroll bar
                     },
                   },
-                  startAdornment: <CodeIcon sx={{ mr: 1, color: "#1976d2" }} />,
+                  startAdornment: <CodeIcon sx={{ mr: 1, color: '#1976d2' }} />,
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
               />
             </Grid>
 
-            <Grid width={"50%"} alignContent={"start"}>
+            <Grid width={'50%'} alignContent={'start'}>
               <Typography gutterBottom mb={1}>
                 Anahtar Kelime Tipi
               </Typography>
@@ -1069,40 +1404,40 @@ const NewMonitorPage = (update = false) => {
                 label="Anahtar Tipi"
                 sx={{ pb: 3.1 }}
                 value={values.keyWordType}
-                onChange={(e) => setFieldValue("keyWordType", e.target.value)}
+                onChange={(e) => setFieldValue('keyWordType', e.target.value)}
                 helperText={
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "2rem" }}
+                    sx={{ color: 'red', minHeight: '2rem' }}
                   >
                     {errors.keyWordType}
                   </Typography>
                 }
                 InputProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
               >
                 <MenuItem
-                  sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                  sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                   value="txt"
                 >
                   TXT
                 </MenuItem>
                 <MenuItem
-                  sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                  sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                   value="html"
                 >
                   HTML
                 </MenuItem>
                 <MenuItem
-                  sx={{ fontSize: "0.8rem", bgcolor: "white" }}
+                  sx={{ fontSize: '0.8rem', bgcolor: 'white' }}
                   value="json"
                 >
                   JSON
@@ -1118,18 +1453,18 @@ const NewMonitorPage = (update = false) => {
         item
         xs={12}
         sx={{
-          display: "flex",
+          display: 'flex',
           gap: 4,
           mt: 2,
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: { xs: 'column', md: 'row' },
         }}
       >
-        {(monitorType === "http" ||
-          monitorType === "port" ||
-          monitorType === "keyword") && (
+        {(monitorType === 'http' ||
+          monitorType === 'port' ||
+          monitorType === 'keyword') && (
           <Box
             sx={{
-              width: { xs: "100%", md: monitorType === "port" ? "50%" : "35%" },
+              width: { xs: '100%', md: monitorType === 'port' ? '50%' : '35%' },
             }}
           >
             <Typography gutterBottom>İstek Zaman Aşımı</Typography>
@@ -1138,34 +1473,34 @@ const NewMonitorPage = (update = false) => {
                 id="timeOut"
                 name="timeOut"
                 value={values.timeOut}
-                onChange={(e) => setFieldValue("timeOut", e.target.value)}
+                onChange={(e) => setFieldValue('timeOut', e.target.value)}
                 sx={{
-                  fontSize: "0.8rem",
+                  fontSize: '0.8rem',
                 }}
               >
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={10}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={10}>
                   10 saniye
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={20}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={20}>
                   20 saniye
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={30}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={30}>
                   30 saniye
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={40}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={40}>
                   40 saniye
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={50}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={50}>
                   50 saniye
                 </MenuItem>
-                <MenuItem sx={{ fontSize: "0.8rem" }} value={60}>
+                <MenuItem sx={{ fontSize: '0.8rem' }} value={60}>
                   60 saniye
                 </MenuItem>
               </Select>
               <FormHelperText>
                 <Typography
                   variant="body2"
-                  sx={{ color: "red", minHeight: "1.5em" }}
+                  sx={{ color: 'red', minHeight: '1.5em' }}
                 >
                   {errors.timeOut}
                 </Typography>
@@ -1173,8 +1508,8 @@ const NewMonitorPage = (update = false) => {
             </FormControl>
           </Box>
         )}
-        {(monitorType === "http" || monitorType === "keyword") && (
-          <Box sx={{ width: { xs: "100%", md: "30%" } }}>
+        {(monitorType === 'http' || monitorType === 'keyword') && (
+          <Box sx={{ width: { xs: '100%', md: '30%' } }}>
             <Typography sx={{ mb: 0.5 }}>
               Kaç Hata Sonrası Bildirim Gönderilsin
             </Typography>
@@ -1184,11 +1519,11 @@ const NewMonitorPage = (update = false) => {
                 onClick={handleDecrementForFailCount}
                 disabled={values.failCountRef <= 1}
                 sx={{
-                  border: "1px solid #ddd",
-                  borderRadius: "8px 0 0 8px",
-                  backgroundColor: "#f5f5f5",
-                  "&:hover": {
-                    backgroundColor: "#e0e0e0",
+                  border: '1px solid #ddd',
+                  borderRadius: '8px 0 0 8px',
+                  backgroundColor: '#f5f5f5',
+                  '&:hover': {
+                    backgroundColor: '#e0e0e0',
                   },
                 }}
               >
@@ -1204,30 +1539,30 @@ const NewMonitorPage = (update = false) => {
                 InputProps={{
                   sx: {
                     height: 35,
-                    fontSize: "0.8rem",
-                    "& input::-webkit-outer-spin-button": {
-                      WebkitAppearance: "none",
+                    fontSize: '0.8rem',
+                    '& input::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
                       margin: 0,
                     },
-                    "& input::-webkit-inner-spin-button": {
-                      WebkitAppearance: "none",
+                    '& input::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
                       margin: 0,
                     },
                   },
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
                 variant="outlined"
                 size="small"
                 inputProps={{
                   style: {
-                    textAlign: "center",
-                    padding: "8px",
+                    textAlign: 'center',
+                    padding: '8px',
                   },
-                  type: "number",
+                  type: 'number',
                 }}
               />
 
@@ -1235,11 +1570,11 @@ const NewMonitorPage = (update = false) => {
                 aria-label="increase"
                 onClick={handleIncrementForFailCount}
                 sx={{
-                  border: "1px solid #ddd",
-                  borderRadius: "0 8px 8px 0",
-                  backgroundColor: "#f5f5f5",
-                  "&:hover": {
-                    backgroundColor: "#e0e0e0",
+                  border: '1px solid #ddd',
+                  borderRadius: '0 8px 8px 0',
+                  backgroundColor: '#f5f5f5',
+                  '&:hover': {
+                    backgroundColor: '#e0e0e0',
                   },
                 }}
               >
@@ -1250,15 +1585,15 @@ const NewMonitorPage = (update = false) => {
             {
               <Typography
                 variant="body2"
-                sx={{ color: "red", minHeight: "1.5em" }}
+                sx={{ color: 'red', minHeight: '1.5em' }}
               >
-                {errors.failCountRef || " "}
+                {errors.failCountRef || ' '}
               </Typography>
             }
           </Box>
         )}
-        {(monitorType === "http" || monitorType === "keyword") && (
-          <Box sx={{ width: { xs: "100%", md: "35%" } }}>
+        {(monitorType === 'http' || monitorType === 'keyword') && (
+          <Box sx={{ width: { xs: '100%', md: '35%' } }}>
             <Typography gutterBottom>İzin Verilen Durum Kodlar</Typography>
             <TextField
               id="allowedStatusCodes"
@@ -1268,12 +1603,12 @@ const NewMonitorPage = (update = false) => {
               InputProps={{
                 sx: {
                   height: 35,
-                  fontSize: "0.8rem",
+                  fontSize: '0.8rem',
                 },
               }}
               InputLabelProps={{
                 sx: {
-                  fontSize: "0.8rem",
+                  fontSize: '0.8rem',
                 },
               }}
               name="allowedStatusCodes"
@@ -1284,22 +1619,22 @@ const NewMonitorPage = (update = false) => {
               helperText={
                 <Typography
                   variant="body2"
-                  sx={{ color: "red", minHeight: "1.5em" }}
+                  sx={{ color: 'red', minHeight: '1.5em' }}
                 >
-                  {errors.allowedStatusCodes || " "}
+                  {errors.allowedStatusCodes || ' '}
                 </Typography>
               }
             />
           </Box>
         )}
-        {monitorType === "port" && (
+        {monitorType === 'port' && (
           <Grid
-            display={"flex"}
-            flexDirection={"column"}
+            display={'flex'}
+            flexDirection={'column'}
             gap={0}
-            sx={{ width: { xs: "100%", md: "50%" } }}
+            sx={{ width: { xs: '100%', md: '50%' } }}
           >
-            <Grid alignContent={"end"}>
+            <Grid alignContent={'end'}>
               <Typography gutterBottom>Port</Typography>
             </Grid>
             <Grid>
@@ -1310,23 +1645,23 @@ const NewMonitorPage = (update = false) => {
                 InputProps={{
                   sx: {
                     height: 35,
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
                 InputLabelProps={{
                   sx: {
-                    fontSize: "0.8rem",
+                    fontSize: '0.8rem',
                   },
                 }}
-                label={"Port numarası 80,3000"}
+                label={'Port numarası 80,3000'}
                 value={values.port}
                 onChange={handleChange}
                 helperText={
                   <Typography
                     variant="body2"
-                    sx={{ color: "red", minHeight: "1.5em" }}
+                    sx={{ color: 'red', minHeight: '1.5em' }}
                   >
-                    {errors.port || " "}
+                    {errors.port || ' '}
                   </Typography>
                 }
               />
@@ -1334,14 +1669,14 @@ const NewMonitorPage = (update = false) => {
           </Grid>
         )}
       </Grid>
-      {monitorType !== "ping" && <Divider width={"100%"} />}
+      {monitorType !== 'ping' && <Divider width={'100%'} />}
 
       <Grid
         item
         xs={12}
         sx={{
-          display: "flex",
-          justifyContent: { xs: "center", md: "flex-end" },
+          display: 'flex',
+          justifyContent: { xs: 'center', md: 'flex-end' },
           mb: 2,
           mt: 2,
           gap: 4,
@@ -1351,8 +1686,8 @@ const NewMonitorPage = (update = false) => {
           variant="contained"
           color="secondary"
           sx={{
-            fontSize: "0.8rem",
-            width: "8rem",
+            fontSize: '0.8rem',
+            width: '8rem',
           }}
           onClick={() => turnMonitorPage()}
         >
@@ -1362,32 +1697,32 @@ const NewMonitorPage = (update = false) => {
           variant="contained"
           color="primary"
           sx={{
-            fontSize: "0.8rem",
-            width: "12rem",
+            fontSize: '0.8rem',
+            width: '12rem',
           }}
           onClick={() => {
             if (isValid) {
               if (update.update) {
-                handleSubmit();
+                handleSubmit()
               } else {
-                handleSubmit();
+                handleSubmit()
               }
             } else {
               Swal.fire({
-                icon: "error",
-                title: "Hata",
-                text: "Lütfen Formu Tekrar Gözden Geçirin",
-                confirmButtonText: "Tamam",
-              });
-              handleSubmit();
+                icon: 'error',
+                title: 'Hata',
+                text: 'Lütfen Formu Tekrar Gözden Geçirin',
+                confirmButtonText: 'Tamam',
+              })
+              handleSubmit()
             }
           }}
         >
-          {update.update ? "Monitoring Güncelle" : "Monitoring Oluştur"}
+          {update.update ? 'Monitoring Güncelle' : 'Monitoring Oluştur'}
         </Button>
       </Grid>
     </Grid>
-  );
-};
+  )
+}
 
-export default NewMonitorPage;
+export default NewMonitorPage

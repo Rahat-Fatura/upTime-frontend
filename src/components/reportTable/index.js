@@ -94,14 +94,14 @@ const ReportTable = ({ stats }) => {
 
   return stats ? (
     <Grid container>
-      <Grid item md={12}>
+      <Grid item  xs={12}>
         <Card
           sx={{
             backgroundColor: "#ffff",
             width: "100%",
           }}
         >
-          <CardContent>
+          <CardContent sx={{width: '100%'}}>
             <Typography
               variant="h5"
               component="div"
@@ -110,7 +110,6 @@ const ReportTable = ({ stats }) => {
                 fontWeight: "bold",
                 fontSize: {
                   xs: "0.8rem",
-                  sm: "0.8rem",
                   xlg: "1rem",
                 },
               }}
@@ -140,7 +139,7 @@ const ReportTable = ({ stats }) => {
                 justifyContent: "start",
               }}
             >
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="90%" height="100%">
                 <BarChart data={chartData()}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
@@ -155,7 +154,7 @@ const ReportTable = ({ stats }) => {
               </ResponsiveContainer>
             </Box>
 
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
+            <TableContainer  component={Paper} sx={{ mt: 2, width:{xs:'90%'} }}>
               <Table size="small">
                 <TableHead>
                   <TableRow>

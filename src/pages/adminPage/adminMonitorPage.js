@@ -525,7 +525,7 @@ export default function Dashboard() {
   }
 
   const handleSubmit = async (e) => {
-    navigate('new/http')
+    navigate('new/monitor')
   }
 
   const calculateStats = () => {
