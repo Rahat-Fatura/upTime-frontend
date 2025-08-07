@@ -612,10 +612,10 @@ const LandingPage = () => {
                   </Typography>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="body1" color="text.secondary">
-                      Email: info@rahatup.com
+                      Email: covhandata@gmail.com
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      Tel: +90 (555) 123 45 67
+                      Tel: +90 (506) 315 88 12
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', gap: 2 }}>
@@ -650,7 +650,7 @@ const LandingPage = () => {
                 Web sitenizi güvenle izleyin.
               </Typography>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={3.7}>
               <Typography variant="h6" gutterBottom>
                 Hızlı Bağlantılar
               </Typography>
@@ -672,15 +672,21 @@ const LandingPage = () => {
                 ))}
               </Box>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4.3} display={'flex'} flexDirection={'column'} gap={2}>
               <Typography variant="h6" gutterBottom>
                 İletişim
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Email: info@rahatup.com
+                Şirket: Covhan Data Arge Yazılım Danışmalık Limited Şirketi
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.8 }}>
-                Tel: +90 (555) 123 45 67
+                Email: covhandata@gmail.com
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Tel: +90 (506) 315 88 12
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                Adress: Çifte havuzlar mah. Eski londra asfaldlı cad. Kuluçka mrk. A1 blok no: 151 /1C iç kapı no: B35 esenler istanbul
               </Typography>
             </Grid>
           </Grid>

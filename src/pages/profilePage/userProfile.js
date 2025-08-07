@@ -70,16 +70,18 @@ const ProfilePage = () => {
     }
   }, [])
   return (
-    <Grid container>
-      <Grid //Profil Header Alanı
+    <Grid container width={"100%"}>
+      <Grid
+        item
         md={12}
         sx={{
-          marginTop: '3vh',
+          width:"100%",
+          marginTop:"5px",
           backgroundColor: 'white',
           boxShadow: 'rgba(255, 255, 255, 0.24) 0px 3px 8px',
         }}
       >
-        <Card sx={{ width: '100%' }}>
+        <Card sx={{width:"100%"}}>
           <Grid
             sx={{
               height: 150,
@@ -122,15 +124,18 @@ const ProfilePage = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 2,
-                position: 'absolute',
+                position: 'relative',
                 top: 20,
                 right: 20,
+                justifyContent: 'space-between',
+                paddingLeft: 4,
+                paddingRight: 2
               }}
             >
-              <Grid item sx={{ display: 'flex', alignItems: 'center' }}>
+              <Grid item  sx={{ display: 'flex', alignItems: 'center' }}>
                 <WorkIcon fontSize="small" sx={{ mr: 1 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Rahat Sistem
+                  RahatUp
                 </Typography>
               </Grid>
               <Divider orientation="vertical" flexItem sx={{ height: '5vh' }} />
@@ -150,7 +155,7 @@ const ProfilePage = () => {
               <Divider orientation="vertical" flexItem sx={{ height: '5vh' }} />
               <Grid item sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="body2" color="text.secondary">
-                  Durum :
+                  Durumu :
                 </Typography>
                 <Chip
                   label={userInfo.status ? 'Aktif' : 'Pasif'}
@@ -162,8 +167,10 @@ const ProfilePage = () => {
         </Card>
       </Grid>
       <Grid
+        item
         md={12}
         sx={{
+          width:"100%", 
           display: 'flex',
           mt: '3vh',
           gap: 5,
@@ -172,7 +179,7 @@ const ProfilePage = () => {
           alignItems: 'center',
         }}
       >
-        <Grid item md={1}>
+        <Grid>
           <Button
             fullWidth
             variant={selectedButtonId === 1 ? 'contained' : 'text'}
@@ -187,7 +194,7 @@ const ProfilePage = () => {
             Bilgiler
           </Button>
         </Grid>
-        <Grid item md={1}>
+        <Grid>
           <Button
             fullWidth
             variant={selectedButtonId === 2 ? 'contained' : 'text'}
@@ -203,10 +210,14 @@ const ProfilePage = () => {
           </Button>
         </Grid>
       </Grid>
+
       {selectedButtonId === 1 ? (
-        <UserInfo userInfo={userInfo} />
+          <UserInfo userInfo={userInfo} />
+        
       ) : selectedButtonId === 2 ? (
-        <UserSetting userInfo={userInfo} />
+    
+          <UserSetting userInfo={userInfo} />
+      
       ) : (
         ''
       )}

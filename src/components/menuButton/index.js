@@ -24,6 +24,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import api from '../../api/auth/axiosInstance'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
+import moment from 'moment-timezone'
 import { cookies } from '../../utils/cookie'
 import { jwtDecode } from 'jwt-decode'
 import {
@@ -40,16 +41,19 @@ import {
   Visibility,
 } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
-import { fontSize, margin, maxHeight } from '@mui/system'
 import { Alert, IconButton } from '@mui/material'
-import MonitorDetail from '../../pages/monitorPage/monitorDetail'
-import { pink } from '@mui/material/colors'
+
 import {
-  DateCalendar,
   DatePicker,
   LocalizationProvider,
 } from '@mui/x-date-pickers'
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const StyledMenu = styled((props) => (
   <Menu
     elevation={0}
@@ -98,7 +102,7 @@ const StyledMenu = styled((props) => (
     }),
   },
 }))
-
+//const localTime = moment().tz(userTimezone);
 export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   const [anchorEl, setAnchorEl] = React.useState(null)
   const open = Boolean(anchorEl)
@@ -343,20 +347,21 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
   }
 
    const handleMaintanance = async() => {
-      const startDateTime = startDate.toDate()
+      const startDateTime = startDate.tz(userTimezone,true).toDate();
       startDateTime.setSeconds(0)
       startDateTime.setMilliseconds(0)
-      const startTimeValue = startTime.toDate();
+      const startTimeValue = startTime.tz(userTimezone,true).toDate();
       startDateTime.setHours(startTimeValue.getHours())
       startDateTime.setMinutes(startTimeValue.getMinutes())
-      const endDateTime = endDate.toDate()
+      const endDateTime = endDate.tz(userTimezone,true).toDate();
       endDateTime.setSeconds(0)
       endDateTime.setMilliseconds(0)
-      const endTimeValue = endTime.toDate();
+      const endTimeValue = endTime.tz(userTimezone,true).toDate();
       endDateTime.setHours(endTimeValue.getHours())
       endDateTime.setMinutes(endTimeValue.getMinutes())
-      const now = new Date()
-
+      const now = dayjs().tz(userTimezone).toDate();
+      console.log("Time zone: ", userTimezone)
+      console.log("NOW :",now)
       console.log("BAşlangıç Tarih", startDateTime)
       console.log("Bitiş Tarih", endDateTime)
       if (!startDateTime || !endDateTime) {
@@ -387,7 +392,6 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
           text: 'Başlangıç tarihi geçmiş tarihten ön tarihte olamaz',
           icon: 'warning',
         })
-        
         return
       }
   
@@ -395,6 +399,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
         const response = await api.post(`monitors/maintanance/${monitor.id}`, {
           startTime: startDateTime,
           endTime: endDateTime,
+          timeZone: userTimezone
         })
         setMonitors((prevMonitors) =>
           prevMonitors.map((m) =>
@@ -579,6 +584,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                   <DatePicker
                     disabled={monitor.maintanance?.status||false}
                     label="Başlangıç Tarih"
+                    format="DD/MM/YYYY"
                     slotProps={{
                       popper: {
                         modifiers: [
@@ -647,6 +653,7 @@ export default function CustomizedMenus({ monitor, monitors, setMonitors }) {
                   <DatePicker
                     disabled={monitor.maintanance?.status||false}
                     label="Bitiş Tarih"
+                    format="DD/MM/YYYY"
                     value={monitor?.maintanance?.status?dayjs(monitor.maintanance.endTime) : endDate}
                     onChange={(newValue) => setEndDate(newValue)}
                     slotProps={{

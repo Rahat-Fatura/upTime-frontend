@@ -1,3 +1,4 @@
+import { bgcolor } from '@mui/system'
 import React from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
@@ -17,7 +18,7 @@ export default function ResponseTimeLineChart({ logs }) {
   })
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={350} sx={{bgcolor:'red'}}>
       <LineChart
         data={data}
         margin={{ top: 20, right: 30, left: 40, bottom: 5 }}

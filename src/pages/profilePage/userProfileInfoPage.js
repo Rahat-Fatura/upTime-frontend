@@ -23,12 +23,12 @@ import { AddressBook, HandThreeFingers, Trees } from "tabler-icons-react";
 
 const UserProfileInfoPage = ({ userInfo}) => {
   return (
-    <Grid item md={12}  className="grid-area">
+    <Grid item md={12} width={'100%'} className="grid-area">
       <Card>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item md={5}>
-              <Typography variant="h6" sx={{ ml: "2vh" }}>
+              <Typography variant="h6" >
                 Bilgiler
               </Typography>
               <List dense>

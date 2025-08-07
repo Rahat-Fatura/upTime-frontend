@@ -48,7 +48,6 @@ import {
   newCronJobMonitorFormShhema,
 } from '../../utils/formSchema/formSchemas'
 
-
 const monitorAlertMessages = [
   {
     monitorType: 'http',
@@ -379,22 +378,24 @@ const NewMonitorPage = (update = false) => {
     switch (unit) {
       case 'seconds':
         values.interval =
-          values.interval >= 20 && values.interval < 60 ? values.interval : 20
+          values.interval <= 20 ? 20 
+          : values.interval > 20 && values.interval <= 40 ? 40
+          : 60
         setMin(20)
-        setMax(59)
-        return { min: 20, max: 59 }
+        setMax(60)
+        return { min: 20, max: 60 }
       case 'minutes':
         values.interval =
           values.interval > 0 && values.interval < 60 ? values.interval : 1
         setMin(1)
-        setMax(59)
-        return { min: 1, max: 59 }
+        setMax(60)
+        return { min: 1, max: 60 }
       case 'hours':
         values.interval =
           values.interval > 0 && values.interval < 24 ? values.interval : 1
         setMin(1)
-        setMax(23)
-        return { min: 1, max: 23 }
+        setMax(24)
+        return { min: 1, max: 60 }
       default:
         return
     }
@@ -638,10 +639,7 @@ const NewMonitorPage = (update = false) => {
       }
 
       console.log(formattedData)
-      const response = await api.put(
-        url,
-        formattedData
-      )
+      const response = await api.put(url, formattedData)
       if (response.data) {
         Swal.fire({
           title: 'İzleme Başarılı Şekilde Güncellendi',
@@ -754,10 +752,14 @@ const NewMonitorPage = (update = false) => {
             }}
           >
             {monitorTypes.map((item) => (
-              <MenuItem key={item.id} value={item.id} disabled={update.update && item.id!==monitorType}>
+              <MenuItem
+                key={item.id}
+                value={item.id}
+                disabled={update.update && item.id !== monitorType}
+              >
                 {' '}
                 {/* value burada önemli! */}
-                <Box  
+                <Box
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
@@ -970,14 +972,22 @@ const NewMonitorPage = (update = false) => {
                   name="interval"
                   value={values.interval}
                   onChange={handleChange}
-                  min={min}
-                  max={max}
-                  step={1}
+                  min={values.intervalUnit === 'seconds' ? 20 : min}
+                  max={values.intervalUnit === 'seconds' ? 60 : max}
+                  step={values.intervalUnit === 'seconds' ? 20 : 1}
                   valueLabelDisplay="auto" // Değeri üzerinde gösterir
-                  marks={[
-                    { value: min, label: `${min}` }, // Min değeri etiketliyor
-                    { value: max, label: `${max}` }, // Max değeri etiketliyor
-                  ]}
+                  marks={
+                    values.intervalUnit === 'seconds'
+                      ? [
+                          { value: 20, label: '20' },
+                          { value: 40, label: '40' },
+                          { value: 60, label: '60' },
+                        ]
+                      : [
+                          { value: min, label: `${min}` },
+                          { value: max, label: `${max}` },
+                        ]
+                  }
                 />
                 <FormHelperText>
                   <Typography

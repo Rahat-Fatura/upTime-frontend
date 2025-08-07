@@ -1,10 +1,18 @@
-import React from "react";
-import { Button, TextField, Grid, Divider, MenuItem, InputAdornment, Box } from "@mui/material";
-import Swal from 'sweetalert2';
+import React from 'react'
+import {
+  Button,
+  TextField,
+  Grid,
+  Divider,
+  MenuItem,
+  InputAdornment,
+  Box,
+} from '@mui/material'
+import Swal from 'sweetalert2'
 import api from '../../api/auth/axiosInstance'
 
-const UserProfileSettingsPage = ({ userInfo}) => {
-const saveChangesInfo = async () => {
+const UserProfileSettingsPage = ({ userInfo }) => {
+  const saveChangesInfo = async () => {
     try {
       const { email, password, name, isEmailVerified } = userInfo
       const updateBody = password
@@ -18,9 +26,9 @@ const saveChangesInfo = async () => {
             name: userInfo.name,
           }
       userInfo = await api.put(
-            `${process.env.REACT_APP_API_URL}auth/register-change`,
-            updateBody
-          )
+        `${process.env.REACT_APP_API_URL}auth/register-change`,
+        updateBody
+      )
       userInfo.password = ''
       Swal.fire({
         icon: 'success',
@@ -40,39 +48,39 @@ const saveChangesInfo = async () => {
   }
 
   const handleSubmit = async () => {
-      if (userInfo.name.length > 0 && userInfo.email.length > 0) {
-        try {
-          const response = await api.put(
-            `${process.env.REACT_APP_API_URL}auth/register-change`,
-            {
-              name: userInfo.name,
-              email:  userInfo.email,
-            }
-          )
-          Swal.fire({
-            icon: 'success',
-            title: 'Başarılı',
-            text: response.data.message,
-            confirmButtonText: 'Tamam',
-          })
-        } catch (error) {
-          console.error('Error changing password:', error)
-          Swal.fire({
-            icon: 'error',
-            title: 'Hata',
-            text: error.response.data.message,
-            confirmButtonText: 'Tamam',
-          })
-        }
-      } else {
+    if (userInfo.name.length > 0 && userInfo.email.length > 0) {
+      try {
+        const response = await api.put(
+          `${process.env.REACT_APP_API_URL}auth/register-change`,
+          {
+            name: userInfo.name,
+            email: userInfo.email,
+          }
+        )
         Swal.fire({
-          icon: 'warning',
-          title: 'Uyarı',
-          text: 'Kullanıcı adı ve mail alanları boş bırakılamaz.',
+          icon: 'success',
+          title: 'Başarılı',
+          text: response.data.message,
+          confirmButtonText: 'Tamam',
+        })
+      } catch (error) {
+        console.error('Error changing password:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'Hata',
+          text: error.response.data.message,
           confirmButtonText: 'Tamam',
         })
       }
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Uyarı',
+        text: 'Kullanıcı adı ve mail alanları boş bırakılamaz.',
+        confirmButtonText: 'Tamam',
+      })
     }
+  }
   const handleVerificationLink = async () => {
     try {
       const response = await api.post(
@@ -101,6 +109,7 @@ const saveChangesInfo = async () => {
       md={12}
       className="grid-area"
       justifyContent={'space-between'}
+      gap={2}
     >
       <Grid
         item
@@ -113,6 +122,11 @@ const saveChangesInfo = async () => {
             fullWidth
             className="input-field"
             label="Adı"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             variant="outlined"
             defaultValue={userInfo.name}
             onChange={(event) => {
@@ -125,6 +139,11 @@ const saveChangesInfo = async () => {
             fullWidth
             className="input-field"
             label="Email"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             variant="outlined"
             defaultValue={userInfo.email}
             onChange={(event) => {
@@ -137,6 +156,11 @@ const saveChangesInfo = async () => {
             fullWidth
             className="input-field"
             label="Şifresi"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             variant="outlined"
             defaultValue={''}
             onChange={(event) => {
@@ -149,11 +173,15 @@ const saveChangesInfo = async () => {
             fullWidth
             className="input-field"
             label="Yetkisi"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             variant="outlined"
-            defaultValue={userInfo.role==='user' ? 'Kullanıcı' : 'Admin'}
+            defaultValue={userInfo.role === 'user' ? 'Kullanıcı' : 'Admin'}
             disabled
-          >
-          </TextField>
+          ></TextField>
         </Grid>
       </Grid>
       <Divider
@@ -165,37 +193,50 @@ const saveChangesInfo = async () => {
         item
         xs={12}
         md={5.5}
-        sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}
+        sx={{ display: 'flex', gap: { xs: 2, md: 2 }, flexDirection: 'column' }}
       >
-        <Grid item xs={12} md={12}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Grid container xs={12} md={12} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Grid item xs={12} md={5}>
             <TextField
-            className="input-field"
-            label="Email doğrulaması"
-            variant="outlined"
-            defaultValue={userInfo.isEmailVerified? 'Onaylı' : 'Onaylı Değil'}
-            disabled
-            sx={{ width: '30%' }}
-          >
-          </TextField>
-          <Button
-            variant="contained"
-            onClick={()=> handleVerificationLink()}
-            sx={{
-              borderRadius: '8px',
-              fontSize: '0.6rem',
-            }}
-          >
+              className="input-field"
+              label="Email doğrulaması"
+              InputLabelProps={{
+                sx: {
+                  fontSize: '0.8rem',
+                },
+              }}
+              sx={{
+                fontSize: '0.8rem',
+              }}
+              variant="outlined"
+              defaultValue={
+                userInfo.isEmailVerified ? 'Onaylı' : 'Onaylı Değil'
+              }
+              disabled
+            ></TextField>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Button
+              variant="contained"
+              onClick={() => handleVerificationLink()}
+              sx={{
+                borderRadius: '8px',
+                fontSize: '0.6rem',
+              }}
+            >
               Doğrulama bağlantısı gönder
-          </Button>
-
-          </Box>
-          
+            </Button>
+          </Grid>
         </Grid>
         <Grid item xs={12} md={12}>
           <TextField
             fullWidth
             label="Adres"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             className="input-field"
             variant="outlined"
             defaultValue={''}
@@ -216,6 +257,11 @@ const saveChangesInfo = async () => {
           <TextField
             fullWidth
             label="Telefon No"
+            InputLabelProps={{
+              sx: {
+                fontSize: '0.8rem',
+              },
+            }}
             variant="outlined"
             className="input-field"
             defaultValue={''}
@@ -247,6 +293,6 @@ const saveChangesInfo = async () => {
       </Grid>
     </Grid>
   )
-};
+}
 
-export default UserProfileSettingsPage;
+export default UserProfileSettingsPage

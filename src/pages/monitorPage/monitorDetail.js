@@ -130,32 +130,7 @@ export default function MonitorDetail() {
   };
 
   const handleEditButton = (monitor) => {
-    switch (monitor.monitorType) {
-      case "HttpMonitor":
-        navigate(`/user/monitors/${monitor.id}/http`);
-        //handleClose()
-        break;
-      case "PingMonitor":
-        navigate(`/user/monitors/${monitor.id}/ping`);
-        //handleClose()
-        break;
-      case "CronJobMonitor":
-        navigate(`/user/monitors/${monitor.id}/cronjob`);
-        //handleClose()
-        break;
-      case "PortMonitor":
-        navigate(`/user/monitors/${monitor.id}/port`);
-        //handleClose()
-        break;
-      case "KeywordMonitor":
-        navigate(`/user/monitors/${monitor.id}/keyword`);
-        //handleClose()
-        break;
-      default:
-        console.error("Unknow monitor type ! :", monitor.monitorType);
-        //handleClose()
-        break;
-    }
+    navigate(`/user/monitors/${monitor.id}/monitor`)
   };
 
   const handleTestButton = async (monitor) => {
@@ -1348,9 +1323,9 @@ export default function MonitorDetail() {
 
               {/* Response Time İstatistikleri */}
               {!monitor.cronJobMonitor && (
-                <Grid item md={12}>
+                <Grid item md={12} width={'100%'}>
                   <Card sx={{ bgcolor: "white", width: "100%" }}>
-                    <CardContent>
+                    <CardContent> 
                       <Typography
                         variant="h6"
                         gutterBottom
@@ -1364,7 +1339,7 @@ export default function MonitorDetail() {
                         <AccessTime color="info" />
                         Son {`${stats.lastLogs.length}`} isteğin yanıt süresi
                       </Typography>
-                      <Grid container spacing={3} sx={{ mt: 1 }}>
+                      <Grid container spacing={3} sx={{ mt: 1, justifyContent: 'space-between' }}>
                         <Grid item md={3}>
                           <Box sx={{ textAlign: "center" }}>
                             <Typography
