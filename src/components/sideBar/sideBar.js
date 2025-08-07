@@ -24,7 +24,7 @@ import {
   Person,
 } from "@mui/icons-material";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import largeLogo from "../../assets/images/by-rahatsistem-logo.png";
+import largeLogo from "../../assets/images/rahatUp.png";
 import smallLogo from "../../assets/images/rahatsistem-logo.png";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { ReportAnalytics, Server } from "tabler-icons-react";
