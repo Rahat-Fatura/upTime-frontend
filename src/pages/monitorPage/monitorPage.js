@@ -131,9 +131,9 @@ function FiltredMenu({ filtreOptions, setFiltereOptions }) {
   useEffect(() => {
     let tempArray = [...filtreOptions]
     if (paused) {
-      tempArray.push('uncertain')
+      tempArray.push('paused')
     } else {
-      tempArray = tempArray.filter((item) => item !== 'uncertain')
+      tempArray = tempArray.filter((item) => item !== 'paused')
     }
     setFiltereOptions(tempArray)
   }, [paused])
@@ -622,7 +622,7 @@ export default function Dashboard() {
     if (searchLower === '') {
       if (filtreOptions.length > 0) {
         let tempFilter = monitors.filter((monitor) => {
-          return filtreOptions.includes(monitor.status)
+          return filtreOptions.includes("paused")? filtreOptions.includes(monitor.status) || monitor.isActiveByOwner === false  : filtreOptions.includes(monitor.status)
         })
         setFilteredMonitors(tempFilter)
       } else {
@@ -676,7 +676,7 @@ export default function Dashboard() {
     })
     if (filtreOptions.length > 0) {
       let tempFilter = filtered.filter((monitor) => {
-        return filtreOptions.includes(monitor.status)
+        return filtreOptions.includes("paused")? filtreOptions.includes(monitor.status) || monitor.isActiveByOwner === false  : filtreOptions.includes(monitor.status)
       })
       setFilteredMonitors(tempFilter)
     } else {
