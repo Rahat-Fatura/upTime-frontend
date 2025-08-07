@@ -730,7 +730,7 @@ const LandingPage = () => {
             variant="contained"
             fullWidth
             sx={{ mt: 2 }}
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => navigate("/login")}
           >
             Giriş Yap
           </Button>
