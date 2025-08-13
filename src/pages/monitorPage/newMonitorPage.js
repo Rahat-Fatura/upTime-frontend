@@ -22,6 +22,8 @@ import {
   AccordionActions,
   AccordionSummary,
   AccordionDetails,
+  Switch,
+  InputAdornment,
 } from '@mui/material'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -33,6 +35,7 @@ import {
   Menu as MenuIcon,
   Add,
   Remove,
+  CheckBox,
 } from '@mui/icons-material'
 import ComputerIcon from '@mui/icons-material/Computer'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
@@ -164,6 +167,8 @@ const NewMonitorPage = (update = false) => {
             interval: 5,
             intervalUnit: 'minutes',
             failCountRef: 3,
+            slowResponseAlertStatus: false,
+            slowResponseAlertValue: 1000,
           },
           validationSchema: newHttpMonitorFormShhema,
         }
@@ -183,6 +188,8 @@ const NewMonitorPage = (update = false) => {
             interval: 5,
             intervalUnit: 'minutes',
             failCountRef: 3,
+            slowResponseAlertStatus: false,
+            slowResponseAlertValue: 1000,
           },
           validationSchema: newKeywordMonitorFormShhema,
         }
@@ -195,6 +202,8 @@ const NewMonitorPage = (update = false) => {
             interval: 5,
             intervalUnit: 'minutes',
             failCountRef: 3,
+            slowResponseAlertStatus: false,
+            slowResponseAlertValue: 1000,
           },
           validationSchema: newPingMonitorFormShhema,
         }
@@ -209,6 +218,8 @@ const NewMonitorPage = (update = false) => {
             interval: 5,
             intervalUnit: 'minutes',
             failCountRef: 3,
+            slowResponseAlertStatus: false,
+            slowResponseAlertValue: 1000,
           },
           validationSchema: newPortMonitorFormShhema,
         }
@@ -280,6 +291,15 @@ const NewMonitorPage = (update = false) => {
             setFieldValue('intervalUnit', response.data.intervalUnit)
             setFieldValue('timeOut', response.data.httpMonitor.timeOut)
             setFieldValue('failCountRef', response.data.failCountRef)
+            setFieldValue(
+              'slowResponseAlertStatus',
+              response.data.httpMonitor.slowResponseAlertStatus
+            )
+            setFieldValue(
+              'slowResponseAlertValue',
+              response.data.httpMonitor.slowResponseAlertValue
+            )
+
             break
           }
           case 'PingMonitor': {
@@ -289,6 +309,14 @@ const NewMonitorPage = (update = false) => {
             setFieldValue('interval', response.data.interval)
             setFieldValue('intervalUnit', response.data.intervalUnit)
             setFieldValue('failCountRef', response.data.failCountRef)
+            setFieldValue(
+              'slowResponseAlertStatus',
+              response.data.pingMonitor.slowResponseAlertStatus
+            )
+            setFieldValue(
+              'slowResponseAlertValue',
+              response.data.pingMonitor.slowResponseAlertValue
+            )
             break
           }
           case 'PortMonitor': {
@@ -300,6 +328,14 @@ const NewMonitorPage = (update = false) => {
             setFieldValue('interval', response.data.interval)
             setFieldValue('intervalUnit', response.data.intervalUnit)
             setFieldValue('failCountRef', response.data.failCountRef)
+            setFieldValue(
+              'slowResponseAlertStatus',
+              response.data.portMonitor.slowResponseAlertStatus
+            )
+            setFieldValue(
+              'slowResponseAlertValue',
+              response.data.portMonitor.slowResponseAlertValue
+            )
             break
           }
           case 'KeywordMonitor': {
@@ -334,6 +370,14 @@ const NewMonitorPage = (update = false) => {
             setFieldValue('intervalUnit', response.data.intervalUnit)
             setFieldValue('timeOut', response.data.keyWordMonitor.timeOut)
             setFieldValue('failCountRef', response.data.failCountRef)
+            setFieldValue(
+              'slowResponseAlertStatus',
+              response.data.keyWordMonitor.slowResponseAlertStatus
+            )
+            setFieldValue(
+              'slowResponseAlertValue',
+              response.data.keyWordMonitor.slowResponseAlertValue
+            )
             break
           }
           case 'CronJobMonitor': {
@@ -378,9 +422,11 @@ const NewMonitorPage = (update = false) => {
     switch (unit) {
       case 'seconds':
         values.interval =
-          values.interval <= 20 ? 20 
-          : values.interval > 20 && values.interval <= 40 ? 40
-          : 60
+          values.interval <= 20
+            ? 20
+            : values.interval > 20 && values.interval <= 40
+            ? 40
+            : 60
         setMin(20)
         setMax(60)
         return { min: 20, max: 60 }
@@ -404,28 +450,29 @@ const NewMonitorPage = (update = false) => {
   const createMonitor = async (values, actions) => {
     try {
       let url = ''
-      let formattedData = {}
+      let formattedData = {
+        name: values.name,
+        interval: values.interval,
+        intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
+      }
       switch (monitorType) {
         case 'http': {
-          formattedData = {
-            name: values.name,
-            httpMonitor: {
-              host: values.host,
-              method: values.method,
-              body: values.body.length > 0 ? JSON.parse(values.body) : {},
-              headers:
-                values.headers.length > 0 ? JSON.parse(values.headers) : {},
-              allowedStatusCodes:
-                values.allowedStatusCodes.length > 0
-                  ? values.allowedStatusCodes
-                      .split(',')
-                      .map((code) => code.trim())
-                  : [],
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.httpMonitor = {
+            host: values.host,
+            method: values.method,
+            body: values.body.length > 0 ? JSON.parse(values.body) : {},
+            headers:
+              values.headers.length > 0 ? JSON.parse(values.headers) : {},
+            allowedStatusCodes:
+              values.allowedStatusCodes.length > 0
+                ? values.allowedStatusCodes
+                    .split(',')
+                    .map((code) => code.trim())
+                : [],
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url =
             role === 'admin'
@@ -434,15 +481,12 @@ const NewMonitorPage = (update = false) => {
           break
         }
         case 'ping': {
-          formattedData = {
-            name: values.name,
-            pingMonitor: {
-              host: values.host,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.pingMonitor = {
+            host: values.host,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
+
           url =
             role === 'admin'
               ? `monitors/ping/${params.userId}`
@@ -450,16 +494,12 @@ const NewMonitorPage = (update = false) => {
           break
         }
         case 'port': {
-          formattedData = {
-            name: values.name,
-            portMonitor: {
-              host: values.host,
-              port: Number(values.port),
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.portMonitor = {
+            host: values.host,
+            port: Number(values.port),
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url =
             role === 'admin'
@@ -468,27 +508,23 @@ const NewMonitorPage = (update = false) => {
           break
         }
         case 'keyword': {
-          formattedData = {
-            name: values.name,
-            keyWordMonitor: {
-              host: values.host,
-              method: values.method,
-              body: values.body.length > 0 ? JSON.parse(values.body) : {},
-              headers:
-                values.headers.length > 0 ? JSON.parse(values.headers) : {},
-              keyWordType: values.keyWordType,
-              keyWord: values.keyWord,
-              allowedStatusCodes:
-                values.allowedStatusCodes.length > 0
-                  ? values.allowedStatusCodes
-                      .split(',')
-                      .map((code) => code.trim())
-                  : [],
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.keyWordMonitor = {
+            host: values.host,
+            method: values.method,
+            body: values.body.length > 0 ? JSON.parse(values.body) : {},
+            headers:
+              values.headers.length > 0 ? JSON.parse(values.headers) : {},
+            keyWordType: values.keyWordType,
+            keyWord: values.keyWord,
+            allowedStatusCodes:
+              values.allowedStatusCodes.length > 0
+                ? values.allowedStatusCodes
+                    .split(',')
+                    .map((code) => code.trim())
+                : [],
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url =
             role === 'admin'
@@ -540,82 +576,72 @@ const NewMonitorPage = (update = false) => {
   const updateMonitor = async (e) => {
     try {
       let url = ''
-      let formattedData = {}
+      let formattedData = {
+        name: values.name,
+        interval: values.interval,
+        intervalUnit: values.intervalUnit,
+        failCountRef: values.failCountRef,
+      }
       switch (monitorType) {
         case 'http': {
-          formattedData = {
-            name: values.name,
-            httpMonitor: {
-              host: values.host,
-              method: values.method,
-              body: values.body.length > 0 ? JSON.parse(values.body) : {},
-              headers:
-                values.headers.length > 0 ? JSON.parse(values.headers) : {},
-              allowedStatusCodes:
-                values.allowedStatusCodes.length > 0
-                  ? values.allowedStatusCodes
-                      .split(',')
-                      .map((code) => code.trim())
-                  : [],
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.httpMonitor = {
+            host: values.host,
+            method: values.method,
+            body: values.body.length > 0 ? JSON.parse(values.body) : {},
+            headers:
+              values.headers.length > 0 ? JSON.parse(values.headers) : {},
+            allowedStatusCodes:
+              values.allowedStatusCodes.length > 0
+                ? values.allowedStatusCodes
+                    .split(',')
+                    .map((code) => code.trim())
+                : [],
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
+
           url = `monitors/http/${params.id}`
           break
         }
         case 'ping': {
-          formattedData = {
-            name: values.name,
-            pingMonitor: {
-              host: values.host,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.pingMonitor = {
+            host: values.host,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url = `monitors/ping/${params.id}`
           break
         }
         case 'port': {
-          formattedData = {
-            name: values.name,
-            portMonitor: {
-              host: values.host,
-              port: Number(values.port),
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.portMonitor = {
+            host: values.host,
+            port: Number(values.port),
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url = `monitors/port/${params.id}`
           break
         }
         case 'keyword': {
-          formattedData = {
-            name: values.name,
-            keyWordMonitor: {
-              host: values.host,
-              method: values.method,
-              body: values.body.length > 0 ? JSON.parse(values.body) : {},
-              headers:
-                values.headers.length > 0 ? JSON.parse(values.headers) : {},
-              keyWordType: values.keyWordType,
-              keyWord: values.keyWord,
-              allowedStatusCodes:
-                values.allowedStatusCodes.length > 0
-                  ? values.allowedStatusCodes
-                      .split(',')
-                      .map((code) => code.trim())
-                  : [],
-              timeOut: values.timeOut,
-            },
-            interval: values.interval,
-            intervalUnit: values.intervalUnit,
-            failCountRef: values.failCountRef,
+          formattedData.keyWordMonitor = {
+            host: values.host,
+            method: values.method,
+            body: values.body.length > 0 ? JSON.parse(values.body) : {},
+            headers:
+              values.headers.length > 0 ? JSON.parse(values.headers) : {},
+            keyWordType: values.keyWordType,
+            keyWord: values.keyWord,
+            allowedStatusCodes:
+              values.allowedStatusCodes.length > 0
+                ? values.allowedStatusCodes
+                    .split(',')
+                    .map((code) => code.trim())
+                : [],
+            timeOut: values.timeOut,
+            slowResponseAlertStatus: values.slowResponseAlertStatus,
+            slowResponseAlertValue: values.slowResponseAlertValue,
           }
           url = `monitors/keyword/${params.id}`
           break
@@ -683,7 +709,9 @@ const NewMonitorPage = (update = false) => {
     console.log('Interval Value:', values.interval)
     getIntervalLimits(values.intervalUnit)
   }, [values.intervalUnit])
-
+  useEffect(() => {
+    console.log('slowResponseAlertStatus:', values.slowResponseAlertStatus)
+  }, [values.slowResponseAlertStatus])
   return (
     <Grid container className="grid-area" width={'100%'}>
       <Grid
@@ -1474,7 +1502,7 @@ const NewMonitorPage = (update = false) => {
           monitorType === 'keyword') && (
           <Box
             sx={{
-              width: { xs: '100%', md: monitorType === 'port' ? '50%' : '35%' },
+              width: { xs: '100%', md: monitorType === 'port' ? '50%' : '50%' },
             }}
           >
             <Typography gutterBottom>İstek Zaman Aşımı</Typography>
@@ -1519,91 +1547,7 @@ const NewMonitorPage = (update = false) => {
           </Box>
         )}
         {(monitorType === 'http' || monitorType === 'keyword') && (
-          <Box sx={{ width: { xs: '100%', md: '30%' } }}>
-            <Typography sx={{ mb: 0.5 }}>
-              Kaç Hata Sonrası Bildirim Gönderilsin
-            </Typography>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <IconButton
-                aria-label="decrease"
-                onClick={handleDecrementForFailCount}
-                disabled={values.failCountRef <= 1}
-                sx={{
-                  border: '1px solid #ddd',
-                  borderRadius: '8px 0 0 8px',
-                  backgroundColor: '#f5f5f5',
-                  '&:hover': {
-                    backgroundColor: '#e0e0e0',
-                  },
-                }}
-              >
-                <Remove />
-              </IconButton>
-
-              <TextField
-                id="failCountRef"
-                name="failCountRef"
-                value={values.failCountRef}
-                fullWidth
-                onChange={handleChange}
-                InputProps={{
-                  sx: {
-                    height: 35,
-                    fontSize: '0.8rem',
-                    '& input::-webkit-outer-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                    '& input::-webkit-inner-spin-button': {
-                      WebkitAppearance: 'none',
-                      margin: 0,
-                    },
-                  },
-                }}
-                InputLabelProps={{
-                  sx: {
-                    fontSize: '0.8rem',
-                  },
-                }}
-                variant="outlined"
-                size="small"
-                inputProps={{
-                  style: {
-                    textAlign: 'center',
-                    padding: '8px',
-                  },
-                  type: 'number',
-                }}
-              />
-
-              <IconButton
-                aria-label="increase"
-                onClick={handleIncrementForFailCount}
-                sx={{
-                  border: '1px solid #ddd',
-                  borderRadius: '0 8px 8px 0',
-                  backgroundColor: '#f5f5f5',
-                  '&:hover': {
-                    backgroundColor: '#e0e0e0',
-                  },
-                }}
-              >
-                <Add />
-              </IconButton>
-            </Stack>
-
-            {
-              <Typography
-                variant="body2"
-                sx={{ color: 'red', minHeight: '1.5em' }}
-              >
-                {errors.failCountRef || ' '}
-              </Typography>
-            }
-          </Box>
-        )}
-        {(monitorType === 'http' || monitorType === 'keyword') && (
-          <Box sx={{ width: { xs: '100%', md: '35%' } }}>
+          <Box sx={{ width: { xs: '100%', md: '50%' } }}>
             <Typography gutterBottom>İzin Verilen Durum Kodlar</Typography>
             <TextField
               id="allowedStatusCodes"
@@ -1637,6 +1581,8 @@ const NewMonitorPage = (update = false) => {
             />
           </Box>
         )}
+
+        {/******************************************************** */}
         {monitorType === 'port' && (
           <Grid
             display={'flex'}
@@ -1679,8 +1625,260 @@ const NewMonitorPage = (update = false) => {
           </Grid>
         )}
       </Grid>
-      {monitorType !== 'ping' && <Divider width={'100%'} />}
+      {monitorType !== 'ping' &&
+        monitorType !== 'keyword' &&
+        monitorType !== 'http'}
+      {/*Altıncı satır*/}
+      {/* {(monitorType === 'http' || monitorType === 'keyword') && (
+        <Grid item xs={12}>
+          <Accordion
+            sx={{
+              width: '100%',
+              bgcolor: 'white',
+              boxShadow: 'none',
+              borderBlockStart: '0.5px solid rgba(0, 0, 0, 0.3)', // Çok ince ve soluk siyah
+              borderBlockEnd: '0.5px solid rgba(0, 0, 0, 0.3)',
+              mt: 1,
+              mb: 4,
+            }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel2-content"
+              id="panel2-header"
+              sx={{
+                paddingLeft: 0,
+                '& .MuiAccordionSummary-expandIconWrapper': {
+                  marginLeft: 0,
+                  paddingLeft: 0,
+                },
+                '& .MuiTypography-root': {
+                  marginLeft: 0,
+                  paddingLeft: 0,
+                },
+              }}
+            >
+              <Typography
+                component="span"
+                sx={{ fontWeight: 'bold', marginLeft: 0, paddingLeft: 0 }}
+              >
+                SSL sertifkası ve Domain'ni kontrol et
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid
+                container
+                sx={{ display: 'flex', justifyContent: 'space-between' }}
+              >
+                <Grid item xs={12} md={3.8} display={'flex'} gap={0.5}>
+                  <Switch
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-thumb': {
+                        backgroundColor: 'black', // Yuvarlak kısmın rengi
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb': {
+                        backgroundColor: 'blue', // Açıkken yuvarlak kısmın rengi
+                      },
+                    }}
+                  />
+                  <Typography>SSL Hatalarını Kontrol Et</Typography>
+                </Grid>
 
+                <Grid item xs={12} md={3.8} display={'flex'} gap={0.5}>
+                  <Switch
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-thumb': {
+                        backgroundColor: 'black', // Yuvarlak kısmın rengi
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb': {
+                        backgroundColor: 'blue', // Açıkken yuvarlak kısmın rengi
+                      },
+                    }}
+                  />
+                  <Typography>SSL Son Tarihinde Hatırlat</Typography>
+                </Grid>
+
+                <Grid item xs={12} md={3.8} display={'flex'} gap={0.5}>
+                  <Switch
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-thumb': {
+                        backgroundColor: 'black', // Yuvarlak kısmın rengi
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb': {
+                        backgroundColor: 'blue', // Açıkken yuvarlak kısmın rengi
+                      },
+                    }}
+                  />
+                  <Typography>Domain Son Tarihinde Hatırlat</Typography>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        </Grid>
+      )} */}
+      {/**Yedinci Satır */}
+      {monitorType !== 'cronjob' && (
+        <Grid
+          container
+          sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}
+        >
+          <Grid
+            item
+            xs={12}
+            md={5.9}
+            display={'flex'}
+            flexDirection={'column'}
+            gap={1}
+          >
+            <Grid alignContent={'end'} display={'flex'} gap={2}>
+              <Typography component="span">
+                Yavaş Yanıtda Bildirim Gönderilsin mi
+              </Typography>
+              <Switch
+                size="small"
+                sx={{
+                  '& .MuiSwitch-thumb': {
+                    backgroundColor: 'black', // Yuvarlak kısmın rengi
+                  },
+                  '& .MuiSwitch-switchBase.Mui-checked .MuiSwitch-thumb': {
+                    backgroundColor: 'blue', // Açıkken yuvarlak kısmın rengi
+                  },
+                }}
+                checked={values.slowResponseAlertStatus}
+                onChange={() =>
+                  setFieldValue(
+                    'slowResponseAlertStatus',
+                    !values.slowResponseAlertStatus
+                  )
+                }
+              />
+            </Grid>
+
+            <Grid display={'flex'}>
+              <TextField
+                disabled={!values.slowResponseAlertStatus}
+                id="slowResponseAlertValue"
+                required
+                fullWidth
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">milisaniye</InputAdornment>
+                  ),
+                  sx: {
+                    height: 35,
+                    fontSize: '0.8rem',
+                  },
+                }}
+                InputLabelProps={{
+                  sx: {
+                    fontSize: '0.8rem',
+                  },
+                }}
+                label={''}
+                value={values.slowResponseAlertValue}
+                onChange={handleChange}
+                helperText={
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'red', minHeight: '1.5em' }}
+                  >
+                    {errors.slowResponseAlertValue || ' '}
+                  </Typography>
+                }
+              />
+            </Grid>
+          </Grid>
+          {(monitorType === 'http' || monitorType === 'keyword') && (
+            <Grid
+              item
+              xs={12}
+              md={5.9}
+              display={'flex'}
+              flexDirection={'column'}
+              gap={1}
+            >
+              <Grid>
+                <Typography component={'span'}>
+                  Kaç Hata Sonrası Bildirim Gönderilsin
+                </Typography>
+              </Grid>
+              <Grid item md={12}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <IconButton
+                    aria-label="decrease"
+                    onClick={handleDecrementForFailCount}
+                    disabled={values.failCountRef <= 1}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '8px 0 0 8px',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Remove />
+                  </IconButton>
+
+                  <TextField
+                    id="failCountRef"
+                    name="failCountRef"
+                    value={values.failCountRef}
+                    fullWidth
+                    onChange={handleChange}
+                    InputProps={{
+                      sx: {
+                        height: 35,
+                        fontSize: '0.8rem',
+                        '& input::-webkit-outer-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                        '& input::-webkit-inner-spin-button': {
+                          WebkitAppearance: 'none',
+                          margin: 0,
+                        },
+                      },
+                    }}
+                    InputLabelProps={{
+                      sx: {
+                        fontSize: '0.8rem',
+                      },
+                    }}
+                    variant="outlined"
+                    size="small"
+                    inputProps={{
+                      style: {
+                        textAlign: 'center',
+                        padding: '8px',
+                      },
+                      type: 'number',
+                    }}
+                  />
+
+                  <IconButton
+                    aria-label="increase"
+                    onClick={handleIncrementForFailCount}
+                    sx={{
+                      border: '1px solid #ddd',
+                      borderRadius: '0 8px 8px 0',
+                      backgroundColor: '#f5f5f5',
+                      '&:hover': {
+                        backgroundColor: '#e0e0e0',
+                      },
+                    }}
+                  >
+                    <Add />
+                  </IconButton>
+                </Stack>
+              </Grid>
+            </Grid>
+          )}
+        </Grid>
+      )}
       <Grid
         item
         xs={12}

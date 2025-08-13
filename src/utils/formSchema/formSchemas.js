@@ -185,7 +185,22 @@ export const newHttpMonitorFormShhema = yup.object().shape({
   failCountRef: yup
     .number()
     .min(1, 'Başarısızlık sayısı en az 1 olmalıdır !')
-    .required('Başarısızlık sayısı zorunludur !')
+    .required('Başarısızlık sayısı zorunludur !'
+    ),
+  slowResponseAlertStatus: yup
+    .boolean()
+    .required('İşaretlenesi Önemlidir !'),
+  slowResponseAlertValue: yup
+    .string()
+    .required('Zaman birimi girilmelidir.')
+    .test(
+      'is-valid-slowResponseValue',
+      'Geçerli bir zaman birimini girin !',
+      (value) => {
+        const slowResponseAlertValue = Number(value)
+        return Number.isInteger(slowResponseAlertValue)
+      }
+    ),
 })
 
 export const newKeywordMonitorFormShhema = yup.object().shape({
